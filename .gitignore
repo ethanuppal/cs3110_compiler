@@ -1,4 +1,4 @@
 *._DS_Store
 _build/
 _coverage/
-cs3110_compiler.opam
+*.opam

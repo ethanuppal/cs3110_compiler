@@ -1,6 +1,7 @@
 (lang dune 3.14)
 
-(name cs3110_compiler)
+(name X86ISTMB)
+
 (using menhir 3.0)
 
 (generate_opam_files true)
@@ -21,7 +22,7 @@
 (documentation https://github.com/ethanuppal/cs3110_compiler)
 
 (package
- (name cs3110_compiler)
+ (name X86ISTMB)
  (synopsis "CS 3110 final project")
  (depends ocaml dune)
  (tags

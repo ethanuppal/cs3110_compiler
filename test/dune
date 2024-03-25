@@ -1,2 +1,2 @@
 (test
- (name test_cs3110_compiler))
+ (name test_x86ISTMB))

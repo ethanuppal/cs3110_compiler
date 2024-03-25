@@ -1,4 +1,4 @@
 (executable
- (public_name cs3110_compiler)
+ (public_name X86ISTMB)
  (name main)
- (libraries cs3110_compiler))
+ (libraries X86ISTMB))

@@ -1,2 +1,8 @@
 (library
- (name cs3110_compiler))
+ (name cs3110_compiler)
+ (libraries menhirLib))
+
+(ocamllex lexer)
+
+(menhir
+ (modules parser))

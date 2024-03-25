@@ -6,21 +6,25 @@
 %token <string> VAR
 %token PLUS MINUS TIMES PRINT ASSIGN LET
 %token EOF
-%token LINEBREAK
+%token NEWLINE
 
 %start <Ast.main> main
 %type <Ast.expr> expr
+%type <Ast.stmt> stmt
+%type <Ast.prog> prog
 
 %%
 
-main:
-  | expr EOF { $1 }
+prog:
+  separated_list(stmt, NEWLINE) EOF { $1 }
 
 expr:
   | CONST { Const $1 }
   | VAR { Var $1 }
-  | LET VAR ASSIGN expr { Declaration ($2, $4) }
   | expr PLUS expr { Infix {lhs = $1; op = Plus; rhs = $3} }
   | expr MINUS expr { Infix {lhs = $1; op = Minus; rhs = $3} }
   | expr TIMES expr { Infix {lhs = $1; op = Times; rhs = $3} }
-  | PRINT expr { Unary {op = Print; rhs = $2} }
+
+stmt:
+  | PRINT expr NEWLINE { Print $2 }
+  | LET VAR ASSIGN expr NEWLINE { Declaration ($2, $4) }

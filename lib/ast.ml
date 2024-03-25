@@ -16,5 +16,6 @@ type expr =
 type stmt =
   | Declaration of string * expr
   | Print of expr
+  | Eof
 
 type prog = stmt list

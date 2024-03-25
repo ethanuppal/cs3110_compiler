@@ -12,13 +12,13 @@ In x86ISTMB, variables are declared using the `let` keyword followed by the vari
 
 Syntax:
 
-```x86ISTMB
+```swift
 let variableName = value
 ```
 
 Example:
 
-```x86ISTMB
+```swift
 let x = 5
 ```
 
@@ -40,13 +40,13 @@ Operators can be used in expressions to perform operations on variables and inte
 
 Syntax:
 
-```x86ISTMB
+```swift
 let variableName = operand1 + operand2;
 ```
 
 Example:
 
-```x86ISTMB
+```swift
 let x = 5
 let y = x + 3 // y is now 8
 ```
@@ -55,13 +55,13 @@ let y = x + 3 // y is now 8
 
 Syntax:
 
-```x86ISTMB
+```swift
 variableName = newValue
 ```
 
 Example:
 
-```x86ISTMB
+```swift
 let x = 5
 let x = 10 // x is now 10
 ```
@@ -70,13 +70,13 @@ let x = 10 // x is now 10
 
 Syntax:
 
-```x86ISTMB
+```swift
 let variableName = operand1 * operand2
 ```
 
 Example:
 
-```x86ISTMB
+```swift
 let x = 5
 let y = x * 2 // y is now 10
 ```
@@ -87,7 +87,7 @@ Below are examples that demonstrate the use of variables and operators in x86IST
 
 ### Example 1: Simple Arithmetic
 
-```x86ISTMB
+```swift
 let a = 10
 let b = 5
 let sum = a + b // sum is now 15
@@ -98,7 +98,7 @@ This example demonstrates declaring variables and performing basic arithmetic op
 
 ### Example 2: Reassignment
 
-```x86ISTMB
+```swift
 let x = 10
 let x = x + 5 // x is now 15
 let x = x * 2 // x is now 30

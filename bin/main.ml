@@ -23,13 +23,8 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let read_file filename =
-  BatFile.lines_of filename |> BatList.of_enum
-  |> List.map (fun e -> e ^ "\n")
-  |> String.concat ""
-
 let file_driver path flag =
-  let source = read_file path in
+  let source = Util.read_file path in
   try
     let statements = Parse_lex.lex_and_parse source in
     if flag = Cli.UseInterpreter then

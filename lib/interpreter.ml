@@ -1,6 +1,7 @@
 type interpreter_mode =
   | File
   | REPL
+  | Text of string ref
 
 (** The duplicated public interface from [interpreter.mli]. Please ensure that
     these two types are in sync. *)
@@ -125,10 +126,13 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
     | Assignment (name, expr) -> update_binding false name expr
     | Function { name; body } ->
         update_binding true name (FunctionExpr { body })
-    | Print expr ->
+    | Print expr -> (
         let value = interpreter_eval i expr in
         if !i.mode = REPL then Printf.printf "[print]\n";
-        print_endline (Value.to_string value)
+        match !i.mode with
+        | Text output_ref ->
+            output_ref := !output_ref ^ Value.to_string value ^ "\n"
+        | _ -> print_endline (Value.to_string value))
   with
   | NameResolutionError name ->
       Printf.eprintf "NameResolutionError: '%s' could not be resolved\n" name

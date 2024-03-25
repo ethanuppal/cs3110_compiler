@@ -1,6 +1,6 @@
 (library
  (name cs3110_compiler)
- (libraries menhirLib))
+ (libraries batteries menhirLib))
 
 ; (ocamllex lexer)
 

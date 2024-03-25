@@ -7,7 +7,7 @@
 %token PLUS MINUS TIMES 
 %token PRINT ASSIGN LET
 %token NEWLINE
-%token DOLLAR
+%token EOF
 
 %start <Ast.stmt list> main
 
@@ -17,7 +17,7 @@
 %%
 
 main:
-  | DOLLAR { [] }
+  | EOF { [] }
   | stmt NEWLINE main { $1 :: $3 }
 
 expr:

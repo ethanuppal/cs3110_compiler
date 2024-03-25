@@ -33,4 +33,4 @@ let string_of_stmt s =
   | Print e -> "print " ^ string_of_expr e
 
 let string_of_prog p = 
-  List.map string_of_expr p |> String.concat "\n"
+  List.map string_of_stmt p |> String.concat "\n"

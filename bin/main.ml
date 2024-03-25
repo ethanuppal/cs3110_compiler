@@ -5,7 +5,7 @@ let print_help prog =
   printf "%s\n" Meta.get.description;
   printf "\n";
   printf "Usage: %s [-h|-v]\n" prog;
-  printf "   or: %s -f FILE (-i|-c)\n" prog;
+  printf "   or: %s -f FILE [-i|-c]\n" prog;
   printf "   or: %s -r\n" prog;
   printf "\n";
   printf "-h,--help         prints this info\n";

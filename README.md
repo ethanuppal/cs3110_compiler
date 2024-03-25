@@ -18,7 +18,7 @@ Usage: ./main [-h|-v]
 $ ./main -v
 x86ISTMB v0.0.0
 
-Written by: Utku Melemeti, Jason Klein, Utku Melemetci, Jeffrey Huang, Vijay Shanmugam, Ethan Uppal
+Written by: Utku Melemeti, Jason Klein, Jeffrey Huang, Vijay Shanmugam, Ethan Uppal
 ```
 
 ## Group

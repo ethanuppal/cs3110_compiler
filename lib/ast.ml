@@ -15,3 +15,6 @@ type expr =
   | Declaration of string * expr
   | Infix of {lhs: expr; op: op; rhs: expr}
   | Unary of {op: op; rhs: expr}
+
+type stmt =
+  | ExprStm of expr

@@ -12,6 +12,6 @@ type op =
 type expr = 
   | Var of string
   | Const of int
-  | Declaration of {name: string; value: expr}
+  | Declaration of string * expr
   | Infix of {lhs: expr; op: op; rhs: expr}
   | Unary of {op: op; rhs: expr}

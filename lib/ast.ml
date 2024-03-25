@@ -5,16 +5,16 @@ type op =
   | Plus
   | Minus
   | Times
-  | Print
   | Assign
   | Let
 
 type expr = 
   | Var of string
   | Const of int
-  | Declaration of string * expr
   | Infix of {lhs: expr; op: op; rhs: expr}
-  | Unary of {op: op; rhs: expr}
 
 type stmt =
-  | ExprStm of expr
+  | Declaration of string * expr
+  | Print of expr
+
+type prog = stmt list

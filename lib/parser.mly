@@ -4,7 +4,8 @@
 
 %token <int> CONST
 %token <string> VAR
-// %token PLUS MINUS TIMES PRINT ASSIGN LET
+%token PLUS MINUS TIMES 
+// %token PRINT ASSIGN LET
 %token NEWLINE
 %token DOLLAR
 
@@ -22,3 +23,6 @@ main:
 expr:
   | CONST { Const $1 }
   | VAR { Var $1 }
+  | expr PLUS expr { Infix {lhs = $1; op = Plus; rhs = $3} }
+  | expr MINUS expr { Infix {lhs = $1; op = Minus; rhs = $3} }
+  | expr TIMES expr { Infix {lhs = $1; op = Times; rhs = $3} }

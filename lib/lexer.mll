@@ -7,12 +7,12 @@ rule read = parse
   | ['0'-'9']+ { CONST (int_of_string (Lexing.lexeme lexbuf)) }
   | ['a'-'z' 'A'-'Z' '_']+ { VAR (Lexing.lexeme lexbuf) }
   | "\n" { NEWLINE }
-  (* | "+" { PLUS }
+  | "+" { PLUS }
   | "-" { MINUS }
   | "*" { TIMES }
-  | "=" { ASSIGN }
-  | "let" { LET }
-  | "=" { ASSIGN }
+  (* | "=" { ASSIGN } *)
+  (* | "let" { LET } *)
+  (* | "=" { ASSIGN }
   | "print" { PRINT } *)
   (* | eof { EOF } *)
   | "$" { DOLLAR }

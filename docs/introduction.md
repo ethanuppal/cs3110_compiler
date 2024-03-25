@@ -41,7 +41,7 @@ Operators can be used in expressions to perform operations on variables and inte
 Syntax:
 
 ```swift
-let variableName = operand1 + operand2;
+let variableName = operand_A + operand_B
 ```
 
 Example:
@@ -71,7 +71,7 @@ let x = 10 // x is now 10
 Syntax:
 
 ```swift
-let variableName = operand1 * operand2
+let variableName = operand_A * operand_B
 ```
 
 Example:

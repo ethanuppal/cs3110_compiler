@@ -1,3 +1,5 @@
 (test
  (name test_cs3110_compiler)
- (libraries cs3110_compiler ounit2))
+ (libraries cs3110_compiler ounit2)
+ (deps
+  (source_tree snapshots)))

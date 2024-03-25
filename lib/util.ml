@@ -11,7 +11,7 @@ let read_file path =
 
 let uncurry f (x, y) = f x y
 
-let merge_paths =
+let merge_paths paths =
   let string_to_chars = String.to_seq >> List.of_seq in
   let trim_slashes str =
     let trim_prefix = function
@@ -25,4 +25,12 @@ let merge_paths =
     in
     String.concat "" trimmed_chars
   in
-  List.map trim_slashes >> String.concat "/"
+  if List.is_empty paths then ""
+  else
+    let first = List.hd paths in
+    let first =
+      if String.length first = 0 then first
+      else if String.get first 0 = '/' then "/" ^ trim_slashes first
+      else first
+    in
+    first :: (List.tl paths |> List.map trim_slashes) |> String.concat "/"

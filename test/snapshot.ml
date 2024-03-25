@@ -9,6 +9,7 @@ let make_test_suite root =
   let snapshot_folder =
     Util.merge_paths [ Project_root.path; root; version_string ]
   in
+  print_endline snapshot_folder;
   let files = Sys.readdir snapshot_folder in
   let snapshots =
     files |> Array.to_list

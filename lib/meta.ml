@@ -13,7 +13,7 @@ type t = {
 
 let get : t =
   {
-    name = "x86istmb";
+    name = "x86ISTMB";
     version = (0, 0, 0);
     description = "CS 3110 final project";
     authors =

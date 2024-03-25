@@ -13,7 +13,5 @@ rule read = parse
   | "+" { PLUS }
   | "-" { MINUS }
   | "*" { TIMES }
-  (* | "=" { ASSIGN }
-  | "print" { PRINT } *)
   (* | eof { EOF } *)
   | "$" { DOLLAR }

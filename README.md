@@ -14,6 +14,7 @@ Usage: ./main [-h|-v]
 -i                runs the interpreter (default)
 -c                runs the compiler
 -r,--repl         starts the REPL
+
 $ ./main -v
 x86ISTMB v0.0.0
 

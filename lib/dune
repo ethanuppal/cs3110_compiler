@@ -1,5 +1,5 @@
 (library
- (name X86ISTMB)
+ (name cs3110_compiler)
  (libraries batteries menhirLib))
 
 (ocamllex lexer)

@@ -1,4 +1,4 @@
-open X86ISTMB
+open Cs3110_compiler
 
 let print_help prog =
   let open Printf in

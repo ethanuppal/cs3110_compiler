@@ -1,6 +1,6 @@
 type t = {
   dump : unit -> unit;
-  lookup : string -> Value.t option;
+  step : Ast.stmt -> unit;
 }
 
 val create : unit -> t

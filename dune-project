@@ -1,6 +1,6 @@
 (lang dune 3.14)
 
-(name X86ISTMB)
+(name cs3110_compiler)
 
 (using menhir 3.0)
 
@@ -22,7 +22,7 @@
 (documentation https://github.com/ethanuppal/cs3110_compiler)
 
 (package
- (name X86ISTMB)
+ (name cs3110_compiler)
  (synopsis "CS 3110 final project")
  (depends ocaml dune)
  (tags

@@ -1,11 +1,11 @@
 type t = {
   dump : unit -> unit;
-  lookup : string -> Value.t option;
+  step : Ast.stmt -> unit;
 }
 
 type t' = { scopes : Scope.t BatDynArray.t }
 
-let interpreter_dump i =
+let interpreter_dump (i : t' ref) () =
   let open Util in
   let scope_dump =
     Scope.bindings
@@ -21,7 +21,7 @@ let interpreter_dump i =
   in
   dump_aux (BatDynArray.length !i.scopes - 1)
 
-let interpreter_lookup i name =
+let interpreter_lookup (i : t' ref) name =
   let rec lookup_aux idx =
     if idx = -1 then None
     else
@@ -31,14 +31,35 @@ let interpreter_lookup i name =
   in
   lookup_aux (BatDynArray.length !i.scopes - 1)
 
-(* let interpreter_eval i = let eval_aux =
+let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
+  | Var name -> (
+      match interpreter_lookup i name with
+      | None ->
+          failwith
+            "name couldn't be resolved, make better exception handling system \
+             here"
+      | Some value -> value)
+  | Const const -> const
+  | Infix { lhs; op; rhs } -> (
+      let eval_lhs = interpreter_eval i lhs in
+      let eval_rhs = interpreter_eval i rhs in
+      match op with
+      | Plus -> eval_lhs + eval_rhs
+      | Minus -> eval_lhs - eval_rhs
+      | Times -> eval_lhs * eval_rhs)
 
-   let interpreter_run i stm = failwith "not impl" *)
+let interpreter_step (i : t' ref) : Ast.stmt -> unit = function
+  | Declaration (name, expr) ->
+      let value = interpreter_eval i expr in
+      let scope =
+        BatDynArray.get !i.scopes (BatDynArray.length !i.scopes - 1)
+      in
+      Scope.store scope name value
+  | Print expr ->
+      let value = interpreter_eval i expr in
+      print_endline (Value.to_string value)
 
 let create () : t =
   let i = ref { scopes = BatDynArray.create () } in
-  {
-    dump = interpreter_dump i;
-    lookup = interpreter_lookup i;
-    (* run = interpreter_run i; *)
-  }
+  BatDynArray.add !i.scopes (Scope.empty ());
+  { dump = interpreter_dump i; step = interpreter_step i }

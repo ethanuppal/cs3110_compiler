@@ -21,10 +21,16 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
+(** https://stackoverflow.com/a/53840784 *)
 let read_file filename =
-  BatFile.lines_of filename |> BatList.of_enum
-  |> List.map (fun e -> e ^ "\n")
-  |> String.concat ""
+  let file = open_in filename in
+  try
+    let s = really_input_string file (in_channel_length file) in
+    close_in file;
+    s
+  with exn ->
+    close_in file;
+    raise exn
 
 let file_driver path flag =
   let source = read_file path in

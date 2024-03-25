@@ -1,6 +1,7 @@
 (lang dune 3.14)
 
 (name cs3110_compiler)
+(using menhir 3.0)
 
 (generate_opam_files true)
 

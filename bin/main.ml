@@ -16,8 +16,11 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
+let read_file filename = BatFile.lines_of filename |> BatList.of_enum |> List.map (fun e -> e ^ "\n") |> String.concat ""
+
 let driver path =
-  Printf.printf "you are running on file %s but nothing happens L\n" path
+  let source = read_file path in
+  Cs3110_compiler.Parse_lex.lex_and_parse source
 
 let () =
   match Sys.argv |> Tui.parse with

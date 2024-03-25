@@ -10,7 +10,7 @@ type op =
 type expr = 
   | Var of string
   | Const of int
-  (* | Infix of {lhs: expr; op: op; rhs: expr} *)
+  | Infix of {lhs: expr; op: op; rhs: expr}
 
 type stmt =
   | Declaration of string * expr
@@ -25,11 +25,11 @@ let string_of_op = function
   | Assign -> "="
   | Let -> "="
 
-let string_of_expr e =
+let rec string_of_expr e =
   match e with
   | Var name -> name
   | Const i -> string_of_int i
-  (* | Infix {lhs = lhs; op = op; rhs = rhs} -> String.concat " " [string_of_expr lhs; string_of_op op; string_of_expr rhs] *)
+  | Infix {lhs = lhs; op = op; rhs = rhs} -> String.concat " " [string_of_expr lhs; string_of_op op; string_of_expr rhs]
 
 let string_of_stmt s =
   match s with 

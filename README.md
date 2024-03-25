@@ -1,11 +1,11 @@
 # cs3110_compiler
 
-```
+```shell
 $ ./main -h
 CS 3110 final project
 
 Usage: ./main [-h|-v]
-   or: ./main -f FILE (-i|-c)
+   or: ./main -f FILE [-i|-c]
    or: ./main -r
 
 -h,--help         prints this info
@@ -14,6 +14,10 @@ Usage: ./main [-h|-v]
 -i                runs the interpreter (default)
 -c                runs the compiler
 -r,--repl         starts the REPL
+$ ./main -v
+x86ISTMB v0.0.0
+
+Written by: Utku Melemeti, Jason Klein, Utku Melemetci, Jeffrey Huang, Vijay Shanmugam, Ethan Uppal
 ```
 
 ## Group

@@ -1,9 +1,9 @@
 func print4() {
-    print 4
+    print(4)
 }
 func empty() {}
 func empty2() {}
-func print4oneline() { print 4 }
+func print4oneline() { print(4) }
 
 print4()
 print4oneline()
@@ -13,6 +13,6 @@ empty2()
 func calc() {
     let x = 1
     let y = 2
-    print x + y
+    print(x + y)
 }
 calc()

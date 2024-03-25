@@ -4,8 +4,6 @@ type op =
   | Plus
   | Minus
   | Times
-  | Assign
-  | Let
 
 type expr = 
   | Var of string
@@ -22,8 +20,6 @@ let string_of_op = function
   | Plus -> "+"
   | Minus -> "-"
   | Times -> "*"
-  | Assign -> "="
-  | Let -> "let"
 
 let rec string_of_expr e =
   match e with

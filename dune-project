@@ -17,9 +17,7 @@
  "Vijay Shanmugam"
  "Ethan Uppal")
 
-(license LICENSE)
-
-(documentation https://github.com/ethanuppal/cs3110_compiler)
+(documentation https://github.com/ethanuppal/cs3110_compiler/wiki)
 
 (package
  (name cs3110_compiler)

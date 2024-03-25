@@ -1,0 +1,22 @@
+---
+group:
+  - name: Ethan Uppal
+    netid: eu55
+  - name: Jeffrey Huang 
+    netid: jrh382
+  - name: Vijay Shanmugam
+    netid: vrs29
+  - name: Jason Klein
+    netid: jak532 
+  - name: Utku Melemetci
+    netid: um44
+pm:
+  name: Zoe Berthold
+  netid: zmb27
+publish: true
+title: "x86ISTMB"
+git-repo: "https://github.com/ethanuppal/cs3110_compiler"
+demo-video-url: ""
+desc: >
+  x86ISTMB (x86 Is Simple Trust Me Bro) is a fully featured optimizing compiler
+  for our own language by the same name.

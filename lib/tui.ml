@@ -1,0 +1,17 @@
+type t =
+  | Error of {
+      prog : string;
+      msg : string;
+    }
+  | Help of { prog : string }
+  | Version of { prog : string }
+
+let parse : string array -> t =
+  let open Util in
+  let parse_aux = function
+    | [ prog; "-h" ] | [ prog; "--help" ] -> Help { prog }
+    | [ prog; "-v" ] | [ prog; "--version" ] -> Version { prog }
+    | prog :: _ -> Error { prog; msg = "invalid arguments" }
+    | _ -> failwith "program invoked with empty argument array"
+  in
+  Array.to_list >> parse_aux

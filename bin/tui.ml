@@ -11,7 +11,7 @@ type t =
     }
 
 let parse : string array -> t =
-  let open Util in
+  let open X86ISTMB.Util in
   let parse_aux = function
     | [ prog; "-h" ] | [ prog; "--help" ] -> Help { prog }
     | [ prog; "-v" ] | [ prog; "--version" ] -> Version { prog }

@@ -1,5 +1,3 @@
-open X86ISTMB
-
 let print_help prog =
   let open Printf in
   printf "%s\n" Meta.get.description;

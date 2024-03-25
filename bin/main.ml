@@ -21,7 +21,6 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-(** https://stackoverflow.com/a/53840784 *)
 let read_file filename = BatFile.with_file_in filename BatIO.read_all
 
 let file_driver path flag =

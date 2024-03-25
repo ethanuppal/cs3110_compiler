@@ -4,8 +4,6 @@ type op =
   | Plus
   | Minus
   | Times
-  | Assign
-  | Let
 
 type expr = 
   | Var of string
@@ -22,8 +20,6 @@ let string_of_op = function
   | Plus -> "+"
   | Minus -> "-"
   | Times -> "*"
-  | Assign -> "="
-  | Let -> "="
 
 let rec string_of_expr e =
   match e with
@@ -34,7 +30,7 @@ let rec string_of_expr e =
 let string_of_stmt s =
   match s with 
   | Declaration (vname, e) -> String.concat " " ["let"; vname; "="; string_of_expr e]
-  | Print e -> "print " ^ (string_of_expr e)
+  | Print e -> "print " ^ string_of_expr e
 
 let string_of_prog p = 
-  List.map string_of_expr p |> String.concat "\n"
+  List.map string_of_stmt p |> String.concat "\n"

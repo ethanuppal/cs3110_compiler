@@ -1,0 +1,6 @@
+(include_subdirs no)
+
+(library
+ (name interpreter)
+ (modules value scope)
+ (libraries batteries X86ISTMB))

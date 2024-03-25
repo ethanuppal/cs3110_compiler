@@ -23,7 +23,7 @@ let string_of_op = function
   | Minus -> "-"
   | Times -> "*"
   | Assign -> "="
-  | Let -> "="
+  | Let -> "let"
 
 let rec string_of_expr e =
   match e with
@@ -34,7 +34,7 @@ let rec string_of_expr e =
 let string_of_stmt s =
   match s with 
   | Declaration (vname, e) -> String.concat " " ["let"; vname; "="; string_of_expr e]
-  | Print e -> "print " ^ (string_of_expr e)
+  | Print e -> "print " ^ string_of_expr e
 
 let string_of_prog p = 
   List.map string_of_expr p |> String.concat "\n"

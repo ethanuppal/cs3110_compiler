@@ -20,7 +20,6 @@ let get : t =
       [
         "Utku Melemeti";
         "Jason Klein";
-        "Utku Melemetci";
         "Jeffrey Huang";
         "Vijay Shanmugam";
         "Ethan Uppal";

@@ -6,3 +6,9 @@
 
 (menhir
  (modules parser))
+
+(rule
+ (targets project_root.ml)
+ (deps ../script/generate_project_root.ml)
+ (action
+  (run ocaml ../script/generate_project_root.ml)))

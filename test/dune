@@ -1,2 +1,5 @@
 (test
- (name test_x86ISTMB))
+ (name test_cs3110_compiler)
+ (libraries cs3110_compiler ounit2)
+ (deps
+  (source_tree snapshots)))

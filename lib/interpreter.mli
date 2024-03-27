@@ -2,6 +2,7 @@
 type interpreter_mode =
   | File
   | REPL
+  | Text of string ref
 
 (** The public interface of the interpreter. *)
 type t = {

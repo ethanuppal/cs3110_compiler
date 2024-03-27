@@ -1,11 +1,13 @@
 open Cs3110_compiler
 
+let print_error = Printf.eprintf "error: %s"
+
 let print_help prog =
   let open Printf in
   printf "%s\n" Meta.get.description;
   printf "\n";
   printf "Usage: %s [-h|-v]\n" prog;
-  printf "   or: %s -f FILE (-i|-c)\n" prog;
+  printf "   or: %s -f FILE [-i|-c]\n" prog;
   printf "   or: %s -r\n" prog;
   printf "\n";
   printf "-h,--help         prints this info\n";
@@ -21,15 +23,15 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let read_file filename = BatFile.with_file_in filename BatIO.read_all
-
 let file_driver path flag =
-  let source = read_file path in
-  let statements = Parse_lex.lex_and_parse source in
-  if flag = Cli.UseInterpreter then
-    let interpreter = Interpreter.create () in
-    List.iter interpreter.step statements
-  else failwith "compiler not done yet"
+  let source = Util.read_file path in
+  try
+    let statements = Parse_lex.lex_and_parse source in
+    if flag = Cli.UseInterpreter then
+      let interpreter = Interpreter.create () in
+      List.iter interpreter.step statements
+    else failwith "compiler not done yet"
+  with Parse_lex.ParseError msg -> print_error (msg ^ "\n")
 
 let repl_driver () =
   let interpreter = Interpreter.create () in
@@ -46,10 +48,12 @@ let repl_driver () =
     | "#dump\n" ->
         interpreter.dump ();
         repl ()
-    | _ ->
-        let statements = Parse_lex.lex_and_parse line in
-        List.iter interpreter.step statements;
-        repl ()
+    | _ -> (
+        try
+          let statements = Parse_lex.lex_and_parse line in
+          List.iter interpreter.step statements;
+          repl ()
+        with Parse_lex.ParseError msg -> print_error (msg ^ "\n"))
   in
   repl ()
 
@@ -59,4 +63,5 @@ let () =
   | Version { prog = _ } -> print_version ()
   | File { prog = _; path; flag } -> file_driver path flag
   | Repl { prog = _ } -> repl_driver ()
-  | Error { prog; msg } -> Printf.printf "error: %s\nuse %s -h\n" msg prog
+  | Error { prog; msg } ->
+      Printf.sprintf "%s\nuse %s -h\n" msg prog |> print_error

@@ -5,7 +5,7 @@
 > It simply explains how to get the project onto your computer.
 > To see how to get it up and running, read the [user manual](docs/user_manual.md).
 
-1. install make
-2. install ocaml
-3. git clone
-4. victory
+These instructions assume you already have OCaml installed.
+1. Create a new `opam` switch by running `opam switch create cs3110-compiler ocaml-base-compiler.5.1.1`
+2. Install the required libraries: `opam install menhir batteries ounit2`
+3. Build the project by running `dune build`

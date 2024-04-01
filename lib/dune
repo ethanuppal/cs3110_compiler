@@ -4,11 +4,6 @@
  (name x86ISTMB)
  (libraries batteries menhirLib))
 
-(ocamllex lexer)
-
-(menhir
- (modules parser))
-
 (rule
  (targets project_root.ml)
  (deps ../script/generate_project_root.ml)

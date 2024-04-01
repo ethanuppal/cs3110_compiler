@@ -1,3 +1,5 @@
+open Frontend
+
 (** A value in the interpreter. *)
 type t =
   | Int of int

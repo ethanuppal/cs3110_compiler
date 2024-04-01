@@ -1,5 +1,6 @@
 open OUnit2
 open X86ISTMB
+open X86ISTMB.Frontend
 
 (** Used to categorize snapshots by validity in version. *)
 let version_string = Meta.Version.to_string Meta.get.version
@@ -24,11 +25,11 @@ let make_test_suite root =
     let output = read_file output_path in
     let stdout = ref "" in
     try
-      let statements = Parse_lex.lex_and_parse input in
+      let statements = ParseLex.lex_and_parse input in
       interpreter.set_mode (Text stdout);
       List.iter interpreter.step statements;
       assert_equal output !stdout
-    with Parse_lex.ParseError msg -> assert_failure msg
+    with ParseLex.ParseError msg -> assert_failure msg
   in
   let snapshot_test_funcs : test_fun list = List.map snapshot_test snapshots in
   Printf.sprintf "Snapshot Test Suite (testing version %s)" version_string

@@ -7,7 +7,7 @@ type interpreter_mode =
 (** The public interface of the interpreter. *)
 type t = {
   dump : unit -> unit;
-  step : Ast.stmt -> unit;
+  step : Frontend.Ast.stmt -> unit;
   set_mode : interpreter_mode -> unit;
 }
 

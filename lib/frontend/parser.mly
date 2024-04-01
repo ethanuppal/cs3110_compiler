@@ -1,7 +1,3 @@
-%{
-  open Ast
-%}
-
 %token <int> CONST
 %token <string> VAR
 %token PLUS MINUS TIMES DIVIDE MOD 
@@ -17,6 +13,7 @@
 
 %type <Ast.stmt> stmt
 %type <Ast.expr> expr
+%type <Ast.stmt list> body_till_rbrace
 
 %%
 

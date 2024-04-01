@@ -1,3 +1,5 @@
+open Frontend
+
 type interpreter_mode =
   | File
   | REPL

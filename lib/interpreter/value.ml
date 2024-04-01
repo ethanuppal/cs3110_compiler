@@ -1,9 +1,7 @@
-open Frontend
-
 (** A value in the interpreter. *)
 type t =
   | Int of int
-  | FunctionValue of { body : Ast.stmt list }
+  | FunctionValue of { body : Frontend.Ast.stmt list }
 
 exception
   TypeError of {

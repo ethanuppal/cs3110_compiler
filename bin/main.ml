@@ -1,5 +1,4 @@
 open X86ISTMB
-open X86ISTMB.Frontend
 
 let print_error = Printf.eprintf "error: %s"
 
@@ -27,12 +26,12 @@ let print_version () =
 let file_driver path flag =
   let source = Util.read_file path in
   try
-    let statements = ParseLex.lex_and_parse source in
+    let statements = Frontend.ParseLex.lex_and_parse source in
     if flag = Cli.UseInterpreter then
       let interpreter = Interpreter.create () in
       List.iter interpreter.step statements
     else failwith "compiler not done yet"
-  with ParseLex.ParseError msg -> print_error (msg ^ "\n")
+  with Frontend.ParseLex.ParseError msg -> print_error (msg ^ "\n")
 
 let repl_driver () =
   let interpreter = Interpreter.create () in
@@ -51,10 +50,10 @@ let repl_driver () =
         repl ()
     | _ -> (
         try
-          let statements = ParseLex.lex_and_parse line in
+          let statements = Frontend.ParseLex.lex_and_parse line in
           List.iter interpreter.step statements;
           repl ()
-        with ParseLex.ParseError msg -> print_error (msg ^ "\n"))
+        with Frontend.ParseLex.ParseError msg -> print_error (msg ^ "\n"))
   in
   repl ()
 

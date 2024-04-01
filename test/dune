@@ -1,2 +1,5 @@
 (test
- (name test_x86ISTMB))
+ (name test_x86ISTMB)
+ (libraries x86ISTMB ounit2)
+ (deps
+  (source_tree snapshots)))

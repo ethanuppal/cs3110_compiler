@@ -1,4 +1,4 @@
 (executable
- (public_name X86ISTMB)
+ (public_name x86ISTMB)
  (name main)
- (libraries X86ISTMB))
+ (libraries x86ISTMB))

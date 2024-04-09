@@ -69,6 +69,9 @@ let interpreter_lookup (i : t' ref) name =
   in
   lookup_aux (BatDynArray.length !i.scopes - 1)
 
+let interpreter_push (i : t' ref) = BatDynArray.add !i.scopes (Scope.empty ())
+let intepreter_pop (i : t' ref) = BatDynArray.delete_last !i.scopes
+
 let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
   | Var name -> (
       match interpreter_lookup i name with
@@ -121,7 +124,9 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
         | None -> raise (NameResolutionError name)
         | Some func_value ->
             let func_body = func_value |> Value.as_func in
-            List.iter (interpreter_step i) func_body)
+            interpreter_push i;
+            List.iter (interpreter_step i) func_body;
+            intepreter_pop i)
     | Declaration (name, expr) -> update_binding true name expr
     | Assignment (name, expr) -> update_binding false name expr
     | Function { name; body } ->

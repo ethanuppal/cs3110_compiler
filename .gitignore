@@ -4,3 +4,4 @@ _coverage/
 *.opam
 main
 test/project_root.ml 
+gitlog.txt

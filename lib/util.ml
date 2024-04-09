@@ -4,10 +4,7 @@ let ( >> ) f g x = g (f x)
 
 (** [read_file path] is the contents of the file at [path]. If the file does not
     exist, the behavior is undefined. *)
-let read_file path =
-  BatFile.lines_of path |> BatList.of_enum
-  |> List.map (fun e -> e ^ "\n")
-  |> String.concat ""
+let read_file filename = BatFile.with_file_in filename BatIO.read_all
 
 let uncurry f (x, y) = f x y
 
@@ -34,3 +31,7 @@ let merge_paths paths =
       else first
     in
     first :: (List.tl paths |> List.map trim_slashes) |> String.concat "/"
+
+(** [pp_of string_of] is a pretty printer for a type with the string conversion
+    function [string_of] that simply prints the result of [string_of] inline. *)
+let pp_of string_of fmt x = Format.fprintf fmt "%s" (string_of x)

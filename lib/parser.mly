@@ -10,6 +10,9 @@
 %token NEWLINE
 %token EOF
 
+%left PLUS MINUS
+%left TIMES
+
 %start <Ast.stmt list> main
 
 %type <Ast.stmt> stmt

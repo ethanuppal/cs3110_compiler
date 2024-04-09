@@ -140,12 +140,12 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
         | _ -> print_endline (Value.to_string value))
   with
   | NameResolutionError name ->
-      Printf.eprintf "NameResolutionError: '%s' could not be resolved\n" name
+      Printf.eprintf "NameResolutionError: '%s' could not be resolved\n%!" name
   | NameRedefinitionError name ->
-      Printf.eprintf "NameRedefinitionError: invalid redefinition of '%s'\n"
+      Printf.eprintf "NameRedefinitionError: invalid redefinition of '%s'\n%!"
         name
   | Value.TypeError { value; ctx } ->
-      Printf.eprintf "TypeError: illegal type operation: %s on '%s'\n" ctx
+      Printf.eprintf "TypeError: illegal type operation: %s on '%s'\n%!" ctx
         (Value.to_string value)
 
 (* Creates a new interpreter with one empty scope *)

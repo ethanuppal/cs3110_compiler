@@ -8,8 +8,8 @@ val make : unit -> t
 val label_of : t -> Label.t
 
 (** [add basic_block ir] adds [ir] to the end of [basic_block]. *)
-val add : t -> Ir.t -> unit
+val add : t -> Instr.t -> unit
 
 (** [to_list basic_block] are the IR operations in [basic_block] in order as a
     list. *)
-val to_list : t -> Ir.t list
+val to_list : t -> Instr.t list

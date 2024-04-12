@@ -1,6 +1,5 @@
 open X86ISTMB
 open Util
-open Intermediate
 
 let print_error = Printf.eprintf "error: %s"
 
@@ -26,15 +25,16 @@ let print_version () =
 let test () =
   let ir =
     [
-      Ir.Assign (Ir.var 0, Ir.const 1);
-      Ir.Assign (Ir.var 1, Ir.const 2);
-      Ir.Add (Ir.var 2, Ir.var_op 0, Ir.var_op 1);
+      Ir.Instr.Assign (Ir.Variable.make 0, Ir.Operand.make_const 1);
+      Ir.Instr.Assign (Ir.Variable.make 1, Ir.Operand.make_const 2);
+      Ir.Instr.Add
+        (Ir.Variable.make 2, Ir.Operand.make_var 0, Ir.Operand.make_var 1);
     ]
   in
-  let bb = BasicBlock.make () in
-  List.iter (BasicBlock.add bb) ir;
-  Printf.printf "%s:\n" (BasicBlock.label_of bb |> Label.name_of);
-  List.iter (Ir.to_string >> Printf.printf "  %s\n") ir
+  let bb = Ir.BasicBlock.make () in
+  List.iter (Ir.BasicBlock.add bb) ir;
+  Printf.printf "%s:\n" (Ir.BasicBlock.label_of bb |> Ir.Label.name_of);
+  List.iter (Ir.Instr.to_string >> Printf.printf "  %s\n") ir
 
 let file_driver path flags =
   let source = Util.read_file path in

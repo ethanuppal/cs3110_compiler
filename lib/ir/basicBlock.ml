@@ -1,4 +1,4 @@
-type ir_array = Ir.t BatDynArray.t
+type ir_array = Instr.t BatDynArray.t
 
 type t = {
   label : Label.t;

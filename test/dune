@@ -1,5 +1,5 @@
 (test
  (name test_x86ISTMB)
- (libraries x86ISTMB ounit2)
+ (libraries x86ISTMB ounit2 alcotest)
  (deps
   (source_tree snapshots)))

@@ -1,7 +1,7 @@
-(** An additional flag passed to the CLI after a file is specified. *)
+(** Compiler flags *)
 type flag =
-  | UseInterpreter
-  | UseCompiler
+  | OnlyIR
+  | Optimize
 
 (** The various parses of CLI arguments. *)
 type t =
@@ -14,9 +14,8 @@ type t =
   | File of {
       prog : string;
       path : string;
-      flag : flag;
+      flags : flag list;
     }
-  | Repl of { prog : string }
 
 (** [parse args] is the command line [args] parsed. *)
 let parse : string array -> t =
@@ -24,12 +23,16 @@ let parse : string array -> t =
   let parse_aux = function
     | [ prog; "-h" ] | [ prog; "--help" ] -> Help { prog }
     | [ prog; "-v" ] | [ prog; "--version" ] -> Version { prog }
-    | [ prog; "-r" ] | [ prog; "--repl" ] -> Repl { prog }
-    | prog :: "-f" :: path :: rest | prog :: "--file" :: path :: rest -> (
-        match rest with
-        | [] | [ "-i" ] -> File { prog; path; flag = UseInterpreter }
-        | [ "-c" ] -> File { prog; path; flag = UseCompiler }
-        | _ -> Error { prog; msg = "expected -i or -c after file" })
+    | prog :: path :: rest ->
+        let flags =
+          rest
+          |> List.filter_map (fun s ->
+                 match s with
+                 | "-g" | "--gen" -> Some OnlyIR
+                 | "-O" | "--optimize" -> Some Optimize
+                 | _ -> None)
+        in
+        File { prog; path; flags }
     | prog :: _ -> Error { prog; msg = "invalid arguments" }
     | _ -> failwith "program invoked with empty argument array"
   in

@@ -22,7 +22,10 @@
 (package
  (name x86ISTMB)
  (synopsis "CS 3110 final project")
- (depends ocaml dune)
+ (depends
+  ocaml
+  dune
+  (alcotest :with-test))
  (tags
   (cs3110 compiler)))
 

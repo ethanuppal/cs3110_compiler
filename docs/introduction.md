@@ -63,7 +63,7 @@ Example:
 
 ```swift
 let x = 5
-let x = 10 // x is now 10
+x = 10 // x is now 10
 ```
 
 #### Multiplication (*)
@@ -100,8 +100,8 @@ This example demonstrates declaring variables and performing basic arithmetic op
 
 ```swift
 let x = 10
-let x = x + 5 // x is now 15
-let x = x * 2 // x is now 30
+x = x + 5 // x is now 15
+x = x * 2 // x is now 30
 ```
 
 In this example, we see how a variable's value can be reassigned using the result of an arithmetic operation involving its current value.

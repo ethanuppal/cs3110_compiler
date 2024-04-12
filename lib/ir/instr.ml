@@ -1,5 +1,3 @@
-type constant = int
-
 (* todo *)
 type t =
   | Assign of Variable.t * Operand.t

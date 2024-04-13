@@ -1,7 +1,6 @@
 *._DS_Store
 _build/
 _coverage/
-*.opam
 main
 test/project_root.ml 
 gitlog.txt

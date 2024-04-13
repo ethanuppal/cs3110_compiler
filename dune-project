@@ -17,14 +17,20 @@
  "Vijay Shanmugam"
  "Ethan Uppal")
 
+(maintainers "CS 3110 Compiler Team")
+
 (documentation https://github.com/ethanuppal/cs3110_compiler/wiki)
 
 (package
  (name cs3110_compiler)
  (synopsis "CS 3110 final project")
  (depends
+  (ocaml
+   (>= 5.1.1))
   ocaml
   dune
+  menhir
+  batteries
   (alcotest :with-test))
  (tags
   (cs3110 compiler)))

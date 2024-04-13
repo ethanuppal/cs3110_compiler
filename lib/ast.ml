@@ -61,7 +61,6 @@ let type_of_expr = function
   | Prefix { op = _; rhs = _; ty } -> ty
   | FunctionExpr _ -> None
 
-(** TODO: to string functions *)
 let pp_op fmt op =
   let char =
     match op with
@@ -72,6 +71,12 @@ let pp_op fmt op =
     | Mod -> "%"
   in
   Format.pp_print_string fmt char
+
+let pp_to_string pp args =
+  pp Format.str_formatter args;
+  Format.flush_str_formatter ()
+
+let op_to_string = pp_to_string pp_op
 
 let rec pp_expr fmt = function
   | Var { name; _ } -> Format.pp_print_string fmt name
@@ -92,6 +97,8 @@ let rec pp_expr fmt = function
       pp_expr fmt rhs;
       Format.pp_print_string fmt ")"
   | FunctionExpr _ -> Format.pp_print_string fmt "<func>"
+
+let expr_to_string = pp_to_string pp_expr
 
 let rec pp_stmt fmt = function
   | Call name -> Format.fprintf fmt "%s()" name
@@ -119,6 +126,8 @@ let rec pp_stmt fmt = function
       Format.pp_print_string fmt "print ";
       pp_expr fmt e
 
+let stmt_to_string = pp_to_string pp_stmt
+
 let pp_prog fmt prog =
   Format.pp_open_vbox fmt 0;
   List.iter
@@ -127,3 +136,5 @@ let pp_prog fmt prog =
       Format.pp_print_cut fmt ())
     prog;
   Format.pp_close_box fmt ()
+
+let prog_to_string = pp_to_string pp_prog

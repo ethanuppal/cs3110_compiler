@@ -4,7 +4,7 @@
 
 (using menhir 3.0)
 
-(generate_opam_files false)
+(generate_opam_files true)
 
 (source
  (github ethanuppal/cs3110_compiler))
@@ -16,8 +16,6 @@
  "Jeffrey Huang"
  "Vijay Shanmugam"
  "Ethan Uppal")
-
-(maintainers "CS 3110 Compiler Team")
 
 (documentation https://github.com/ethanuppal/cs3110_compiler/wiki)
 
@@ -34,5 +32,3 @@
   (alcotest :with-test))
  (tags
   (cs3110 compiler)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

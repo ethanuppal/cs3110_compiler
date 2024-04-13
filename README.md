@@ -1,4 +1,4 @@
-# cs3110_compiler
+# x86ISTMB
 
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 

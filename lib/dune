@@ -1,5 +1,5 @@
 (library
- (name cs3110_compiler)
+ (name x86ISTMB)
  (libraries batteries menhirLib)
  (preprocess
   (pps ppx_inline_test)))

@@ -10,9 +10,9 @@ authors: [
   "Ethan Uppal"
 ]
 tags: ["cs3110" "compiler"]
-homepage: "https://github.com/ethanuppal/cs3110_compiler"
+homepage: "https://github.com/ethanuppal/x86ISTMB"
 doc: "https://github.com/ethanuppal/cs3110_compiler/wiki"
-bug-reports: "https://github.com/ethanuppal/cs3110_compiler/issues"
+bug-reports: "https://github.com/ethanuppal/x86ISTMB/issues"
 depends: [
   "ocaml" {>= "5.1.1"}
   "ocaml"
@@ -37,4 +37,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/ethanuppal/cs3110_compiler.git"
+dev-repo: "git+https://github.com/ethanuppal/x86ISTMB.git"

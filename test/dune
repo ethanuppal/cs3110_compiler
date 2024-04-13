@@ -1,5 +1,5 @@
 (test
- (name test_cs3110_compiler)
- (libraries cs3110_compiler alcotest)
+ (name test_x86ISTMB)
+ (libraries x86ISTMB alcotest)
  (deps
   (source_tree snapshots)))

@@ -2,7 +2,7 @@
 build:
 	@rm -f ./main
 	opam exec -- dune build
-	@cp _build/install/default/bin/cs3110_compiler ./main
+	@cp _build/install/default/bin/x86ISTMB ./main
 	@chmod u+x ./main
 
 .PHONY: test 
@@ -11,7 +11,7 @@ test: build
 
 # .PHONY: utop 
 # utop: 
-# 	echo "open Cs3110_compiler;;" | dune utop
+# 	echo "open X86ISTMB;;" | dune utop
 
 .PHONY: clean
 clean:

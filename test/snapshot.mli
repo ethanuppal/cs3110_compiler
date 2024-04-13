@@ -8,7 +8,4 @@ type transform = string -> string -> string
     [Meta.get.version] using snapshot transformation [f] (see the documentation
     for [transform]). Optionally, the version can be manually specified. *)
 val make_test_suite :
-  ?version:Cs3110_compiler.Meta.Version.t ->
-  string ->
-  transform ->
-  unit Alcotest.test
+  ?version:X86ISTMB.Meta.Version.t -> string -> transform -> unit Alcotest.test

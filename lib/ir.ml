@@ -30,6 +30,34 @@ end
 
 type constant = int
 
+module BranchCondition = struct
+  type t =
+    | Unconditional
+    | Equal of Operand.t * Operand.t
+    | Unequal of Operand.t * Operand.t
+    | LessThan of Operand.t * Operand.t
+    | GreaterThan of Operand.t * Operand.t
+    | AtMost of Operand.t * Operand.t
+    | AtLeast of Operand.t * Operand.t
+
+  let to_string =
+    let open Printf in
+    function
+    | Unconditional -> "true"
+    | Equal (o1, o2) ->
+        sprintf "%s == %s" (Operand.to_string o1) (Operand.to_string o2)
+    | Unequal (o1, o2) ->
+        sprintf "%s != %s" (Operand.to_string o1) (Operand.to_string o2)
+    | LessThan (o1, o2) ->
+        sprintf "%s < %s" (Operand.to_string o1) (Operand.to_string o2)
+    | GreaterThan (o1, o2) ->
+        sprintf "%s > %s" (Operand.to_string o1) (Operand.to_string o2)
+    | AtMost (o1, o2) ->
+        sprintf "%s <= %s" (Operand.to_string o1) (Operand.to_string o2)
+    | AtLeast (o1, o2) ->
+        sprintf "%s >= %s" (Operand.to_string o1) (Operand.to_string o2)
+end
+
 (* todo *)
 type t =
   | Assign of Variable.t * Operand.t
@@ -37,7 +65,7 @@ type t =
   | Store of Variable.t * Operand.t
   | Load of Variable.t * Operand.t
   | Param of Operand.t
-  | Jump of Label.t
+  | Jump of Label.t * BranchCondition.t
   | Call of Label.t
 
 let var = Variable.make
@@ -57,5 +85,7 @@ let to_string =
   | Load (r, o) ->
       sprintf "%s = *%s" (Variable.to_string r) (Operand.to_string o)
   | Param o -> sprintf "arg %s" (Operand.to_string o)
-  | Jump label -> sprintf "jump %s" (Label.name_of label)
+  | Jump (label, br_cond) ->
+      sprintf "jump %s if %s" (Label.name_of label)
+        (BranchCondition.to_string br_cond)
   | Call label -> sprintf "call %s" (Label.name_of label)

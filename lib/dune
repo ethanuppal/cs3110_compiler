@@ -1,6 +1,8 @@
 (library
  (name cs3110_compiler)
- (libraries batteries menhirLib))
+ (libraries batteries menhirLib)
+ (preprocess
+  (pps ppx_inline_test)))
 
 (ocamllex lexer)
 

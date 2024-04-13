@@ -26,7 +26,10 @@ let make_test_suite (root : string) (transform : transform) : unit test =
     let expected = read_file output_path in
     try
       let actual = transform input_path input in
-      (check string) "output equality" expected actual
+      (check string)
+        "Using the given input transformer should yield matching output to the \
+         expected."
+        expected actual
     with Parse_lex.ParseError msg -> fail msg
   in
   let suite_name =

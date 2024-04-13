@@ -30,7 +30,8 @@ let test () =
       Ir.Add (Ir.var 2, Ir.var_op 0, Ir.var_op 1);
     ]
   in
-  let bb = Basic_block.make () in
+  let gen = Id.Gen.make () in
+  let bb = Basic_block.make gen in
   List.iter (Basic_block.add bb) ir;
   Printf.printf "%s:\n" (Basic_block.label_of bb |> Label.name_of);
   List.iter (Ir.to_string >> Printf.printf "  %s\n") ir

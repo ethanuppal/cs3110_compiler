@@ -4,7 +4,7 @@
 
 (using menhir 3.0)
 
-(generate_opam_files true)
+(generate_opam_files false)
 
 (source
  (github ethanuppal/cs3110_compiler))

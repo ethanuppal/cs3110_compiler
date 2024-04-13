@@ -1,20 +1,3 @@
-let interpreter_transform path input =
-  ignore path;
-  let open Cs3110_compiler in
-  let interpreter = Interpreter.create () in
-  let stdout = ref "" in
-  let statements = Parse_lex.lex_and_parse input in
-  interpreter.set_mode (Text stdout);
-  List.iter interpreter.step statements;
-  stdout
-
-let () = ignore interpreter_transform
-
-let ir_transform path input =
-  ignore path;
-  ignore input;
-  ""
-
 let id_module_test_suite =
   let open Alcotest in
   let id_gens_isolated_test n () =
@@ -139,11 +122,44 @@ let cfg_module_test_suite =
   in
   ("lib/control_flow_graph.mli", [ test_1 ])
 
+let snapshot_test_suite =
+  let interpreter_transform path input =
+    ignore path;
+    let open Cs3110_compiler in
+    let interpreter = Interpreter.create () in
+    let stdout = ref "" in
+    let statements = Parse_lex.lex_and_parse input in
+    interpreter.set_mode (Text stdout);
+    List.iter interpreter.step statements;
+    stdout
+  in
+  let () = ignore interpreter_transform in
+  let transform path input =
+    let open Cs3110_compiler in
+    let open Util in
+    let stmt_to_string stmt =
+      Ast.pp_stmt Format.str_formatter stmt;
+      Format.flush_str_formatter ()
+    in
+    if String.starts_with ~prefix:"type" path then
+      try
+        let statements = Parse_lex.lex_and_parse input in
+        Analysis.infer statements;
+        List.map (stmt_to_string >> fun s -> s ^ "\n") statements
+        |> String.concat ""
+      with
+      | Analysis.TypeInferenceError err ->
+          Printexc.to_string (Analysis.TypeInferenceError err) ^ "\n"
+      | e -> raise e
+    else ""
+  in
+  Snapshot.make_test_suite "test/snapshots" transform
+
 let () =
   [
     util_module_test_suite;
     id_module_test_suite;
     cfg_module_test_suite;
-    Snapshot.make_test_suite "test/snapshots" ir_transform;
+    snapshot_test_suite;
   ]
   |> Alcotest.run "x86ISTMB"

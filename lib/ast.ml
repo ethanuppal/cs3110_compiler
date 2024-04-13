@@ -80,12 +80,15 @@ let rec pp_expr fmt = function
   | Infix { lhs; op; rhs; _ } ->
       Format.pp_print_string fmt "(";
       pp_expr fmt lhs;
+      Format.pp_print_string fmt " ";
       pp_op fmt op;
+      Format.pp_print_string fmt " ";
       pp_expr fmt rhs;
       Format.pp_print_string fmt ")"
   | Prefix { op; rhs; _ } ->
       Format.pp_print_string fmt "(";
       pp_op fmt op;
+      Format.pp_print_string fmt " ";
       pp_expr fmt rhs;
       Format.pp_print_string fmt ")"
   | FunctionExpr _ -> Format.pp_print_string fmt "<func>"

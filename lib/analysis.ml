@@ -29,12 +29,31 @@ let () =
     | _ -> None)
 
 (** After [infer_expr ctx hint expr], [expr] will be assigned a type based on
-    [hint] and [ctx].
+    [ctx] and [hint].
 
     @raise TypeInferenceError on failure. *)
 let rec infer_expr ctx hint expr =
   match expr with
-  | Var var -> var.ty <- Context.get ctx var.name
+  | Var var ->
+      var.ty <- Context.get ctx var.name;
+      if var.ty = None then
+        raise
+          (TypeInferenceError
+             {
+               domain = "resolution";
+               symbol = Some var.name;
+               ast = Left expr;
+               unify = None;
+             })
+      else if hint <> None && var.ty <> hint then
+        raise
+          (TypeInferenceError
+             {
+               domain = "unification";
+               symbol = Some var.name;
+               ast = Left expr;
+               unify = Some (Option.get hint, Option.get var.ty);
+             })
   | ConstInt _ -> (
       match hint with
       | None | Some (Type.Primitive Int63) | Some Any -> ()
@@ -111,6 +130,7 @@ let infer_stmt ctx stmt =
                     unify = Some (t1, t2);
                   }));
       Context.insert ctx name (type_of_expr expr |> Option.get)
+  | Print expr -> infer_expr ctx None expr
   | _ -> ()
 
 let infer prog =

@@ -3,11 +3,9 @@ open Cs3110_compiler
 
 type transform = string -> string -> string
 
-(** Used to categorize snapshots by validity in version. *)
-let version_string = Meta.Version.to_string Meta.get.version
-
-let make_test_suite (root : string) (transform : transform) : unit test =
+let make_test_suite ?(version = Meta.get.version) root transform =
   let open Util in
+  let version_string = Meta.Version.to_string version in
   let snapshot_folder =
     Util.merge_paths [ Project_root.path; root; version_string ]
   in
@@ -25,7 +23,7 @@ let make_test_suite (root : string) (transform : transform) : unit test =
     let input = read_file input_path in
     let expected = read_file output_path in
     try
-      let actual = transform input_path input in
+      let actual = transform (snapshot ^ ".in") input in
       (check string)
         "Using the given input transformer should yield matching output to the \
          expected."

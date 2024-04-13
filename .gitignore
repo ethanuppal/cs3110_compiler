@@ -4,3 +4,5 @@ _coverage/
 main
 test/project_root.ml 
 gitlog.txt
+docs/html/*
+!docs/html/.gitkeep

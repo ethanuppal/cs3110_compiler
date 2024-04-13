@@ -1,15 +1,15 @@
 .PHONY: build
 build:
 	@rm -f ./main
-	dune build
+	opam exec -- dune build
 	@cp _build/install/default/bin/x86ISTMB ./main
 	@chmod u+x ./main
 
 .PHONY: test 
 test: build 
-	dune test
+	opam exec -- dune test
 
 .PHONY: clean
 clean:
-	dune clean
+	opam exec -- dune clean
 	@rm -rf ./main

@@ -17,14 +17,20 @@
  "Vijay Shanmugam"
  "Ethan Uppal")
 
-(documentation https://github.com/ethanuppal/x86ISTMB/wiki)
+(maintainers "CS 3110 Compiler Team")
+
+(documentation https://github.com/ethanuppal/cs3110_compiler/wiki)
 
 (package
  (name x86ISTMB)
  (synopsis "CS 3110 final project")
  (depends
+  (ocaml
+   (>= 5.1.1))
   ocaml
   dune
+  menhir
+  batteries
   (alcotest :with-test))
  (tags
   (cs3110 compiler)))

@@ -15,6 +15,7 @@ let make_test_suite (root : string) (transform : transform) : unit test =
   let files = Sys.readdir snapshot_folder in
   let snapshots =
     files |> Array.to_list
+    |> List.filter (fun file -> not (String.get file 0 = '.'))
     |> List.map (String.split_on_char '.' >> List.hd)
     |> List.sort_uniq String.compare
   in

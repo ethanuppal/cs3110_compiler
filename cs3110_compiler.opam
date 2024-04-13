@@ -19,6 +19,7 @@ depends: [
   "dune" {>= "3.14"}
   "menhir"
   "batteries"
+  "ppx_inline_test"
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]

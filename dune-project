@@ -29,6 +29,7 @@
   dune
   menhir
   batteries
+  ppx_inline_test
   (alcotest :with-test))
  (tags
   (cs3110 compiler)))

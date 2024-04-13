@@ -22,19 +22,39 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let test () =
-  let ir =
-    [
-      Ir.Assign (Ir.var 0, Ir.const 1);
-      Ir.Assign (Ir.var 1, Ir.const 2);
-      Ir.Add (Ir.var 2, Ir.var_op 0, Ir.var_op 1);
-    ]
-  in
-  let gen = Id.Gen.make () in
-  let bb = Basic_block.make gen in
-  List.iter (Basic_block.add bb) ir;
+let print_bb bb =
   Printf.printf "%s:\n" (Basic_block.label_of bb |> Label.name_of);
-  List.iter (Ir.to_string >> Printf.printf "  %s\n") ir
+  List.iter (Ir.to_string >> Printf.printf "  %s\n") (Basic_block.to_list bb)
+
+let test () =
+  let cfg = Control_flow_graph.make () in
+  let entry = Control_flow_graph.entry cfg in
+  let symbol_gen = Id.Gen.make () in
+  let part2 = Control_flow_graph.label_for_new_bb cfg in
+  let part3 = Control_flow_graph.label_for_new_bb cfg in
+  let ir1 =
+    [|
+      Ir.Assign (Ir.var 0, Ir.const 4);
+      Ir.Jump (part2, Ir.BranchCondition.Equal (Ir.var_op 0, Ir.const 0));
+    |]
+  in
+  let ir2 =
+    [|
+      Ir.Param (Ir.const 5);
+      Ir.Call (Label.make_symbol symbol_gen "print");
+      Ir.Jump (part3, Ir.BranchCondition.Unconditional);
+    |]
+  in
+  let ir3 =
+    [| Ir.Jump (Basic_block.label_of entry, Ir.BranchCondition.Unconditional) |]
+  in
+  Control_flow_graph.insert_ir cfg entry ir1.(0) |> ignore;
+  let bb2 = Control_flow_graph.insert_ir cfg entry ir1.(1) |> Option.get in
+  Control_flow_graph.insert_ir cfg bb2 ir2.(0) |> ignore;
+  Control_flow_graph.insert_ir cfg bb2 ir2.(1) |> ignore;
+  let bb3 = Control_flow_graph.insert_ir cfg bb2 ir2.(2) |> Option.get in
+  Control_flow_graph.insert_ir cfg bb3 ir3.(0) |> ignore;
+  List.iter print_bb (Control_flow_graph.to_list cfg)
 
 let file_driver path flags =
   let source = Util.read_file path in

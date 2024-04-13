@@ -1,0 +1,5 @@
+open Cs3110_compiler
+#install_printer Ast.pp_op
+#install_printer Ast.pp_expr
+#install_printer Ast.pp_stmt
+#install_printer Ast.pp_prog

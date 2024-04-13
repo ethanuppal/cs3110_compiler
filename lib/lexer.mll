@@ -17,8 +17,17 @@ rule read = parse
 | ')' { RPAR }
 | '{' { LBRACE }
 | '}' { RBRACE }
+| ':' { COLON }
+| "->" { ARROW }
+| "Int" { INT_TYPE }
+| "Bool" { BOOL_TYPE }
 | "let" { LET }
 | "print" { PRINT }
 | "func" { FUNC }
+| "if" { IF }
+| "else" { ELSE }
+| "while" { WHILE }
+| "true" { CONST_TRUE }
+| "false" { CONST_FALSE }
 | ['a'-'z' 'A'-'Z' '_'] ['0'-'9' 'a'-'z' 'A'-'Z' '_']* { VAR (Lexing.lexeme lexbuf) }
-| ['0'-'9']+ { CONST (int_of_string (Lexing.lexeme lexbuf)) }
+| ['0'-'9']+ { CONST_INT (int_of_string (Lexing.lexeme lexbuf)) }

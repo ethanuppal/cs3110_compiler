@@ -1,3 +1,5 @@
+(** WARNING: THIS CODE (scope.mli and scope.ml) IS DEPRECATED. *)
+
 (** A scope in which bindings can be made. *)
 type t
 

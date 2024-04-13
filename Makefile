@@ -9,6 +9,10 @@ build:
 test: build 
 	opam exec -- dune test
 
+# .PHONY: utop 
+# utop: 
+# 	echo "open Cs3110_compiler;;" | dune utop
+
 .PHONY: clean
 clean:
 	opam exec -- dune clean

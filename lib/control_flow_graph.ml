@@ -38,27 +38,11 @@ let entry cfg =
   let cfg = rep_ok cfg in
   Digraph.get cfg.graph cfg.entry
 
-let make_bb_label cfg = Label.make_location cfg.gen
-
-(** [retrieve cfg label] is the basic block labeled [label] in [cfg]. If such a
-    basic block does not exist, a new one is created in [cfg]. Runs in amortized
-    [O(1)] time if called with every basic block created over the course of the
-    control flow graph.
-
-    The basic block label identifiers are kept in sync with their vertex
-    identifiers to the point of integer equality. By the invariant on
-    [Digraph]s, the vertex identifier is related to the length of the array such
-    that if there are less vertices than one more than the integral form of the
-    basic block identifier, we can simply add new vertices until we obtain that
-    count, and then return the most recently-added vertex. Of course, the loop
-    does not execute if the basic block already exists in the graph. *)
-let retrieve cfg label =
-  let cfg = rep_ok cfg in
-  let bb_label_id = Label.id_of label in
-  while Digraph.vertex_count cfg.graph < bb_label_id + 1 do
-    ignore (Digraph.add_vertex cfg.graph (Basic_block.make_for_label label))
-  done;
-  Digraph.get (rep_ok cfg).graph (Digraph.vertex_id_of_int bb_label_id)
+let label_for_new_bb cfg =
+  let label = Label.make_location cfg.gen in
+  let bb = Basic_block.make_for_label label in
+  Digraph.add_vertex cfg.graph bb |> ignore;
+  label
 
 let insert_ir cfg bb ir =
   let open Util in
@@ -69,7 +53,9 @@ let insert_ir cfg bb ir =
   Basic_block.add bb ir;
   match ir with
   | Ir.Jump (label, _) ->
-      let bb2 = retrieve cfg label in
+      let bb2 =
+        Digraph.get cfg.graph (Digraph.vertex_id_of_int (Label.id_of label))
+      in
       Digraph.add_edge cfg.graph (bb_to_vertex_id bb) (bb_to_vertex_id bb2);
       Some bb2
   | _ -> None

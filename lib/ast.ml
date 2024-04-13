@@ -11,17 +11,24 @@ type op =
 
 (** An expression can be evaluated to a value. *)
 type expr =
-  | Var of string
-  | Const of int
+  | Var of {
+      name : string;
+      mutable ty : Type.t option;
+    }
+  | ConstInt of int
+  | ConstBool of bool
   | Infix of {
       lhs : expr;
       op : op;
       rhs : expr;
+      mutable ty : Type.t option;
     }
   | Prefix of {
       op : op;
       rhs : expr;
+      mutable ty : Type.t option;
     }
+  (* ignore, only for interpreter *)
   | FunctionExpr of { body : stmt list }
 
 (** A statement can be executed. *)
@@ -29,7 +36,11 @@ and stmt =
   | Call of string
     (* tbd better function support ia ExpressionStatement need to add in stuff
        baout returns and stuf lol*)
-  | Declaration of string * expr
+  | Declaration of {
+      name : string;
+      hint : Type.t option;
+      expr : expr;
+    }
   | Assignment of string * expr
   | Function of {
       name : string;
@@ -39,6 +50,16 @@ and stmt =
 
 (** A program is a series of statements. *)
 type prog = stmt list
+
+(** [type_of_expr expr] is the type of [expr] to the extent that it is currently
+    resolved. *)
+let type_of_expr = function
+  | Var { name = _; ty } -> ty
+  | ConstInt _ -> Some Type.int_prim_type
+  | ConstBool _ -> Some Type.bool_prim_type
+  | Infix { lhs = _; op = _; rhs = _; ty } -> ty
+  | Prefix { op = _; rhs = _; ty } -> ty
+  | FunctionExpr _ -> None
 
 (** TODO: to string functions *)
 let pp_op fmt op =
@@ -53,15 +74,16 @@ let pp_op fmt op =
   Format.pp_print_string fmt char
 
 let rec pp_expr fmt = function
-  | Var name -> Format.pp_print_string fmt name
-  | Const i -> Format.pp_print_int fmt i
-  | Infix { lhs; op; rhs } ->
+  | Var { name; _ } -> Format.pp_print_string fmt name
+  | ConstInt i -> Format.pp_print_int fmt i
+  | ConstBool b -> Format.pp_print_bool fmt b
+  | Infix { lhs; op; rhs; _ } ->
       Format.pp_print_string fmt "(";
       pp_expr fmt lhs;
       pp_op fmt op;
       pp_expr fmt rhs;
       Format.pp_print_string fmt ")"
-  | Prefix { op; rhs } ->
+  | Prefix { op; rhs; _ } ->
       Format.pp_print_string fmt "(";
       pp_op fmt op;
       pp_expr fmt rhs;
@@ -70,8 +92,13 @@ let rec pp_expr fmt = function
 
 let rec pp_stmt fmt = function
   | Call name -> Format.fprintf fmt "%s()" name
-  | Declaration (name, expr) ->
-      Format.fprintf fmt "let %s = " name;
+  | Declaration { name; hint; expr } ->
+      Format.fprintf fmt "let %s%s = " name
+        (let expr_type = type_of_expr expr in
+         let display_type = if expr_type = None then hint else expr_type in
+         match display_type with
+         | Some ty -> ": " ^ Type.to_string ty
+         | None -> "");
       pp_expr fmt expr
   | Assignment (name, expr) ->
       Format.fprintf fmt "%s = " name;
@@ -89,7 +116,7 @@ let rec pp_stmt fmt = function
       Format.pp_print_string fmt "print ";
       pp_expr fmt e
 
-let prog_pp fmt prog =
+let pp_prog fmt prog =
   Format.pp_open_vbox fmt 0;
   List.iter
     (fun stmt ->

@@ -1,3 +1,5 @@
+(** WARNING: THIS CODE (interperter.mli and interpreter.ml) IS DEPRECATED. *)
+
 (** The type of input the interpreter should optimize for. *)
 type interpreter_mode =
   | File

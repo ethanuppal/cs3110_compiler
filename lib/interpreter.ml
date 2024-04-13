@@ -73,14 +73,14 @@ let interpreter_push (i : t' ref) = BatDynArray.add !i.scopes (Scope.empty ())
 let intepreter_pop (i : t' ref) = BatDynArray.delete_last !i.scopes
 
 let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
-  | Var name -> (
+  | Var { name; _ } -> (
       match interpreter_lookup i name with
       | None -> raise (NameResolutionError name)
       | Some value -> value)
-  | Const const ->
+  | ConstInt const ->
       if const = 69 && funny_mode = FunnyLol then print_endline "Nice";
       Int const
-  | Infix { lhs; op; rhs } ->
+  | Infix { lhs; op; rhs; _ } ->
       Int
         (let eval_lhs = interpreter_eval i lhs |> Value.as_int in
          let eval_rhs = interpreter_eval i rhs |> Value.as_int in
@@ -92,7 +92,7 @@ let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
          | Times -> eval_lhs * eval_rhs
          | Divide -> eval_lhs / eval_rhs
          | Mod -> eval_lhs mod eval_rhs)
-  | Prefix { op; rhs } ->
+  | Prefix { op; rhs; _ } ->
       Int
         (let eval_rhs = interpreter_eval i rhs |> Value.as_int in
          match op with
@@ -101,6 +101,7 @@ let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
          | Times -> failwith "pointers not impl yet"
          | _ -> raise (OperatorMisuseError { op; env = "prefix" }))
   | FunctionExpr { body } -> FunctionValue { body }
+  | _ -> failwith "interpreter error: missing case for an expr type"
 
 let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
   try
@@ -127,7 +128,7 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
             interpreter_push i;
             List.iter (interpreter_step i) func_body;
             intepreter_pop i)
-    | Declaration (name, expr) -> update_binding true name expr
+    | Declaration { name; hint = _; expr } -> update_binding true name expr
     | Assignment (name, expr) -> update_binding false name expr
     | Function { name; body } ->
         update_binding true name (FunctionExpr { body })

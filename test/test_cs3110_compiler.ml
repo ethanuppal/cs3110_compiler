@@ -80,39 +80,56 @@ let cfg_module_test_suite =
   let open Alcotest in
   let open Cs3110_compiler in
   let test_1 =
-    let open Util in
     let test () =
       Id.Gen.hard_reset ();
       let cfg = Control_flow_graph.make () in
       let entry = Control_flow_graph.entry cfg in
       let symbol_gen = Id.Gen.make () in
-      let ir1 =
+      let ir3 =
         [|
-          Ir.Assign (Ir.var 0, Ir.const 4);
-          Ir.Jump
-            ( Control_flow_graph.make_bb_label cfg,
-              Ir.BranchCondition.Equal (Ir.var_op 0, Ir.const 0) );
+          Ir.Jump (Basic_block.label_of entry, Ir.BranchCondition.Unconditional);
         |]
       in
       let ir2 =
         [|
-          Ir.Param (Ir.const 5); Ir.Call (Label.make_symbol symbol_gen "print");
+          Ir.Param (Ir.const 5);
+          Ir.Call (Label.make_symbol symbol_gen "print");
+          Ir.Jump
+            ( Control_flow_graph.label_for_new_bb cfg,
+              Ir.BranchCondition.Unconditional );
+        |]
+      in
+      let ir1 =
+        [|
+          Ir.Assign (Ir.var 0, Ir.const 4);
+          Ir.Jump
+            ( Control_flow_graph.label_for_new_bb cfg,
+              Ir.BranchCondition.Equal (Ir.var_op 0, Ir.const 0) );
         |]
       in
       Control_flow_graph.insert_ir cfg entry ir1.(0) |> ignore;
       let bb2 = Control_flow_graph.insert_ir cfg entry ir1.(1) |> Option.get in
-      Array.iter (Control_flow_graph.insert_ir cfg bb2 >> ignore) ir2;
+      Control_flow_graph.insert_ir cfg bb2 ir2.(0) |> ignore;
+      Control_flow_graph.insert_ir cfg bb2 ir2.(1) |> ignore;
+      let bb3 = Control_flow_graph.insert_ir cfg bb2 ir2.(2) |> Option.get in
+      let entry_hopefully =
+        Control_flow_graph.insert_ir cfg bb3 ir3.(0) |> Option.get
+      in
+      (check string) "Basic block backreference should work"
+        (Basic_block.label_of entry |> Label.name_of)
+        (Basic_block.label_of entry_hopefully |> Label.name_of);
       match Control_flow_graph.to_list cfg with
-      | [ cfg_bb1; cfg_bb2 ] ->
+      | [ cfg_bb1; cfg_bb2; cfg_bb3 ] ->
           let check_match ir bb =
             (check (list string))
-              "The IR maintained by the CFG should be the same as that \
-               inputted."
+              "The IR maintained by the CFG should be the same as the order \
+               basic block labels were requested (i.e., in this case, 1 3 2)."
               (ir |> Array.to_seq |> List.of_seq |> List.map Ir.to_string)
               (bb |> Basic_block.to_list |> List.map Ir.to_string)
           in
           check_match ir1 cfg_bb1;
-          check_match ir2 cfg_bb2
+          check_match ir3 cfg_bb2;
+          check_match ir2 cfg_bb3
       | _ ->
           fail
             "Control_flow_graph.to_list did not return the two (no more, no \

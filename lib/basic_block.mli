@@ -6,6 +6,10 @@ type t
     [Id.Gen.next gen]. *)
 val make : Id.Gen.t -> t
 
+(** [make_for_label label] is a new basic block [bb] such that
+    [label_of bb = label]. *)
+val make_for_label : Label.t -> t
+
 (** [label_of basic_block] is the label of [basic_block]. *)
 val label_of : t -> Label.t
 

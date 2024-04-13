@@ -76,10 +76,57 @@ let util_module_test_suite =
   in
   ("lib/util.ml", [ test_merge_paths ])
 
+let cfg_module_test_suite =
+  let open Alcotest in
+  let open Cs3110_compiler in
+  let test_1 =
+    let open Util in
+    let test () =
+      Id.Gen.hard_reset ();
+      let cfg = Control_flow_graph.make () in
+      let entry = Control_flow_graph.entry cfg in
+      let symbol_gen = Id.Gen.make () in
+      let ir1 =
+        [|
+          Ir.Assign (Ir.var 0, Ir.const 4);
+          Ir.Jump
+            ( Control_flow_graph.make_bb_label cfg,
+              Ir.BranchCondition.Equal (Ir.var_op 0, Ir.const 0) );
+        |]
+      in
+      let ir2 =
+        [|
+          Ir.Param (Ir.const 5); Ir.Call (Label.make_symbol symbol_gen "print");
+        |]
+      in
+      Control_flow_graph.insert_ir cfg entry ir1.(0) |> ignore;
+      let bb2 = Control_flow_graph.insert_ir cfg entry ir1.(1) |> Option.get in
+      Array.iter (Control_flow_graph.insert_ir cfg bb2 >> ignore) ir2;
+      match Control_flow_graph.to_list cfg with
+      | [ cfg_bb1; cfg_bb2 ] ->
+          let check_match ir bb =
+            (check (list string))
+              "The IR maintained by the CFG should be the same as that \
+               inputted."
+              (ir |> Array.to_seq |> List.of_seq |> List.map Ir.to_string)
+              (bb |> Basic_block.to_list |> List.map Ir.to_string)
+          in
+          check_match ir1 cfg_bb1;
+          check_match ir2 cfg_bb2
+      | _ ->
+          fail
+            "Control_flow_graph.to_list did not return the two (no more, no \
+             less) basic blocks created."
+    in
+    test_case "test1" `Quick test
+  in
+  ("lib/control_flow_graph.mli", [ test_1 ])
+
 let () =
   [
     util_module_test_suite;
     id_module_test_suite;
+    cfg_module_test_suite;
     Snapshot.make_test_suite "test/snapshots" ir_transform;
   ]
   |> Alcotest.run "x86ISTMB"

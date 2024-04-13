@@ -17,26 +17,23 @@ module Gen : sig
       [gen]. In particular, the identifier returned is the integer successor of
       the value of the last call to this function. *)
   val next : t -> id
+
+  val hard_reset : unit -> unit
 end = struct
   type t = {
-    next : unit -> id;
+    mutable value : id;
     self_id : id;
   }
 
   let id_of gen = gen.self_id
+  let make_aux start self_id () = { value = start; self_id }
+  let global = make_aux 1 0 ()
 
-  let make_aux self_id () =
-    let id = ref 0 in
-    {
-      next =
-        (fun () ->
-          let result = !id in
-          id := !id + 1;
-          result);
-      self_id;
-    }
+  let next gen =
+    let result = gen.value in
+    gen.value <- gen.value + 1;
+    result
 
-  let global = make_aux 0 ()
-  let make () = make_aux (global.next ()) ()
-  let next gen = gen.next ()
+  let make () = make_aux 0 (next global) ()
+  let hard_reset () = global.value <- 0
 end

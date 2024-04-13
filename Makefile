@@ -9,6 +9,18 @@ build:
 test: build 
 	opam exec -- dune test
 
+bisect:
+	@find . -name '*.coverage' | xargs rm -f
+	@OUNIT_CI=true dune test --instrument-with bisect_ppx --force
+	@bisect-ppx-report html
+	@if [ $$(command -v pup) ]; then \
+		printf "Overall Coverage: "; \
+		cat _coverage/index.html | pup html body div#header h2 text{}; \
+	fi
+
+view:
+	open _coverage/index.html
+
 # .PHONY: utop 
 # utop: 
 # 	echo "open Cs3110_compiler;;" | dune utop

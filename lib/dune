@@ -2,7 +2,9 @@
  (name cs3110_compiler)
  (libraries batteries menhirLib)
  (preprocess
-  (pps ppx_inline_test)))
+  (pps ppx_inline_test))
+ (instrumentation
+  (backend bisect_ppx)))
 
 (ocamllex lexer)
 

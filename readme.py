@@ -15,7 +15,7 @@ if __name__ == "__main__":
         put(
             "VERSION_NUM",
             subprocess.check_output(
-                "ocaml -e '#use \"./lib/meta.ml\";; print_endline (Version.to_string get.version)'",
+                "opam exec -- ocaml -e '#use \"./lib/meta.ml\";; print_endline (Version.to_string get.version)'",
                 shell=True,
                 text=True,
             ),

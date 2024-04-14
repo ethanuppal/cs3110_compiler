@@ -1,0 +1,5 @@
+let x = true
+func foo() {
+    let x = 4
+    print +x
+}

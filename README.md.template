@@ -1,16 +1,18 @@
-# x86ISTMB
+# x86ISTMB {{VERSION_NUM}}
 
-```shell
-$ ./main -h
-{{HELP}}
-``````shell
-$ ./main -v
-{{VERSION}}
+![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
+
+> "x86 is simple trust me bro"  
+> Last updated: {{DATE}}
+
 ```
+$ ./main -h
+{{HELP}}```
+```
+$ ./main -v
+{{VERSION}}```
 
 ## Group
-
-This is the CS 3110 final project by:
 
 - Jason Klein (jak532)
 - Utku Melemetci (um44)

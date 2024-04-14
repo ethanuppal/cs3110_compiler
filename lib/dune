@@ -4,7 +4,9 @@
  (name x86ISTMB)
  (libraries batteries menhirLib)
  (preprocess
-  (pps ppx_inline_test)))
+  (pps ppx_inline_test))
+ (instrumentation
+  (backend bisect_ppx)))
 
 (rule
  (targets project_root.ml)

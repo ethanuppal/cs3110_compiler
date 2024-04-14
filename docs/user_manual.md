@@ -11,7 +11,12 @@ make test
 Running `make build` will produce an executable in the same directory called `./main`.
 You can see what options are available with `./main -h` or `./main --help`, and view versioning information with `./main -v` or `./main --version`.
 
-To clean up all build and executable files, run `make clean`.
+Here are some other commands.
 
-To generate documentation, run `make docs`.
-Then, view it locally with `make serve PORT=8003`, which will host the documentation website at `localhost:8003`.
+| Command    | Description            |
+|------------|------------------------|
+| `make clean` | Removes all build and executable files |
+| `make docs` | Generates documentation |
+| `make serve PORT=8003` | Hosts the documentation website at `localhost:8003` |
+| `make bisect` | Runs `make test` and outputs the percentage of coverage |
+| `make cloc` | Counts the lines of code in the project.

@@ -1,35 +1,5 @@
 (lang dune 3.14)
 
-(name x86ISTMB)
-
 (using menhir 3.0)
 
-(generate_opam_files true)
-
-(source
- (github ethanuppal/x86ISTMB))
-
-(authors
- "Utku Melemeti"
- "Jason Klein"
- "Utku Melemetci"
- "Jeffrey Huang"
- "Vijay Shanmugam"
- "Ethan Uppal")
-
-(documentation https://github.com/ethanuppal/cs3110_compiler/wiki)
-
-(package
- (name x86ISTMB)
- (synopsis "CS 3110 final project")
- (depends
-  (ocaml
-   (>= 5.1.1))
-  ocaml
-  dune
-  menhir
-  batteries
-  ppx_inline_test
-  (alcotest :with-test))
- (tags
-  (cs3110 compiler)))
+(generate_opam_files false)

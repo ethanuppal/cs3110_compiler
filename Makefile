@@ -51,3 +51,7 @@ serve: docs
 	@echo '==> Serving at localhost:$(PORT)'
 	@cd docs/html; $(shell which python || which python3) -m http.server $(PORT)
 
+.PHONY: cloc 
+cloc: 
+	@make build > /dev/null
+	@echo "$$(cloc bin lib --json | jq .SUM.code) lines of code"

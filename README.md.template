@@ -1,8 +1,9 @@
-# cs3110_compiler
+# x86ISTMB {{VERSION_NUM}}
 
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
-Last updated: {{DATE}}
+> "x86 is simple trust me bro"  
+> Last updated: {{DATE}}
 
 ```
 $ ./main -h

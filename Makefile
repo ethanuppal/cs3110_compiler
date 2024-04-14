@@ -6,6 +6,7 @@ build:
 	opam exec -- dune build
 	@cp _build/install/default/bin/cs3110_compiler ./main
 	@chmod u+x ./main
+	@chmod u+x .githooks/pre-commit
 	@make README
 
 .PHONY: README
@@ -16,6 +17,7 @@ README:
 test: build 
 	opam exec -- dune test
 
+.PHONY: bisect
 bisect:
 	@find . -name '*.coverage' | xargs rm -f
 	@OUNIT_CI=true dune test --instrument-with bisect_ppx --force
@@ -25,6 +27,7 @@ bisect:
 		cat _coverage/index.html | pup html body div#header h2 text{}; \
 	fi
 
+.PHONY: view
 view:
 	open _coverage/index.html
 

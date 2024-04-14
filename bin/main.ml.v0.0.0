@@ -1,4 +1,4 @@
-open Cs3110_compiler
+open X86ISTMB
 
 let print_error = Printf.eprintf "error: %s"
 

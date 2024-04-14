@@ -1,15 +1,12 @@
+(include_subdirs unqualified)
+
 (library
- (name cs3110_compiler)
+ (name x86ISTMB)
  (libraries batteries menhirLib)
  (preprocess
   (pps ppx_inline_test))
  (instrumentation
   (backend bisect_ppx)))
-
-(ocamllex lexer)
-
-(menhir
- (modules parser))
 
 (rule
  (targets project_root.ml)

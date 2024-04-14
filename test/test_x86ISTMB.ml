@@ -1,7 +1,7 @@
 let id_module_test_suite =
   let open Alcotest in
   let id_gens_isolated_test n () =
-    let open Cs3110_compiler in
+    let open X86ISTMB in
     let gen1 = Id.Gen.make () in
     let gen2 = Id.Gen.make () in
     (check @@ neg int)
@@ -33,7 +33,7 @@ let id_module_test_suite =
 
 let util_module_test_suite =
   let open Alcotest in
-  let open Cs3110_compiler in
+  let open X86ISTMB in
   let test_merge_paths =
     let test () =
       (check string) "An empty list yields the empty path." ""
@@ -61,7 +61,7 @@ let util_module_test_suite =
 
 let cfg_module_test_suite =
   let open Alcotest in
-  let open Cs3110_compiler in
+  let open X86ISTMB in
   let test_1 =
     let test () =
       Id.Gen.hard_reset ();
@@ -125,7 +125,7 @@ let cfg_module_test_suite =
 let snapshot_test_suite =
   let interpreter_transform path input =
     ignore path;
-    let open Cs3110_compiler in
+    let open X86ISTMB in
     let interpreter = Interpreter.create () in
     let stdout = ref "" in
     let statements = Parse_lex.lex_and_parse input in
@@ -135,7 +135,7 @@ let snapshot_test_suite =
   in
   let () = ignore interpreter_transform in
   let transform path input =
-    let open Cs3110_compiler in
+    let open X86ISTMB in
     if String.starts_with ~prefix:"type" path then
       try
         let statements = Parse_lex.lex_and_parse input in

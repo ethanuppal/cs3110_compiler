@@ -4,7 +4,7 @@ PY	:= $(shell which python3 || which python || which pypy3 || which pypy)
 build:
 	@rm -f ./main
 	opam exec -- dune build
-	@cp _build/install/default/bin/cs3110_compiler ./main
+	@cp _build/install/default/bin/x86ISTMB ./main
 	@chmod u+x ./main
 	@chmod u+x .githooks/pre-commit
 	@make README
@@ -33,7 +33,7 @@ view:
 
 # .PHONY: utop 
 # utop: 
-# 	echo "open Cs3110_compiler;;" | dune utop
+# 	echo "open X86ISTMB;;" | dune utop
 
 .PHONY: clean
 clean:

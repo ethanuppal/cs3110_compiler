@@ -1,5 +1,5 @@
 open Alcotest
-open Cs3110_compiler
+open X86ISTMB
 
 type transform = string -> string -> string
 

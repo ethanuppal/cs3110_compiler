@@ -1,9 +1,16 @@
+PY	:= $(shell which python3 || which python || which pypy3 || which pypy)
+
 .PHONY: build
 build:
 	@rm -f ./main
 	opam exec -- dune build
 	@cp _build/install/default/bin/cs3110_compiler ./main
 	@chmod u+x ./main
+	@make README
+
+.PHONY: README
+README:
+	$(PY) readme.py
 
 .PHONY: test 
 test: build 

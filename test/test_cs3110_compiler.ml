@@ -136,17 +136,11 @@ let snapshot_test_suite =
   let () = ignore interpreter_transform in
   let transform path input =
     let open Cs3110_compiler in
-    let open Util in
-    let stmt_to_string stmt =
-      Ast.pp_stmt Format.str_formatter stmt;
-      Format.flush_str_formatter ()
-    in
     if String.starts_with ~prefix:"type" path then
       try
         let statements = Parse_lex.lex_and_parse input in
         Analysis.infer statements;
-        List.map (stmt_to_string >> fun s -> s ^ "\n") statements
-        |> String.concat ""
+        statements |> List.map Ast.stmt_to_string |> String.concat ""
       with
       | Analysis.TypeInferenceError err ->
           Printexc.to_string (Analysis.TypeInferenceError err) ^ "\n"

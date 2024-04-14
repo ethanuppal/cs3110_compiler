@@ -104,7 +104,7 @@ let rec infer_expr ctx hint expr =
   | FunctionExpr _ -> ()
 
 (** @raise TypeInferenceError on failure. *)
-let infer_stmt ctx stmt =
+let rec infer_stmt ctx stmt =
   match stmt with
   | Declaration { name; hint; expr } ->
       (infer_expr ctx hint expr;
@@ -131,9 +131,10 @@ let infer_stmt ctx stmt =
                   }));
       Context.insert ctx name (type_of_expr expr |> Option.get)
   | Print expr -> infer_expr ctx None expr
+  | Function { name = _; body } -> infer body
   | _ -> ()
 
-let infer prog =
+and infer prog =
   let ctx = Context.make () in
   Context.push ctx;
   List.iter (infer_stmt ctx) prog;

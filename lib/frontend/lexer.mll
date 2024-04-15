@@ -7,6 +7,7 @@ rule read = parse
 | [' ' '\t' '\r'] { read lexbuf }
 | '\n' { NEWLINE }
 | "//" [^ '\n']* '\n' { NEWLINE }
+| "==" { EQUALS }
 | '=' { ASSIGN }
 | '+' { PLUS }
 | '-' { MINUS }

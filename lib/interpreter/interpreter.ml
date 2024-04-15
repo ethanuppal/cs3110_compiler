@@ -91,7 +91,8 @@ let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
          | Minus -> eval_lhs - eval_rhs
          | Times -> eval_lhs * eval_rhs
          | Divide -> eval_lhs / eval_rhs
-         | Mod -> eval_lhs mod eval_rhs)
+         | Mod -> eval_lhs mod eval_rhs
+         | _ -> failwith "not implemented")
   | Prefix { op; rhs; _ } ->
       Int
         (let eval_rhs = interpreter_eval i rhs |> Value.as_int in

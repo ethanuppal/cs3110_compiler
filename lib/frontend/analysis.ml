@@ -83,7 +83,11 @@ let rec infer_expr ctx hint expr =
       | Plus | Minus | Times | Divide | Mod ->
           infer_expr ctx (Some Type.int_prim_type) infix.lhs;
           infer_expr ctx (Some Type.int_prim_type) infix.rhs;
-          infix.ty <- Some Type.int_prim_type)
+          infix.ty <- Some Type.int_prim_type
+      | Equals ->
+          infer_expr ctx None infix.lhs;
+          infer_expr ctx None infix.rhs;
+          infix.ty <- Some Type.bool_prim_type)
   | Prefix prefix -> (
       match prefix.op with
       | Plus | Minus ->

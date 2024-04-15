@@ -8,6 +8,7 @@ type op =
   | Times
   | Divide
   | Mod
+  | Equals
 
 (** An expression can be evaluated to a value. *)
 type expr =
@@ -68,6 +69,7 @@ let op_to_string op =
   | Times -> "*"
   | Divide -> "/"
   | Mod -> "%"
+  | Equals -> "=="
 
 let rec expr_to_string = function
   | Var { name; ty = _ } -> name

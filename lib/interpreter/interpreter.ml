@@ -140,6 +140,7 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
         | Text output_ref ->
             output_ref := !output_ref ^ Value.to_string value ^ "\n"
         | _ -> print_endline (Value.to_string value))
+    | _ -> failwith "not implemented"
   with
   | NameResolutionError name ->
       Printf.eprintf "NameResolutionError: '%s' could not be resolved\n%!" name

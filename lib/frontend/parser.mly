@@ -56,6 +56,7 @@ body_till_rbrace:
   | stmt NEWLINE body_till_rbrace { $1 :: $3 }
 
 stmt:
+  | IF expr LBRACE body_till_rbrace { If {cond = $2; body = $4 } }
   | VAR LPAR RPAR { Call $1 }
   | LET VAR COLON ty ASSIGN expr { Declaration {name = $2; hint = Some ($4); expr = $6} }
   | LET VAR ASSIGN expr { Declaration {name = $2; hint = None; expr = $4} }

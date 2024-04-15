@@ -34,6 +34,10 @@ type expr =
 
 (** A statement can be executed. *)
 and stmt =
+  | If of {
+      cond : expr;
+      body : stmt list;
+    }
   | Call of string
     (* tbd better function support ia ExpressionStatement need to add in stuff
        baout returns and stuf lol*)
@@ -104,6 +108,12 @@ let stmt_to_string =
             |> String.concat "")
           ^ "}"
       | Print expr -> "print " ^ expr_to_string expr
+      | If { cond; body } ->
+          "if " ^ expr_to_string cond ^ " {\n"
+          ^ (body
+            |> List.map (stmt_to_string_aux (indent ^ add_indent))
+            |> String.concat "")
+          ^ "}"
     in
     indent ^ make_string stmt ^ "\n"
   in
@@ -148,6 +158,16 @@ let rec pp_stmt fmt = function
       pp_expr fmt expr
   | Function { name; body } ->
       Format.fprintf fmt "func %s() {" name;
+      (* Go down a line and indent by two *)
+      Format.pp_print_break fmt 0 2;
+      Format.pp_force_newline fmt ();
+      Format.pp_open_hvbox fmt 0;
+      Format.pp_print_list pp_stmt fmt body;
+      Format.pp_close_box fmt ();
+      Format.pp_print_cut fmt ();
+      Format.pp_print_string fmt "}"
+  | If { cond; body } ->
+      Format.fprintf fmt "if %s {" (expr_to_string cond);
       (* Go down a line and indent by two *)
       Format.pp_print_break fmt 0 2;
       Format.pp_force_newline fmt ();

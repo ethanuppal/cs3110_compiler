@@ -1,5 +1,5 @@
 (test
  (name test_x86ISTMB)
- (libraries x86ISTMB alcotest)
+ (libraries x86ISTMB alcotest qcheck)
  (deps
   (source_tree snapshots)))

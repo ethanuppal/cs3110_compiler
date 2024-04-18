@@ -23,11 +23,15 @@ let full_graph () =
   Graph.add_edge graph 'e' 5 'd';
   Graph.add_edge graph 'd' 6 'd';
 
-  let in_a = Graph.in_neighbors graph 'a' |> List.sort compare in
-  let in_b = Graph.in_neighbors graph 'b' |> List.sort compare in
-  let in_c = Graph.in_neighbors graph 'c' |> List.sort compare in
-  let in_d = Graph.in_neighbors graph 'd' |> List.sort compare in
-  let in_e = Graph.in_neighbors graph 'e' |> List.sort compare in
+  let sorted_in_neighbors char =
+    Graph.in_neighbors graph char |> List.sort compare
+  in
+
+  let in_a = sorted_in_neighbors 'a' in
+  let in_b = sorted_in_neighbors 'b' in
+  let in_c = sorted_in_neighbors 'c' in
+  let in_d = sorted_in_neighbors 'd' in
+  let in_e = sorted_in_neighbors 'e' in
 
   let check_neighbors = check (list (pair char int)) in
 
@@ -37,11 +41,15 @@ let full_graph () =
   check_neighbors "in neighbors of d" [ ('a', 2); ('d', 6); ('e', 5) ] in_d;
   check_neighbors "in neighbors of e" [ ('b', 4) ] in_e;
 
-  let out_a = Graph.out_neighbors graph 'a' |> List.sort compare in
-  let out_b = Graph.out_neighbors graph 'b' |> List.sort compare in
-  let out_c = Graph.out_neighbors graph 'c' |> List.sort compare in
-  let out_d = Graph.out_neighbors graph 'd' |> List.sort compare in
-  let out_e = Graph.out_neighbors graph 'e' |> List.sort compare in
+  let sorted_out_neighbors char =
+    Graph.out_neighbors graph char |> List.sort compare
+  in
+
+  let out_a = sorted_out_neighbors 'a' in
+  let out_b = sorted_out_neighbors 'b' in
+  let out_c = sorted_out_neighbors 'c' in
+  let out_d = sorted_out_neighbors 'd' in
+  let out_e = sorted_out_neighbors 'e' in
 
   check_neighbors "out neighbors of a" [ ('b', 1); ('d', 2) ] out_a;
   check_neighbors "out neighbors of b" [ ('a', 3); ('e', 4) ] out_b;

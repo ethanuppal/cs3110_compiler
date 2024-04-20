@@ -45,6 +45,10 @@ docs:
 	@ocamldoc -html -d docs/html lib/*.mli lib/*.ml 2>/dev/null || echo "==> (Error output surpressed for ocamldoc)"
 	@echo '==> Docs written to docs/html'
 
+.PHONY: deps
+deps:
+	opam install . --deps-only --with-test --with-doc
+
 PORT	:= 8003
 .PHONY: serve 
 serve: docs

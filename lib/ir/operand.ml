@@ -2,7 +2,7 @@ type t =
   | Variable of Variable.t
   | Constant of int
 
-let make_var x = Variable (Variable.make x)
+let make_var var = Variable var
 let make_const x = Constant x
 
 let to_string = function

@@ -1,3 +1,4 @@
+(* TODO: probably will be centralized with AST at some point *)
 type op =
   | Equal
   | Unequal

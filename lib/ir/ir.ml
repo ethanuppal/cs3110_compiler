@@ -1,6 +1,6 @@
 type constant = int
 
-(* todo *)
+(* TODO: how to support more ops? keep consistent with ast? *)
 type t =
   | Assign of Variable.t * Operand.t
   | Add of Variable.t * Operand.t * Operand.t

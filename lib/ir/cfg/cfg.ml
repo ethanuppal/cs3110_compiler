@@ -1,8 +1,8 @@
 module Block = Basic_block
 module Graph = Digraph.Make (Block)
 
-(* TODO: enforce some of this with type system somehow? *)
 (* TODO: rep_ok *)
+(* TODO: enforce some of this with type system somehow? *)
 
 (** RI: [entry] is in [graph] and has no in neighbors. A block in [graph] must
     have zero out neighbors if its condition is [Never], one if its condition is

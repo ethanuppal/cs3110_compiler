@@ -1,5 +1,8 @@
 type t
 
+(* TODO: ability to get all blocks for debugging and stuff, gonna need it later
+   anyways. *)
+
 (** A block in this control flow graph that can be used to store IR. *)
 module Block : sig
   type t

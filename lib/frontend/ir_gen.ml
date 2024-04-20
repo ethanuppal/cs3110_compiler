@@ -5,7 +5,10 @@ type var_context = Variable.t Context.t
 (* TODO: result types? *)
 exception UnboundVariable of { name : string }
 
-let generate_expr (ctx : var_context) (_cfg : Cfg.t) (_block : Cfg.Block.t)
+(* TODO: what are the invariants between context and cfg? should they be
+   packaged together? At least one: variables in ctx must be in cfg *)
+
+let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Cfg.Block.t)
     (expr : Ast.expr) : Operand.t =
   match expr with
   | Var { name; _ } -> (
@@ -14,7 +17,16 @@ let generate_expr (ctx : var_context) (_cfg : Cfg.t) (_block : Cfg.Block.t)
       | Some var -> Operand.make_var var
       | None -> raise (UnboundVariable { name }))
   | ConstInt value -> Operand.make_const value
-  | Infix { lhs; op; rhs; _ } -> failwith "hi"
+  | Infix { lhs; op; rhs; _ } -> (
+      let result = Variable.make () in
+      let lhs_result = generate_expr ctx cfg block lhs in
+      let rhs_result = generate_expr ctx cfg block rhs in
+      match op with
+      | Plus ->
+          let ir = Ir.Add (result, lhs_result, rhs_result) in
+          Cfg.Block.add_ir block ir;
+          Operand.make_var result
+      | _ -> failwith "not implemented")
   | _ -> failwith "not implemented"
 
 (** [generate_stmt ctx cfg block stmt] adds IR for [stmt] (and potentially more
@@ -23,8 +35,12 @@ let generate_expr (ctx : var_context) (_cfg : Cfg.t) (_block : Cfg.Block.t)
 let generate_stmt ctx cfg block = function
   | If _ -> failwith "not implemented"
   | Call _ -> failwith "not implemented"
-  | Declaration { expr; _ } ->
-      let _ = generate_expr ctx cfg block expr in
+  | Declaration { expr; name; _ } ->
+      let result = generate_expr ctx cfg block expr in
+      let result_var = Variable.make () in
+      let assign = Ir.Assign (result_var, result) in
+      Cfg.Block.add_ir block assign;
+      Context.insert ctx name result_var;
       block
   | Assignment _ -> failwith "not implemented"
   | Function _ -> failwith "not allowed"
@@ -34,6 +50,7 @@ let generate prog =
   match prog with
   | Function { name = "main"; body } :: _ ->
       let ctx = Context.make () in
+      Context.push ctx;
       let cfg = Cfg.make () in
       let block = ref (Cfg.entry cfg) in
       List.iter (fun stmt -> block := generate_stmt ctx cfg !block stmt) body;

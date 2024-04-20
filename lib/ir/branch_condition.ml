@@ -1,16 +1,25 @@
-type t =
-  | Unconditional
-  | Equal of Operand.t * Operand.t
-  | Unequal of Operand.t * Operand.t
-  | LessThan of Operand.t * Operand.t
-  | GreaterThan of Operand.t * Operand.t
-  | AtMost of Operand.t * Operand.t
-  | AtLeast of Operand.t * Operand.t
+type unconditional
+type conditional
+type cond_operands = Operand.t * Operand.t
 
-let to_string =
+(* GADT:
+   https://stackoverflow.com/questions/24653301/accepting-only-one-variant-of-sum-type-as-ocaml-function-parameter *)
+(* allows us to only accept a subset of variants *)
+type _ t =
+  | Always : unconditional t
+  | Never : unconditional t
+  | Equal : cond_operands -> conditional t
+  | Unequal : cond_operands -> conditional t
+  | LessThan : cond_operands -> conditional t
+  | GreaterThan : cond_operands -> conditional t
+  | AtMost : cond_operands -> conditional t
+  | AtLeast : cond_operands -> conditional t
+
+let to_string (type a) : a t -> string =
   let open Printf in
   function
-  | Unconditional -> "true"
+  | Always -> "true"
+  | Never -> "false"
   | Equal (o1, o2) ->
       sprintf "%s == %s" (Operand.to_string o1) (Operand.to_string o2)
   | Unequal (o1, o2) ->

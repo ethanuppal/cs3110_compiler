@@ -5,11 +5,15 @@ let bb_gen = Id.Gen.make ()
 type t = {
   id : Id.id;
   contents : ir_array;
-  condition : Branch_condition.t;
+  mutable condition : Branch_condition.t;
 }
 
-let make condition =
-  { id = Id.Gen.next bb_gen; contents = BatDynArray.create (); condition }
+let make () =
+  {
+    id = Id.Gen.next bb_gen;
+    contents = BatDynArray.create ();
+    condition = Branch_condition.Never;
+  }
 
 let id_of basic_block = basic_block.id
 let condition_of bb = bb.condition

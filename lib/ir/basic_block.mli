@@ -1,8 +1,7 @@
 (** [t] is a basic block. *)
 type t
 
-(** [make condition] is a new basic block with [condition] as the final branch
-    condition. It will have a randomly generated id. *)
+(** [make ()] is a new basic block with a random [id] and a condition of [Never] *)
 val make : Branch_condition.t -> t
 
 (** [id_of basic_block] is the id of [basic_block]. *)

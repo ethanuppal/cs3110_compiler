@@ -3,7 +3,7 @@ PY	:= $(shell which python3 || which python || which pypy3 || which pypy)
 .PHONY: build
 build:
 	@rm -f ./main
-	opam exec -- dune build
+	opam exec -- dune build 
 	@cp _build/install/default/bin/x86ISTMB ./main
 	@chmod u+x ./main
 	@chmod u+x .githooks/pre-commit

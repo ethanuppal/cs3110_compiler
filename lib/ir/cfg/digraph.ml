@@ -1,3 +1,6 @@
+(* TODO: disallow edge replacement *)
+(* TODO: rep invariant? *)
+
 module Make (V : Hashtbl.HashedType) = struct
   module T = Hashtbl.Make (V)
 

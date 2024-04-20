@@ -1,3 +1,5 @@
+(** TODO: needs tests *)
+
 type ir_array = Ir.t BatDynArray.t
 
 let bb_gen = Id.Gen.make ()
@@ -17,7 +19,8 @@ let make () =
 
 let id_of basic_block = basic_block.id
 let condition_of bb = bb.condition
-let add basic_block ir = BatDynArray.add basic_block.contents ir
+let set_condition bb cond = bb.condition <- cond
+let add_ir basic_block ir = BatDynArray.add basic_block.contents ir
 let to_list basic_block = BatDynArray.to_list basic_block.contents
 let equal bb1 bb2 = bb1.id = bb2.id
 let hash bb = bb.id

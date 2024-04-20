@@ -2,7 +2,7 @@
 type t
 
 (** [make ()] is a new basic block with a random [id] and a condition of [Never] *)
-val make : Branch_condition.t -> t
+val make : unit -> t
 
 (** [id_of basic_block] is the id of [basic_block]. *)
 val id_of : t -> Id.id
@@ -11,8 +11,11 @@ val id_of : t -> Id.id
     from this basic block. *)
 val condition_of : t -> Branch_condition.t
 
-(** [add basic_block ir] adds [ir] to the end of [basic_block]. *)
-val add : t -> Ir.t -> unit
+(** [set_condition bb cond] sets the condition of [bb] to [cond]. *)
+val set_condition : t -> Branch_condition.t -> unit
+
+(** [add_ir basic_block ir] adds [ir] to the end of [basic_block]. *)
+val add_ir : t -> Ir.t -> unit
 
 (** [to_list basic_block] are the IR operations in [basic_block] in order as a
     list. *)

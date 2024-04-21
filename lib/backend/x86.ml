@@ -1,3 +1,5 @@
+open Util
+
 let display_indent = "  "
 
 module Register = struct
@@ -19,7 +21,7 @@ module Register = struct
     | R14
     | R15
 
-  let to_string = function
+  let to_nasm = function
     | RAX -> "rax"
     | RBX -> "rbx"
     | RCX -> "rcx"
@@ -45,11 +47,38 @@ module Operand = struct
     | Label of string
     | RelativeLabel of string
 
-  let to_string = function
-    | Register reg -> Register.to_string reg
+  let to_nasm = function
+    | Register reg -> Register.to_nasm reg
     | Intermediate int -> string_of_int int
     | Label label -> label
     | RelativeLabel rel_label -> "[rel " ^ rel_label ^ "]"
+end
+
+module Label : sig
+  type t
+
+  (** [make ~is_global:is_global, ~is_external:is_external name] is a label
+      named [name], global if and only if [is_global], and external if and only
+      if [is_external], but not both. *)
+  val make : is_global:bool -> is_external:bool -> string -> t
+
+  val to_nasm : t -> string
+end = struct
+  type t = {
+    is_global : bool;
+    is_external : bool;
+    name : string;
+  }
+
+  let make ~is_global ~is_external name = { is_global; is_external; name }
+
+  let to_nasm label =
+    match (label.is_global, label.is_external) with
+    | false, false -> label.name
+    | true, false -> "global " ^ label.name ^ "\n" ^ display_indent ^ label.name
+    | false, true ->
+        "external " ^ label.name ^ "\n" ^ display_indent ^ label.name
+    | _ -> failwith "invalid label"
 end
 
 module Instruction = struct
@@ -66,33 +95,39 @@ module Instruction = struct
     | Je of Operand.t
     | Ret
     | Syscall
+    | Label of Label.t
 
-  let to_string = function
+  let to_nasm = function
     | Mov (op1, op2) ->
-        "mov " ^ Operand.to_string op1 ^ ", " ^ Operand.to_string op2
+        "mov " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Add (op1, op2) ->
-        "add " ^ Operand.to_string op1 ^ ", " ^ Operand.to_string op2
+        "add " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Sub (op1, op2) ->
-        "sub " ^ Operand.to_string op1 ^ ", " ^ Operand.to_string op2
-    | IMul op -> "imul " ^ Operand.to_string op
-    | Push op -> "push " ^ Operand.to_string op
-    | Pop op -> "pop " ^ Operand.to_string op
-    | Call op -> "call " ^ Operand.to_string op
+        "sub " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+    | IMul op -> "imul " ^ Operand.to_nasm op
+    | Push op -> "push " ^ Operand.to_nasm op
+    | Pop op -> "pop " ^ Operand.to_nasm op
+    | Call op -> "call " ^ Operand.to_nasm op
     | Cmp (op1, op2) ->
-        "cmp " ^ Operand.to_string op1 ^ ", " ^ Operand.to_string op2
-    | Jmp op -> "jmp " ^ Operand.to_string op
-    | Je op -> "je " ^ Operand.to_string op
+        "cmp " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+    | Jmp op -> "jmp " ^ Operand.to_nasm op
+    | Je op -> "je " ^ Operand.to_nasm op
     | Ret -> "ret"
     | Syscall -> "syscall"
+    | Label label -> Label.to_nasm label
 end
 
 module Section : sig
+  (** Values of type [t] are assembly sections. *)
   type t
 
   (** `make name align` is new section with name [name] and alignment [align]. *)
   val make : string -> int -> t
 
-  val to_string : t -> string
+  (** [add section instr] adds [instr] to the end of [section]. *)
+  val add : t -> Instruction.t -> unit
+
+  val to_nasm : t -> string
 end = struct
   type t = {
     name : string;
@@ -101,14 +136,26 @@ end = struct
   }
 
   let make name align = { name; align; contents = BatDynArray.make 16 }
+  let add section = BatDynArray.add section.contents
 
-  let to_string section =
-    let open Util in
+  let to_nasm section =
     ("section ." ^ section.name)
     :: (display_indent ^ "align " ^ string_of_int section.align)
     :: (BatDynArray.to_list section.contents
-       |> List.map (Instruction.to_string >> ( ^ ) display_indent))
+       |> List.map (Instruction.to_nasm >> ( ^ ) display_indent))
     |> String.concat "\n"
 end
 
-module AssemblyFile = struct end
+module AssemblyFile : sig
+  type t
+
+  val add : t -> Section.t -> unit
+  val to_nasm : t -> string
+end = struct
+  type t = Section.t BatDynArray.t
+
+  let add = BatDynArray.add
+
+  let to_nasm =
+    BatDynArray.to_list >> List.map Section.to_nasm >> String.concat "\n\n"
+end

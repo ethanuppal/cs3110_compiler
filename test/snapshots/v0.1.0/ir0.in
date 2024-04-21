@@ -1,7 +1,0 @@
-func main() {
-    let x = 0
-    let y = 2
-    let z = x
-    let w = z + y
-    z = 10
-}

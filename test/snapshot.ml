@@ -30,7 +30,9 @@ let make_test_suite ?(version = Meta.get.version) root transform =
         expected actual
     with Parse_lex.ParseError msg -> fail msg
   in
-  let suite_name = Printf.sprintf "test/snapshots/%s" version_string in
+  let suite_name =
+    Printf.sprintf "Snapshot Test Suite (testing version %s)" version_string
+  in
   let snapshot_tests =
     snapshots
     |> List.map (fun snapshot -> (snapshot, `Slow, snapshot_test snapshot))

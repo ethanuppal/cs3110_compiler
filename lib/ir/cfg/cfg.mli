@@ -3,18 +3,11 @@ type t
 (* TODO: ability to get all blocks for debugging and stuff, gonna need it later
    anyways. *)
 
-(** A block in this control flow graph that can be used to store IR. *)
-module Block : sig
-  type t
-
-  val add_ir : t -> Ir.t -> unit
-end
-
 (** [make ()] is a CFG with one empty block for the entry point. *)
 val make : unit -> t
 
 (** [entry cfg] is the block that is the entry point of [cfg]. *)
-val entry : t -> Block.t
+val entry : t -> Basic_block.t
 
 (* TODO: can any of this be simplified by taking advantage of the type system?
    Especially the requirement on [cond]. *)
@@ -25,4 +18,5 @@ val entry : t -> Block.t
 
     [cond] must be [Conditional], not [Never] or [Always]. [block] must not
     already be followed by another block. *)
-val branch : t -> Block.t -> Branch_condition.t -> Block.t * Block.t
+val branch :
+  t -> Basic_block.t -> Branch_condition.t -> Basic_block.t * Basic_block.t

@@ -22,4 +22,9 @@ module Make (V : Hashtbl.HashedType) : sig
       outgoing edges to coupled with their edge labels. Requires that [vertex]
       is in [graph]. *)
   val out_neighbors : 'edge t -> V.t -> (V.t * 'edge) list
+
+  (* TODO: documentation and tests *)
+
+  val vertices : 'edge t -> V.t list
+  val edges : 'edge t -> (V.t * 'edge * V.t) list
 end

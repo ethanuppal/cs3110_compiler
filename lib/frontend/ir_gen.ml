@@ -8,7 +8,7 @@ exception UnboundVariable of { name : string }
 (* TODO: what are the invariants between context and cfg? should they be
    packaged together? At least one: variables in ctx must be in cfg *)
 
-let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Cfg.Block.t)
+let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Basic_block.t)
     (expr : Ast.expr) : Operand.t =
   match expr with
   | Var { name; _ } -> (
@@ -24,7 +24,7 @@ let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Cfg.Block.t)
       match op with
       | Plus ->
           let ir = Ir.Add (result, lhs_result, rhs_result) in
-          Cfg.Block.add_ir block ir;
+          Basic_block.add_ir block ir;
           Operand.make_var result
       | _ -> failwith "not implemented")
   | _ -> failwith "not implemented"
@@ -36,10 +36,11 @@ let generate_stmt ctx cfg block = function
   | If _ -> failwith "not implemented"
   | Call _ -> failwith "not implemented"
   | Declaration { expr; name; _ } ->
+      (* IR for this could probably be improved but it's fine *)
       let result = generate_expr ctx cfg block expr in
       let result_var = Variable.make () in
       let assign = Ir.Assign (result_var, result) in
-      Cfg.Block.add_ir block assign;
+      Basic_block.add_ir block assign;
       Context.insert ctx name result_var;
       block
   | Assignment _ -> failwith "not implemented"

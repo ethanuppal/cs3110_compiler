@@ -36,8 +36,7 @@ let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Basic_block.t)
 (** [generate_stmt ctx cfg block stmt] adds IR for [stmt] (and potentially more
     blocks) onto [block] in [cfg], and returns the block that program flow
     should continue from. *)
-let generate_stmt ctx cfg block = function
-  | If _ -> failwith "not implemented"
+let rec generate_stmt ctx cfg block = function
   | Call _ -> failwith "not implemented"
   | Declaration { expr; name; _ } ->
       (* IR for this could probably be improved but it's fine *)
@@ -55,8 +54,23 @@ let generate_stmt ctx cfg block = function
       let assign = Ir.Assign (result_var, result) in
       Basic_block.add_ir block assign;
       block
+  | If { cond; body } -> (
+      (* Right now cond can only be ConstBool *)
+      match cond with
+      | ConstBool true ->
+          Context.push ctx;
+          let continuation = generate_stmt_lst ctx cfg block body in
+          Context.pop ctx;
+          continuation
+      | ConstBool false -> block (* just generate whatever is after *)
+      | _ -> failwith "it's over")
   | Function _ -> failwith "not allowed"
   | Print _ -> failwith "not implemented"
+
+and generate_stmt_lst ctx cfg block lst =
+  let block_ref = ref block in
+  List.iter (fun stmt -> block_ref := generate_stmt ctx cfg !block_ref stmt) lst;
+  !block_ref
 
 let generate prog =
   match prog with
@@ -64,7 +78,6 @@ let generate prog =
       let ctx = Context.make () in
       Context.push ctx;
       let cfg = Cfg.make () in
-      let block = ref (Cfg.entry cfg) in
-      List.iter (fun stmt -> block := generate_stmt ctx cfg !block stmt) body;
+      ignore (generate_stmt_lst ctx cfg (Cfg.entry cfg) body);
       [ cfg ]
   | _ -> failwith "not implemented"

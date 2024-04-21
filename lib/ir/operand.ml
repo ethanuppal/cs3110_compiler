@@ -1,3 +1,4 @@
+(* TODO: need types? *)
 type t =
   | Variable of Variable.t
   | Constant of int

@@ -1,5 +1,9 @@
 module Graph = Digraph.Make (Basic_block)
 
+(* TODO: rn the take of this module is "here are basic blocks. you can do
+   whatever you want with them. don't mess it up." this could be improved but I
+   don't know how. *)
+
 (* TODO: rep_ok *)
 (* TODO: enforce some of this with type system somehow? *)
 
@@ -29,3 +33,5 @@ let branch { graph; _ } block cond =
   Graph.add_edge graph block false bf;
   Basic_block.set_condition block cond;
   (bt, bf)
+
+let blocks { graph; _ } = Graph.vertices graph

@@ -20,3 +20,7 @@ val entry : t -> Basic_block.t
     already be followed by another block. *)
 val branch :
   t -> Basic_block.t -> Branch_condition.t -> Basic_block.t * Basic_block.t
+
+(* TODO: documentation *)
+
+val blocks : t -> Basic_block.t list

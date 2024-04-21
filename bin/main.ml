@@ -21,14 +21,23 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let test () = print_endline "lol"
+let show_ir statements =
+  let ir = Ir_gen.generate statements in
+  let main_cfg = List.hd ir in
+  let blocks = Cfg.blocks main_cfg in
+  List.iteri
+    (fun i b ->
+      let lst = Basic_block.to_list b in
+      Printf.printf "Block %i:\n" i;
+      List.iter (fun bir -> print_endline (Ir.to_string bir)) lst)
+    blocks
 
 let file_driver path flags =
   let source = Util.read_file path in
   try
     let statements = Parse_lex.lex_and_parse source in
     ignore statements;
-    if List.mem Cli.OnlyIR flags then test ()
+    if List.mem Cli.OnlyIR flags then show_ir statements
     else failwith "compiler not done yet"
   with Parse_lex.ParseError msg -> print_error (msg ^ "\n")
 

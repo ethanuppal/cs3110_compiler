@@ -39,5 +39,11 @@ let unconditionally { graph; _ } pred succ =
   Graph.add_edge graph pred true succ;
   Basic_block.set_condition pred Branch_condition.Always
 
+let take_branch { graph; _ } bb cond =
+  let out = Graph.out_neighbors graph bb in
+  match List.find_opt (fun (_, edge) -> edge = cond) out with
+  | Some (bb2, _) -> Some bb2
+  | None -> None
+
 let blocks { graph; _ } = Graph.vertices graph
 let edges { graph; _ } = Graph.edges graph

@@ -27,3 +27,6 @@ val insert : 'a t -> string -> 'a -> unit
 (** [get ctx key] is the value associated with [key] in the scope closest to the
     top of the stack in which [key] appears, or [None] if [key] is not bound. *)
 val get : 'a t -> string -> 'a option
+
+(** [to_seq ctx] is [ctx] as a sequence of key-value pairs. *)
+val to_seq : 'a t -> (string * 'a) Seq.t

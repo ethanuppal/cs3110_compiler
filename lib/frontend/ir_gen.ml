@@ -32,6 +32,14 @@ let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Basic_block.t)
           let ir = Ir.Add (result, lhs_result, rhs_result) in
           Basic_block.add_ir block ir;
           Operand.make_var result
+      | Minus ->
+          let ir = Ir.Sub (result, lhs_result, rhs_result) in
+          Basic_block.add_ir block ir;
+          Operand.make_var result
+      | Equals ->
+          let ir = Ir.Equal (result, lhs_result, rhs_result) in
+          Basic_block.add_ir block ir;
+          Operand.make_var result
       | _ -> failwith "not implemented")
   | _ -> failwith "not implemented"
 
@@ -70,7 +78,10 @@ let rec generate_stmt ctx cfg block = function
 
       bf
   | Function _ -> failwith "not allowed"
-  | Print _ -> failwith "not implemented"
+  | Print expr ->
+      let to_print = generate_expr ctx cfg block expr in
+      Basic_block.add_ir block (Ir.DebugPrint to_print);
+      block
 
 and generate_stmt_lst ctx cfg block lst =
   let block_ref = ref block in

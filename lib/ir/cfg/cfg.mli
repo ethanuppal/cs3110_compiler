@@ -30,6 +30,8 @@ val branch :
     [pred] must not already be followed by another block. *)
 val unconditionally : t -> Basic_block.t -> Basic_block.t -> unit
 
+val take_branch : t -> Basic_block.t -> bool -> Basic_block.t option
+
 (* TODO: documentation *)
 
 val blocks : t -> Basic_block.t list

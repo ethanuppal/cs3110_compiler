@@ -15,7 +15,7 @@ let pop = BatDynArray.delete_last
     Requires: [not (is_empty ctx)]. *)
 let top = BatDynArray.last
 
-let insert ctx = Scope.add (top ctx)
+let insert ctx = Scope.replace (top ctx)
 
 let get ctx key =
   let rec get_aux i =
@@ -27,3 +27,8 @@ let get ctx key =
       | Some value -> Some value
   in
   get_aux (stack_size ctx - 1)
+
+(* sadly [Util.(>>)] doesn't work with the type system here *)
+let to_seq ctx =
+  ctx |> BatDynArray.to_list |> List.map Scope.to_seq |> List.to_seq
+  |> Seq.concat

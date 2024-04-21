@@ -22,6 +22,7 @@ let print_version () =
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
 let show_ir statements =
+  Analysis.infer statements;
   let ir = Ir_gen.generate statements in
   let main_cfg = List.hd ir in
   let blocks = Cfg.blocks main_cfg in

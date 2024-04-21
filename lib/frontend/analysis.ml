@@ -78,12 +78,25 @@ let rec infer_expr ctx hint expr =
                  ast = Left expr;
                  unify = Some (other, Type.Primitive Bool);
                }))
-  | Infix infix -> (
-      match infix.op with
+  | Infix infix ->
+      (match infix.op with
       | Plus | Minus | Times | Divide | Mod ->
           infer_expr ctx (Some Type.int_prim_type) infix.lhs;
           infer_expr ctx (Some Type.int_prim_type) infix.rhs;
-          infix.ty <- Some Type.int_prim_type)
+          infix.ty <- Some Type.int_prim_type
+      | Equals ->
+          infer_expr ctx None infix.lhs;
+          infer_expr ctx None infix.rhs;
+          infix.ty <- Some Type.bool_prim_type);
+      if hint <> None && hint <> Some Type.any_type && hint <> infix.ty then
+        raise
+          (TypeInferenceError
+             {
+               domain = "unification";
+               symbol = None;
+               ast = Left expr;
+               unify = Some (Option.get hint, Option.get infix.ty);
+             })
   | Prefix prefix -> (
       match prefix.op with
       | Plus | Minus ->
@@ -132,6 +145,9 @@ let rec infer_stmt ctx stmt =
       Context.insert ctx name (type_of_expr expr |> Option.get)
   | Print expr -> infer_expr ctx None expr
   | Function { name = _; body } -> infer body
+  | If { cond; body } ->
+      infer_expr ctx (Some Type.bool_prim_type) cond;
+      infer body
   | _ -> ()
 
 and infer prog =

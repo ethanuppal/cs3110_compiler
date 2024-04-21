@@ -1,3 +1,5 @@
+(* TODO: can we have immutability here? kind of seems like a good place
+   actually. *)
 module Scope = Hashtbl.Make (String)
 
 type 'a t = 'a Scope.t BatDynArray.t

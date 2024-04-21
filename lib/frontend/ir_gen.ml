@@ -21,6 +21,8 @@ let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Basic_block.t)
       let var = get_or_else (UnboundVariable { name }) var_opt in
       Operand.make_var var
   | ConstInt value -> Operand.make_const value
+  | ConstBool value ->
+      if value then Operand.make_const 1 else Operand.make_const 0
   | Infix { lhs; op; rhs; _ } -> (
       let result = Variable.make () in
       let lhs_result = generate_expr ctx cfg block lhs in
@@ -54,16 +56,19 @@ let rec generate_stmt ctx cfg block = function
       let assign = Ir.Assign (result_var, result) in
       Basic_block.add_ir block assign;
       block
-  | If { cond; body } -> (
-      (* Right now cond can only be ConstBool *)
-      match cond with
-      | ConstBool true ->
-          Context.push ctx;
-          let continuation = generate_stmt_lst ctx cfg block body in
-          Context.pop ctx;
-          continuation
-      | ConstBool false -> block (* just generate whatever is after *)
-      | _ -> failwith "it's over")
+  | If { cond; body } ->
+      let cond_result = generate_expr ctx cfg block cond in
+      let bt, bf =
+        Cfg.branch cfg block (Branch_condition.Conditional cond_result)
+      in
+
+      (* True case *)
+      Context.push ctx;
+      let true_end_block = generate_stmt_lst ctx cfg bt body in
+      Context.pop ctx;
+      Cfg.unconditionally cfg true_end_block bf;
+
+      bf
   | Function _ -> failwith "not allowed"
   | Print _ -> failwith "not implemented"
 

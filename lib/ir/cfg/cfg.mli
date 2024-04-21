@@ -16,11 +16,23 @@ val entry : t -> Basic_block.t
     blocks, [bt] being the jump target from [block] if [cond] is true, [bf]
     being the jump target from [block] if [cond] is false.
 
+    [block] must already be in the graph.
+
     [cond] must be [Conditional], not [Never] or [Always]. [block] must not
     already be followed by another block. *)
 val branch :
   t -> Basic_block.t -> Branch_condition.t -> Basic_block.t * Basic_block.t
 
+(** [unconditionally cfg pred succ] makes [succ] unconditionally follow [pred].
+
+    [pred] and [succ] must already be in the graph.
+
+    [pred] must not already be followed by another block. *)
+val unconditionally : t -> Basic_block.t -> Basic_block.t -> unit
+
 (* TODO: documentation *)
 
 val blocks : t -> Basic_block.t list
+val edges : t -> (Basic_block.t * bool * Basic_block.t) list
+
+(* TODO: pretty print *)

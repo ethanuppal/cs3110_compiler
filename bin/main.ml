@@ -25,12 +25,23 @@ let show_ir statements =
   let ir = Ir_gen.generate statements in
   let main_cfg = List.hd ir in
   let blocks = Cfg.blocks main_cfg in
-  List.iteri
-    (fun i b ->
+  List.iter
+    (fun b ->
       let lst = Basic_block.to_list b in
-      Printf.printf "Block %i:\n" i;
-      List.iter (fun bir -> print_endline (Ir.to_string bir)) lst)
-    blocks
+      Printf.printf "Block %i:\n" (Basic_block.id_of b);
+      List.iter (fun bir -> print_endline (Ir.to_string bir)) lst;
+      print_newline ())
+    blocks;
+  let edges = Cfg.edges main_cfg in
+  List.iter
+    (fun (b1, e, b2) ->
+      Printf.printf "Block %i" (Basic_block.id_of b1);
+      Printf.printf " --%s (%s)--> "
+        (Basic_block.condition_of b1 |> Branch_condition.to_string)
+        (if e then "t" else "f");
+      Printf.printf "Block %i" (Basic_block.id_of b2);
+      print_newline ())
+    edges
 
 let file_driver path flags =
   let source = Util.read_file path in

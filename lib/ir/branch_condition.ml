@@ -1,33 +1,10 @@
-(* TODO: probably will be centralized with AST at some point *)
-type op =
-  | Equal
-  | Unequal
-  | LessThan
-  | GreaterThan
-  | AtMost
-  | AtLeast
-
 type t =
   | Always
   | Never
-  | Conditional of op * Operand.t * Operand.t
+  | Conditional of Operand.t
 
-let to_string =
-  let open Printf in
-  function
-  | Always -> "true"
-  | Never -> "false"
-  | Conditional (op, o1, o2) -> (
-      match op with
-      | Equal ->
-          sprintf "%s == %s" (Operand.to_string o1) (Operand.to_string o2)
-      | Unequal ->
-          sprintf "%s != %s" (Operand.to_string o1) (Operand.to_string o2)
-      | LessThan ->
-          sprintf "%s < %s" (Operand.to_string o1) (Operand.to_string o2)
-      | GreaterThan ->
-          sprintf "%s > %s" (Operand.to_string o1) (Operand.to_string o2)
-      | AtMost ->
-          sprintf "%s <= %s" (Operand.to_string o1) (Operand.to_string o2)
-      | AtLeast ->
-          sprintf "%s >= %s" (Operand.to_string o1) (Operand.to_string o2))
+(* TODO: pretty print *)
+let to_string = function
+  | Always -> "always"
+  | Never -> "never"
+  | Conditional op -> "if " ^ Operand.to_string op

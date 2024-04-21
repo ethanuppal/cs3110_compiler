@@ -54,6 +54,9 @@ module Make (V : Hashtbl.HashedType) = struct
 
   let vertices graph = T.to_seq_keys graph |> List.of_seq
 
-  (* TODO: edges *)
-  let edges _graph = []
+  let edges graph =
+    T.to_seq graph
+    |> Seq.map (fun (v1, lst) -> (v1, List.to_seq lst))
+    |> Seq.flat_map (fun (v1, lst) -> Seq.map (fun (v2, e) -> (v1, e, v2)) lst)
+    |> List.of_seq
 end

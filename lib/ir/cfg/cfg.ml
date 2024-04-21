@@ -34,4 +34,10 @@ let branch { graph; _ } block cond =
   Basic_block.set_condition block cond;
   (bt, bf)
 
+let unconditionally { graph; _ } pred succ =
+  assert (Basic_block.condition_of pred = Never);
+  Graph.add_edge graph pred true succ;
+  Basic_block.set_condition pred Branch_condition.Always
+
 let blocks { graph; _ } = Graph.vertices graph
+let edges { graph; _ } = Graph.edges graph

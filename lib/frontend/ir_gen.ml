@@ -8,14 +8,18 @@ exception UnboundVariable of { name : string }
 (* TODO: what are the invariants between context and cfg? should they be
    packaged together? At least one: variables in ctx must be in cfg *)
 
+let get_or_else excn opt =
+  match opt with
+  | Some v -> v
+  | None -> raise excn
+
 let rec generate_expr (ctx : var_context) (cfg : Cfg.t) (block : Basic_block.t)
     (expr : Ast.expr) : Operand.t =
   match expr with
-  | Var { name; _ } -> (
+  | Var { name; _ } ->
       let var_opt = Context.get ctx name in
-      match var_opt with
-      | Some var -> Operand.make_var var
-      | None -> raise (UnboundVariable { name }))
+      let var = get_or_else (UnboundVariable { name }) var_opt in
+      Operand.make_var var
   | ConstInt value -> Operand.make_const value
   | Infix { lhs; op; rhs; _ } -> (
       let result = Variable.make () in
@@ -43,7 +47,14 @@ let generate_stmt ctx cfg block = function
       Basic_block.add_ir block assign;
       Context.insert ctx name result_var;
       block
-  | Assignment _ -> failwith "not implemented"
+  | Assignment (name, expr) ->
+      let result = generate_expr ctx cfg block expr in
+      let result_var =
+        Context.get ctx name |> get_or_else (UnboundVariable { name })
+      in
+      let assign = Ir.Assign (result_var, result) in
+      Basic_block.add_ir block assign;
+      block
   | Function _ -> failwith "not allowed"
   | Print _ -> failwith "not implemented"
 

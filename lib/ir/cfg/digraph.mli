@@ -1,38 +1,30 @@
-(** [vertex] uniquely identifies a vertex. *)
-type vertex_id
+module Make (V : Hashtbl.HashedType) : sig
+  type 'edge t
 
-(** ['a t] is a directed graph with vertices of type ['a]. *)
-type 'a t
+  (** [empty ()] is a fresh empty digraph. *)
+  val empty : unit -> 'edge t
 
-(** [make ()] is an empty directed graph. *)
-val make : unit -> 'a t
+  (** [add_vertex graph vertex] adds the given [vertex] to [graph] with no
+      neighbors. Requires that [vertex] is not already in [graph]. *)
+  val add_vertex : 'edge t -> V.t -> unit
 
-(** [vertex_count dg] is the number of vertices in [dg]. *)
-val vertex_count : 'a t -> int
+  (** [add_edge graph v1 e v2] adds an edge from [v1] to [v2] labeled with [e].
+      Requires that [v1] and [v2] are already in [graph]. If there already
+      exists a directed edge from [v1] to [v2], its label is replaced with [e]. *)
+  val add_edge : 'edge t -> V.t -> 'edge -> V.t -> unit
 
-(** [vertex_id_of_int (n - 1)] is the handle for the vertex added to an
-    arbitrary directed graph [dg : t] after [n] calls to [add_vertex] on [dg].
-    The vertex may not exist yet, so any attempt to access the result before
-    [vertex_count dg >= n] is strictly invalid. *)
-val vertex_id_of_int : int -> vertex_id
+  (** [in_neighbors graph vertex] is a list of vertices that have outgoing edges
+      to [vertex] coupled with their edge labels. Requires that [vertex] is in
+      [graph]. *)
+  val in_neighbors : 'edge t -> V.t -> (V.t * 'edge) list
 
-(** If the vertex to which [v] is a handle was added to an arbitrary directed
-    graph [dg : t] after [n] calls to [add_vertex] on [dg], then
-    [int_of_vertex_id v] is [n - 1]. *)
-val int_of_vertex_id : vertex_id -> int
+  (** [out_neighbors graph vertex] is a list of vertices that [vertex] has
+      outgoing edges to coupled with their edge labels. Requires that [vertex]
+      is in [graph]. *)
+  val out_neighbors : 'edge t -> V.t -> (V.t * 'edge) list
 
-(** [get dg v] is the vertex in the graph [dg] with handle [v].
+  (* TODO: documentation and tests *)
 
-    Requires: the vertex is in [dg]. *)
-val get : 'a t -> vertex_id -> 'a
-
-(** [vertices_of dg] are the vertices of [dg] as a sequence. *)
-val vertices_of : 'a t -> vertex_id Seq.t
-
-(** [add_vertex dg value] is a handle to [value] after inserting it into the
-    graph [dg] *)
-val add_vertex : 'a t -> 'a -> vertex_id
-
-(** [add_edge dg v1 v2] adds an edge from the the vertex associated with [v1]
-    and the vertex associated with [v2]. *)
-val add_edge : 'a t -> vertex_id -> vertex_id -> unit
+  val vertices : 'edge t -> V.t list
+  val edges : 'edge t -> (V.t * 'edge * V.t) list
+end

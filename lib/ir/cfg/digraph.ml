@@ -1,35 +1,62 @@
-type vertex_id = int
+(* TODO: disallow edge replacement *)
+(* TODO: rep invariant? *)
 
-type 'a vertex = {
-  adj : vertex_id BatDynArray.t;
-  value : 'a;
-}
+module Make (V : Hashtbl.HashedType) = struct
+  module T = Hashtbl.Make (V)
 
-(** AF: equivalent to the nested list
-    [adj = {[v1; v2; v3; ...]; value = val1}; {adj = [v4; v5; v6; ,,,]; value = val2}; ...]
-    is the directed graph where [v1] has edges to the vertices indexed by [v1],
-    [v2], and [v3], [v2] has edges to those indexed by [v4], [v5], [v6], and so
-    on, and where vertex index [i] corresponds to the vertex at index [i] in the
-    list. *)
-type 'a t = 'a vertex BatDynArray.t
+  (* A list is fine or even better here since we have a max out degree count of
+     two. *)
 
-let vertex_count = BatDynArray.length
-let int_of_vertex_id = Util.id
-let vertex_id_of_int = Util.id
-let vertices_of dg = Seq.init (BatDynArray.length dg) Util.id
+  (** AF:
+      [{ 
+        v1 = [ (vi, ea); (vj, eb); ... ];
+        v2 = [ (vk, ec); (vl, ed); ... ];
+        ...
+        vn = [ ... ]
+      }]
+      is a directed graph with [n] vertices and [len vi forall i, 1 <= i <= n]
+      edges. Each element in [vi] [(vj, ea)] represents an outgoing edge from
+      [vi] to [vj] with edge label [ea]. *)
+  type 'edge t = (V.t * 'edge) list T.t
 
-let rep_ok dg =
-  if Rep_ok.check then
-    if vertex_count dg <> Seq.length (vertices_of dg) then failwith "rep_ok";
-  dg
+  let empty () = T.create 4
 
-let make () = BatDynArray.make 16 |> rep_ok
-let get dg v = (BatDynArray.get (rep_ok dg) v).value
+  let add_vertex graph vertex =
+    assert (not (T.mem graph vertex));
+    T.add graph vertex []
 
-let add_vertex dg value =
-  let result = BatDynArray.length (rep_ok dg) in
-  BatDynArray.add dg { adj = BatDynArray.make 16; value };
-  rep_ok dg |> ignore;
-  result
+  let add_edge graph v1 e v2 =
+    assert (T.mem graph v1);
+    assert (T.mem graph v2);
 
-let add_edge dg v1 = (BatDynArray.get (rep_ok dg) v1).adj |> BatDynArray.add
+    let v1_lst = T.find graph v1 in
+    let removed = List.filter (fun (v, _) -> not (V.equal v v2)) v1_lst in
+    T.replace graph v1 ((v2, e) :: removed)
+
+  let in_neighbors graph vertex =
+    assert (T.mem graph vertex);
+
+    let filter_in_edges from_vertex to_vertex out_edges =
+      out_edges
+      |> List.filter (fun (dest_vertex, _label) ->
+             V.equal dest_vertex to_vertex)
+      |> List.map (fun (_dest_vertex, label) -> (from_vertex, label))
+    in
+
+    T.to_seq graph
+    |> Seq.flat_map (fun (from_vertex, edges) ->
+           filter_in_edges from_vertex vertex edges |> List.to_seq)
+    |> List.of_seq
+
+  let out_neighbors graph vertex =
+    assert (T.mem graph vertex);
+    T.find graph vertex
+
+  let vertices graph = T.to_seq_keys graph |> List.of_seq
+
+  let edges graph =
+    T.to_seq graph
+    |> Seq.map (fun (v1, lst) -> (v1, List.to_seq lst))
+    |> Seq.flat_map (fun (v1, lst) -> Seq.map (fun (v2, e) -> (v1, e, v2)) lst)
+    |> List.of_seq
+end

@@ -91,7 +91,8 @@ let rec interpreter_eval (i : t' ref) : Ast.expr -> Value.t = function
          | Minus -> eval_lhs - eval_rhs
          | Times -> eval_lhs * eval_rhs
          | Divide -> eval_lhs / eval_rhs
-         | Mod -> eval_lhs mod eval_rhs)
+         | Mod -> eval_lhs mod eval_rhs
+         | _ -> failwith "not implemented")
   | Prefix { op; rhs; _ } ->
       Int
         (let eval_rhs = interpreter_eval i rhs |> Value.as_int in
@@ -139,6 +140,7 @@ let rec interpreter_step (i : t' ref) (stmt : Ast.stmt) : unit =
         | Text output_ref ->
             output_ref := !output_ref ^ Value.to_string value ^ "\n"
         | _ -> print_endline (Value.to_string value))
+    | _ -> failwith "not implemented"
   with
   | NameResolutionError name ->
       Printf.eprintf "NameResolutionError: '%s' could not be resolved\n%!" name

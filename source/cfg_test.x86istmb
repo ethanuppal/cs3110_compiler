@@ -1,0 +1,15 @@
+func main() {
+    let x = 0
+    let y = 2
+    let z = x
+    let w = z + y
+    z = 10
+    if (true) {
+        let x = 8
+        let y = w
+        z = 1
+        let a = x + y
+    }
+    let a = 9
+    a = 3
+}

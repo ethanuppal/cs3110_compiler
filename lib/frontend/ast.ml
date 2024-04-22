@@ -9,6 +9,7 @@ type op =
   | Divide
   | Mod
   | Equals
+  | BitAnd
 
 (** An expression can be evaluated to a value. *)
 type expr =
@@ -29,8 +30,6 @@ type expr =
       rhs : expr;
       mutable ty : Type.t option;
     }
-  (* ignore, only for interpreter *)
-  | FunctionExpr of { body : stmt list }
 
 (** A statement can be executed. *)
 and stmt =
@@ -64,7 +63,12 @@ let type_of_expr = function
   | ConstBool _ -> Some Type.bool_prim_type
   | Infix { lhs = _; op = _; rhs = _; ty } -> ty
   | Prefix { op = _; rhs = _; ty } -> ty
-  | FunctionExpr _ -> None
+
+(** [expr_is_const expr] if and only if [expr] is a constant (i.e., cannot have
+    an address taken of it). *)
+let expr_is_const = function
+  | ConstInt _ | ConstBool _ -> true
+  | _ -> false
 
 let op_to_string op =
   match op with
@@ -74,6 +78,7 @@ let op_to_string op =
   | Divide -> "/"
   | Mod -> "%"
   | Equals -> "=="
+  | BitAnd -> "&"
 
 let rec expr_to_string = function
   | Var { name; ty = _ } -> name
@@ -84,7 +89,6 @@ let rec expr_to_string = function
       ^ expr_to_string rhs ^ ")"
   | Prefix { op; rhs; ty = _ } ->
       "(" ^ op_to_string op ^ expr_to_string rhs ^ ")"
-  | FunctionExpr _ -> "<func>"
 
 let stmt_to_string =
   let add_indent = String.make 4 ' ' in
@@ -141,7 +145,6 @@ let rec pp_expr fmt = function
       pp_op fmt op;
       pp_expr fmt rhs;
       Format.pp_print_string fmt ")"
-  | FunctionExpr _ -> Format.pp_print_string fmt "<func>"
 
 let rec pp_stmt fmt = function
   | Call name -> Format.fprintf fmt "%s()" name

@@ -5,6 +5,8 @@ let bb_gen = Id.Gen.make ()
 type t = {
   id : Id.id;
   mutable contents : Ir.t list;
+      (* TODO: this should be BatDynArr.t because otherwise passes will be
+         scuffed *)
   mutable condition : Branch_condition.t;
 }
 

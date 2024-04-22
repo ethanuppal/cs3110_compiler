@@ -80,7 +80,7 @@ let rec infer_expr ctx hint expr =
                }))
   | Infix infix ->
       (match infix.op with
-      | Plus | Minus | Times | Divide | Mod ->
+      | Plus | Minus | Times | Divide | Mod | BitAnd ->
           infer_expr ctx (Some Type.int_prim_type) infix.lhs;
           infer_expr ctx (Some Type.int_prim_type) infix.rhs;
           infix.ty <- Some Type.int_prim_type
@@ -105,6 +105,19 @@ let rec infer_expr ctx hint expr =
       | Times ->
           infer_expr ctx (Some Type.(Pointer any_type)) prefix.rhs;
           prefix.ty <- Option.map Type.deref (type_of_expr prefix.rhs)
+      | BitAnd ->
+          if expr_is_const prefix.rhs then
+            raise
+              (TypeInferenceError
+                 {
+                   domain = "combination";
+                   symbol = None;
+                   ast = Left prefix.rhs;
+                   unify = None;
+                 });
+          infer_expr ctx None prefix.rhs;
+          prefix.ty <-
+            Some (Type.Pointer (Option.get (type_of_expr prefix.rhs)))
       | _ ->
           raise
             (TypeInferenceError
@@ -114,7 +127,6 @@ let rec infer_expr ctx hint expr =
                  ast = Left expr;
                  unify = None;
                }))
-  | FunctionExpr _ -> ()
 
 (** @raise TypeInferenceError on failure. *)
 let rec infer_stmt ctx stmt =

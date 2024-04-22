@@ -5,7 +5,7 @@ type t = {
 
 let make () = { context = Context.make (); output = "" }
 
-let simulate simulator cfg =
+let run simulator cfg =
   Context.push simulator.context;
   let entry = Cfg.entry_to cfg in
   let eval = function
@@ -13,7 +13,7 @@ let simulate simulator cfg =
         Context.get simulator.context (Variable.to_string var) |> Option.get
     | Operand.Constant int -> int
   in
-  let rec run bb =
+  let rec run_aux bb =
     Basic_block.to_list bb
     |> List.iter (fun ir ->
            match ir with
@@ -40,11 +40,10 @@ let simulate simulator cfg =
       | Conditional operand -> eval operand <> 0
     in
     match Cfg.take_branch cfg bb cond with
-    | Some bb2 -> run bb2
+    | Some bb2 -> run_aux bb2
     | None -> ()
   in
-
-  run entry
+  run_aux entry
 
 let dump simulator =
   Printf.sprintf "IR Simulation:\n"

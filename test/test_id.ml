@@ -7,15 +7,16 @@ let test_suite =
     (check @@ neg int)
       "Generators should have *different* self-ids. For some reason, Alcotest \
        doesn't display this differently than normal (issue #300)."
-      (Id.Gen.id_of gen1) (Id.Gen.id_of gen2);
-    ignore (Id.Gen.next gen1);
+      (Id.Gen.id_of gen1 |> Id.int_of)
+      (Id.Gen.id_of gen2 |> Id.int_of);
+    let last = Id.Gen.next gen1 in
     (check int) "Using one generator should not affect the other."
-      (Id.Gen.next gen1 - 1)
-      (Id.Gen.next gen2);
-    ignore (Id.Gen.next gen2);
+      (Id.int_of last)
+      (Id.Gen.next gen2 |> Id.int_of);
     for _ = 1 to n do
       (check int) "Using generators in parallel should yield equality of ids."
-        (Id.Gen.next gen1) (Id.Gen.next gen2)
+        (Id.Gen.next gen1 |> Id.int_of)
+        (Id.Gen.next gen2 |> Id.int_of)
     done
   in
   let create_id_gen_isolation_test n =

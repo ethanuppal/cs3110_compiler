@@ -76,4 +76,6 @@ val edges_of : t -> (Basic_block.t * bool * Basic_block.t) list
 (** [edges_from cfg block] is a list of edges from [block]. *)
 val out_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
 
+val iter : t -> (Basic_block.t -> unit) -> unit
+
 (* TODO: pretty print *)

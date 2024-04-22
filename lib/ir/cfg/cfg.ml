@@ -66,3 +66,8 @@ let take_branch cfg bb cond =
 let blocks_of { graph; _ } = Graph.vertices_of graph
 let edges_of { graph; _ } = Graph.edges_of graph
 let out_edges { graph; _ } block = Graph.out_neighbors graph block
+
+let iter cfg f =
+  let cfg = rep_ok cfg in
+  Graph.dfs cfg.graph f cfg.entry;
+  ignore (rep_ok cfg)

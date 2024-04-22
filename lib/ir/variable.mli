@@ -5,7 +5,9 @@ type t
 val make : unit -> t
 
 (** [id_of var] is the unique id of [var]. *)
-val id_of : t -> int
+val id_of : t -> Id.t
 
 (** [to_string var] is [var] as a string. *)
 val to_string : t -> string
+
+val compare : t -> t -> int

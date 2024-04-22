@@ -29,18 +29,18 @@ let show_ir statements =
   List.iter
     (fun b ->
       let lst = Basic_block.to_list b in
-      Printf.printf "Block %i:\n" (Basic_block.id_of b);
+      Printf.printf "Block %i:\n" (Basic_block.id_of b |> Id.int_of);
       List.iter (fun bir -> print_endline (Ir.to_string bir)) lst;
       print_newline ())
     blocks;
   let edges = Cfg.edges_of main_cfg in
   List.iter
     (fun (b1, e, b2) ->
-      Printf.printf "Block %i" (Basic_block.id_of b1);
+      Printf.printf "Block %i" (Basic_block.id_of b1 |> Id.int_of);
       Printf.printf " --%s (%s)--> "
         (Basic_block.condition_of b1 |> Branch_condition.to_string)
         (if e then "t" else "f");
-      Printf.printf "Block %i" (Basic_block.id_of b2);
+      Printf.printf "Block %i" (Basic_block.id_of b2 |> Id.int_of);
       print_newline ())
     edges
 

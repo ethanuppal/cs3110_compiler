@@ -59,4 +59,15 @@ module Make (V : Hashtbl.HashedType) = struct
     |> Seq.map (fun (v1, lst) -> (v1, List.to_seq lst))
     |> Seq.flat_map (fun (v1, lst) -> Seq.map (fun (v2, e) -> (v1, e, v2)) lst)
     |> List.of_seq
+
+  let dfs graph f start =
+    let visited = T.create 16 in
+    let rec dfs_aux vertex =
+      f vertex;
+      T.add visited vertex true;
+      out_neighbors graph vertex |> List.map fst
+      |> List.filter (T.mem visited)
+      |> List.iter dfs_aux
+    in
+    dfs_aux start
 end

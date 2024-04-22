@@ -5,7 +5,7 @@
 %token <int> CONST_INT
 %token CONST_TRUE CONST_FALSE
 %token <string> VAR
-%token PLUS MINUS TIMES DIVIDE MOD EQUALS
+%token PLUS MINUS TIMES DIVIDE MOD EQUALS BITAND
 %token LPAR RPAR LBRACE RBRACE COLON ARROW
 %token PRINT ASSIGN LET FUNC IF ELSE WHILE
 %token NEWLINE EOF
@@ -45,6 +45,7 @@ expr:
   | expr DIVIDE expr { Infix {lhs = $1; op = Divide; rhs = $3; ty = None} }
   | expr MOD expr { Infix {lhs = $1; op = Mod; rhs = $3; ty = None} }
   | expr EQUALS expr { Infix {lhs = $1; op = Equals; rhs = $3; ty = None} }
+  | expr BITAND expr { Infix {lhs = $1; op = BitAnd; rhs = $3; ty = None} }
   | PLUS expr { Prefix {op = Plus; rhs = $2; ty = None} }
   | MINUS expr { Prefix {op = Minus; rhs = $2; ty = None} }
   | TIMES expr { Prefix {op = Times; rhs = $2; ty = None} }

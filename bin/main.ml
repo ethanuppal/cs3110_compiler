@@ -25,7 +25,7 @@ let show_ir statements =
   Analysis.infer statements;
   let ir = Ir_gen.generate statements in
   let main_cfg = List.hd ir in
-  let blocks = Cfg.blocks main_cfg in
+  let blocks = Cfg.blocks_of main_cfg in
   List.iter
     (fun b ->
       let lst = Basic_block.to_list b in
@@ -33,7 +33,7 @@ let show_ir statements =
       List.iter (fun bir -> print_endline (Ir.to_string bir)) lst;
       print_newline ())
     blocks;
-  let edges = Cfg.edges main_cfg in
+  let edges = Cfg.edges_of main_cfg in
   List.iter
     (fun (b1, e, b2) ->
       Printf.printf "Block %i" (Basic_block.id_of b1);

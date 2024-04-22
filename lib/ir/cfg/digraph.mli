@@ -23,8 +23,9 @@ module Make (V : Hashtbl.HashedType) : sig
       is in [graph]. *)
   val out_neighbors : 'edge t -> V.t -> (V.t * 'edge) list
 
-  (* TODO: documentation and tests *)
+  (** [vertices_of graph] are the vertices in [graph]. *)
+  val vertices_of : 'edge t -> V.t list
 
-  val vertices : 'edge t -> V.t list
-  val edges : 'edge t -> (V.t * 'edge * V.t) list
+  (** [edges_of graph] are the edges in [graph]. *)
+  val edges_of : 'edge t -> (V.t * 'edge * V.t) list
 end

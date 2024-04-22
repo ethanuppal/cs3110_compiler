@@ -1,40 +1,79 @@
+(** [t] is a control flow graph.
+
+    Every basic block yielded through this API must only be modified with
+    through this API. In particular, all accessor functions in the [Basic_block]
+    module are permitted. Once the control flow graph generation is complete for
+    a set of basic blocks, then it is permitted to modify the contents (but not
+    the condition) of the basic blocks. *)
 type t
 
-(* TODO: ability to get all blocks for debugging and stuff, gonna need it later
-   anyways. *)
+(** [make name] is a control-flow graph for a function named [name] with one
+    empty block for the entry point. *)
+val make : string -> t
 
-(** [make ()] is a CFG with one empty block for the entry point. *)
-val make : unit -> t
+(** [name_of cfg] is the name of the function represented by [cfg]. *)
+val name_of : t -> string
 
-(** [entry cfg] is the block that is the entry point of [cfg]. *)
-val entry : t -> Basic_block.t
+(** [entry_to cfg] is the block that is the entry point of [cfg].
+
+    Review the specification for [t] on the basic blocks yielded through this
+    API. *)
+val entry_to : t -> Basic_block.t
+
+(** [create_block cfg] is a new block added to [cfg] with no inputs and no
+    outputs.
+
+    Review the specification for [t] on the basic blocks yielded through this
+    API. *)
+val create_block : t -> Basic_block.t
 
 (* TODO: can any of this be simplified by taking advantage of the type system?
    Especially the requirement on [cond]. *)
 
-(** [branch cfg block cond] is a pair [(bt, bf)] where [bt] and [bf] are new
-    blocks, [bt] being the jump target from [block] if [cond] is true, [bf]
-    being the jump target from [block] if [cond] is false.
+(** [insert_branch cfg block cond bt bf] creates a branch from [block] that goes
+    to [bt] when [cond] is true and goes to [bf] when [cond] is false.
 
-    [block] must already be in the graph.
+    Review the specification for [t] on the basic blocks yielded through this
+    API.
 
-    [cond] must be [Conditional], not [Never] or [Always]. [block] must not
-    already be followed by another block. *)
-val branch :
-  t -> Basic_block.t -> Branch_condition.t -> Basic_block.t * Basic_block.t
+    Requires: [block], [bt], and [bf] must already be in the graph.
+    Additiionally, [cond] must be [Conditional], not [Never] or [Always].
+    [block] must not already be followed by another block. *)
+val insert_branch :
+  t ->
+  Basic_block.t ->
+  Branch_condition.t ->
+  Basic_block.t ->
+  Basic_block.t ->
+  unit
 
-(** [unconditionally cfg pred succ] makes [succ] unconditionally follow [pred].
+(** [insert_unconditional cfg pred succ] makes [succ] unconditionally follow
+    [pred].
 
-    [pred] and [succ] must already be in the graph.
+    Review the specification for [t] on the basic blocks yielded through this
+    API.
 
-    [pred] must not already be followed by another block. *)
-val unconditionally : t -> Basic_block.t -> Basic_block.t -> unit
+    Requires: [pred] and [succ] must already be in the graph, and [pred] must
+    not already be followed by another block. *)
+val insert_unconditional : t -> Basic_block.t -> Basic_block.t -> unit
 
+(** [take_branch cfg bb cond] is [Some bb2], where [bb2] is basic block
+    branching from [bb] in [cfg] with branch condition [cond], or [None] if no
+    such branch exists.
+
+    Review the specification for [t] on the basic blocks yielded through this
+    API. *)
 val take_branch : t -> Basic_block.t -> bool -> Basic_block.t option
 
-(* TODO: documentation *)
+(** [blocks_of cfg] is a list of all blocks in [cfg]. *)
+val blocks_of : t -> Basic_block.t list
 
-val blocks : t -> Basic_block.t list
-val edges : t -> (Basic_block.t * bool * Basic_block.t) list
+(** [edges_of cfg] is a list of all edges [(v1, b, v2)] in [cfg] where [v1] is
+    the start block, [v2] is the destination block, and [b] indicates wheter
+    [v2] follows [v1] when the condition of [v1] is true or false. *)
+val edges_of : t -> (Basic_block.t * bool * Basic_block.t) list
+
+(** [edges_from cfg block] is a list of edges from [block]. *)
+val out_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
 
 (* TODO: pretty print *)

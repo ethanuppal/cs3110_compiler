@@ -7,7 +7,7 @@ let make () = { context = Context.make (); output = "" }
 
 let run simulator cfg =
   Context.push simulator.context;
-  let entry = Cfg.entry cfg in
+  let entry = Cfg.entry_to cfg in
   let eval = function
     | Operand.Variable var ->
         Context.get simulator.context (Variable.to_string var) |> Option.get
@@ -26,12 +26,13 @@ let run simulator cfg =
            | Ir.Sub (var, operand1, operand2) ->
                Context.insert simulator.context (Variable.to_string var)
                  (eval operand1 - eval operand2)
-           | Ir.Equal (var, operand1, operand2) ->
+           | Ir.TestEqual (var, operand1, operand2) ->
                Context.insert simulator.context (Variable.to_string var)
                  (if eval operand1 = eval operand2 then 1 else 0)
            | Ir.DebugPrint operand ->
                simulator.output <-
-                 simulator.output ^ Printf.sprintf "%d\n" (eval operand));
+                 simulator.output ^ Printf.sprintf "%d\n" (eval operand)
+           | _ -> failwith "Simulator.run doesn't implement all of IR yet");
     let cond =
       match Basic_block.condition_of bb with
       | Always -> true

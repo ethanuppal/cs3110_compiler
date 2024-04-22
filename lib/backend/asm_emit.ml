@@ -1,5 +1,3 @@
-open Util
-
 let emit_ir section =
   ignore section;
   failwith "i hate reg alloc"

@@ -14,6 +14,7 @@ rule read = parse
 | '*' { TIMES }
 | '/' { DIVIDE }
 | '%' { MOD }
+| '&' { BITAND }
 | '(' { LPAR }
 | ')' { RPAR }
 | '{' { LBRACE }

@@ -66,15 +66,16 @@ let rec generate_stmt ctx cfg block = function
       block
   | If { cond; body } ->
       let cond_result = generate_expr ctx cfg block cond in
-      let bt, bf =
-        Cfg.branch cfg block (Branch_condition.Conditional cond_result)
-      in
+      let bt = Cfg.create_block cfg in
+      let bf = Cfg.create_block cfg in
+      let cond = Branch_condition.Conditional cond_result in
+      Cfg.insert_branch cfg block cond bt bf;
 
       (* True case *)
       Context.push ctx;
       let true_end_block = generate_stmt_lst ctx cfg bt body in
       Context.pop ctx;
-      Cfg.unconditionally cfg true_end_block bf;
+      Cfg.insert_unconditional cfg true_end_block bf;
 
       bf
   | Function _ -> failwith "not allowed"

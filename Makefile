@@ -9,6 +9,10 @@ build:
 	@chmod u+x .githooks/pre-commit
 	@make README
 
+.PHONY: protect
+protect:
+	sudo chmod +x .githooks/pre-commit
+
 .PHONY: README
 README:
 	$(PY) readme.py

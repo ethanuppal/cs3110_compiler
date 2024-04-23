@@ -28,5 +28,6 @@ val insert : 'a t -> string -> 'a -> unit
     top of the stack in which [key] appears, or [None] if [key] is not bound. *)
 val get : 'a t -> string -> 'a option
 
-(** [to_seq ctx] is [ctx] as a sequence of key-value pairs. *)
-val to_seq : 'a t -> (string * 'a) Seq.t
+(** [to_list ctx] is [ctx] as a list of key-value pair lists, where each list is
+    a scope. Scopes that were pushed later are earlier in the result. *)
+val to_list : 'a t -> (string * 'a) list list

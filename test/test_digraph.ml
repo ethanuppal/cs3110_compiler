@@ -73,7 +73,7 @@ let replace_edge () =
     (Graph.in_neighbors graph 'b')
 
 let test_suite =
-  ( "lib/cfg/digraph.ml",
+  ( "lib/ir/cfg/digraph.ml",
     [
       test_case "single vertex" `Quick single_vertex;
       test_case "full graph" `Quick full_graph;

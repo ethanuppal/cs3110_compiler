@@ -15,7 +15,11 @@ README:
 
 .PHONY: test 
 test: build 
-	opam exec -- dune test
+	opam exec -- dune exec ./test/test_x86ISTMB.exe
+
+.PHONY: quick_test
+quick_test: build
+	opam exec -- dune exec ./test/test_x86ISTMB.exe -- -q
 
 .PHONY: bisect
 bisect:

@@ -30,6 +30,6 @@ let make_test_suite root suite transform =
   let suite_name = Util.merge_paths [ root; suite ] in
   let snapshot_tests =
     snapshots
-    |> List.map (fun snapshot -> (snapshot, `Slow, snapshot_test snapshot))
+    |> List.map (fun snapshot -> (snapshot, `Quick, snapshot_test snapshot))
   in
   (suite_name, snapshot_tests)

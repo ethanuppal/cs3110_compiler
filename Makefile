@@ -21,6 +21,10 @@ README:
 test: build 
 	opam exec -- dune test
 
+.PHONY: utop
+utop:
+	dune utop
+
 .PHONY: bisect
 bisect:
 	@find . -name '*.coverage' | xargs rm -f

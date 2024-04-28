@@ -35,6 +35,17 @@ let () =
 let rec infer_expr ctx hint expr =
   match expr with
   | Var var ->
+      (match Context.get ctx var.name with
+      | Some _ -> ()
+      | None ->
+          raise
+            (TypeInferenceError
+               {
+                 domain = "resolution";
+                 symbol = Some var.name;
+                 ast = Left expr;
+                 unify = None;
+               }));
       var.ty <- Context.get ctx var.name;
       if var.ty = None then
         raise
@@ -160,7 +171,22 @@ let rec infer_stmt ctx stmt =
   | If { cond; body } ->
       infer_expr ctx (Some Type.bool_prim_type) cond;
       infer body
-  | _ -> ()
+  | Assignment (name, expr) ->
+      let hint =
+        match Context.get ctx name with
+        | None ->
+            raise
+              (TypeInferenceError
+                 {
+                   domain = "resolution";
+                   symbol = Some name;
+                   ast = Right stmt;
+                   unify = None;
+                 })
+        | Some hint -> hint
+      in
+      infer_expr ctx (Some hint) expr
+  | Call _ -> failwith "Call case not implemented"
 
 and infer prog =
   let ctx = Context.make () in

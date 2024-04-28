@@ -1,34 +1,25 @@
-(* TODO: can we have immutability here? kind of seems like a good place
-   actually. *)
+open Util
 module Scope = Hashtbl.Make (String)
 
-type 'a t = 'a Scope.t BatDynArray.t
+type 'a t = 'a Scope.t list ref
 
-let make () = BatDynArray.make 16
-let stack_size = BatDynArray.length
-let is_empty = BatDynArray.empty
-let push ctx = BatDynArray.add ctx (Scope.create 16)
-let pop = BatDynArray.delete_last
-
-(** [top ctx] is the scope at the top of the stack.
-
-    Requires: [not (is_empty ctx)]. *)
-let top = BatDynArray.last
-
+let make () = ref []
+let stack_size ctx = List.length !ctx
+let is_empty ctx = List.is_empty !ctx
+let push ctx = ctx := Scope.create 16 :: !ctx
+let pop ctx = ctx := List.tl !ctx
+let top ctx = List.hd !ctx
 let insert ctx = Scope.replace (top ctx)
 
 let get ctx key =
-  let rec get_aux i =
-    if i = -1 then None
-    else
-      let scope = BatDynArray.get ctx i in
-      match Scope.find_opt scope key with
-      | None -> get_aux (i - 1)
-      | Some value -> Some value
+  let rec get_aux lst =
+    match lst with
+    | [] -> None
+    | scope :: rest -> (
+        match Scope.find_opt scope key with
+        | None -> get_aux rest
+        | Some value -> Some value)
   in
-  get_aux (stack_size ctx - 1)
+  get_aux !ctx
 
-(* sadly [Util.(>>)] doesn't work with the type system here *)
-let to_seq ctx =
-  ctx |> BatDynArray.to_list |> List.map Scope.to_seq |> List.to_seq
-  |> Seq.concat
+let to_list ctx = !ctx |> List.map (Scope.to_seq >> List.of_seq)

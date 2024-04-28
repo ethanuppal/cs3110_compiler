@@ -6,5 +6,6 @@ let () =
     Test_snapshots.type_suite;
     Test_digraph.test_suite;
     Test_liveliness.test_suite;
+    Test_context.suite;
   ]
   |> Alcotest.run "x86ISTMB"

@@ -45,13 +45,4 @@ let run simulator cfg =
   in
   run_aux entry
 
-let dump simulator =
-  Printf.sprintf "IR Simulation:\n"
-  ^ (Context.to_seq simulator.context
-    |> Seq.map (fun (var, value) -> Printf.sprintf "  %s = %d" var value)
-    |> List.of_seq
-    |> List.sort_uniq String.compare
-    |> String.concat "\n")
-  ^ "\n"
-
 let output_of simulator = simulator.output

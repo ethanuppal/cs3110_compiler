@@ -71,3 +71,7 @@ let iter cfg f =
   let cfg = rep_ok cfg in
   Graph.dfs cfg.graph f cfg.entry;
   ignore (rep_ok cfg)
+
+let exit_points cfg =
+  let vertices = Graph.vertices_of cfg.graph in
+  List.filter (fun v -> Graph.out_neighbors cfg.graph v = []) vertices

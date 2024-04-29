@@ -26,9 +26,9 @@ module Analysis : sig
   val to_string : t -> string
 end
 
-(** [analysis_of bb_list] is an association between the basic blocks in
-    [bb_list] and their liveliness analyses. In particular, let [a] be the
-    result of this function and let [bb] be a basic block such that
-    [List.mem bb bb_list]. Then, [Util.IdMap.find a (Basic_block.id_of bb)] is
-    the liveliness analysis of [bb]. *)
-val analysis_of : Basic_block.t list -> Analysis.t IdMap.t
+(** [analysis_of cfg] is an association between the basic blocks in [cfg] and
+    their liveliness analyses. In particular, let [a] be the result of this
+    function and let [bb] be a basic block in [cfg] Then,
+    [Util.IdMap.find a (Basic_block.id_of bb)] is the liveliness analysis of
+    [bb]. *)
+val analysis_of : Cfg.t -> Analysis.t IdMap.t

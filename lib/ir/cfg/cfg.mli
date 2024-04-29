@@ -79,8 +79,8 @@ val out_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
 (** [in_edges cfg block] is a list of edges into [block]. *)
 val in_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
 
-(** [iter cfg f] calls [f] on every basic block in [cfg]. *)
-val iter : t -> (Basic_block.t -> unit) -> unit
+(** [iter f cfg] calls [f] on every basic block in [cfg]. *)
+val iter : (Basic_block.t -> unit) -> t -> unit
 
 (** [exit_points cfg] is a list of all blocks that exit the program in [cfg]. *)
 val exit_points : t -> Basic_block.t list

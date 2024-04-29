@@ -68,7 +68,7 @@ let edges_of { graph; _ } = Graph.edges_of graph
 let out_edges { graph; _ } block = Graph.out_neighbors graph block
 let in_edges { graph; _ } block = Graph.in_neighbors graph block
 
-let iter cfg f =
+let iter f cfg =
   let cfg = rep_ok cfg in
   Graph.dfs cfg.graph f cfg.entry;
   ignore (rep_ok cfg)

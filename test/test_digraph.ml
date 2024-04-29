@@ -80,8 +80,10 @@ let replace_edge =
 
 let gen_graph density =
   let open QCheck2.Gen in
-  let* n = small_nat in
-  let vertices = Seq.ints 0 |> Seq.take n |> Seq.map Char.chr |> Array.of_seq in
+  let* n = int_range 0 25 in
+  let vertices =
+    Seq.ints 97 |> Seq.take n |> Seq.map Char.chr |> Array.of_seq
+  in
   let gen_edge =
     frequency [ (density, int >|= Option.some); (100 - density, pure None) ]
   in
@@ -109,31 +111,56 @@ let print_graph graph =
   let s =
     Printf.sprintf "Vertices: %s; Edges: %s"
       (String.concat ", " vert_strings)
-      (String.concat " " edge_strings)
+      (String.concat ", " edge_strings)
   in
   QCheck2.Print.string s
 
 let in_out_neighbors density =
   let open QCheck2 in
-  let name = Printf.sprintf "in out symmetric (density=%i)" density in
-  let test =
-    Test.make ~name ~count:100 ~print:print_graph (gen_graph density)
-      (fun graph ->
-        let vertices = Graph.vertices_of graph in
-        let results =
-          vertices
-          |> List.map (fun v ->
-                 let out_neighbors = Graph.out_neighbors graph v in
-                 List.map
-                   (fun (neighbor, edge) ->
-                     Graph.in_neighbors graph neighbor |> List.mem (v, edge))
-                   out_neighbors)
-          |> List.flatten
-        in
-        List.for_all Fun.id results)
+  let test graph =
+    let vertices = Graph.vertices_of graph in
+    let results =
+      vertices
+      |> List.map (fun v ->
+             let out_neighbors = Graph.out_neighbors graph v in
+             List.map
+               (fun (neighbor, edge) ->
+                 Graph.in_neighbors graph neighbor |> List.mem (v, edge))
+               out_neighbors)
+      |> List.flatten
+    in
+    List.for_all Fun.id results
   in
-  QCheck_alcotest.to_alcotest ~long:true test
+
+  let name = Printf.sprintf "in out symmetric (density=%i)" density in
+  Test.make ~name ~count:100 ~print:print_graph (gen_graph density) test
+  |> QCheck_alcotest.to_alcotest ~long:true
+
+let fully_connected_dfs =
+  let open QCheck2 in
+  let test graph =
+    let vertices = Graph.vertices_of graph |> List.sort Stdlib.compare in
+    vertices
+    |> List.map (fun start ->
+           let lst = ref [] in
+           Graph.dfs graph (fun v -> lst := v :: !lst) start;
+           !lst)
+    |> List.map (List.sort Stdlib.compare)
+    |> List.map (( = ) vertices)
+    |> List.for_all Fun.id
+  in
+
+  Test.make ~name:"fully connected dfs" ~count:100 ~print:print_graph
+    (gen_graph 100) test
+  |> QCheck_alcotest.to_alcotest ~long:true
 
 let test_suite =
   ( "lib/ir/cfg/digraph.ml",
-    [ single_vertex; full_graph; replace_edge; in_out_neighbors 50 ] )
+    [
+      single_vertex;
+      full_graph;
+      replace_edge;
+      in_out_neighbors 10;
+      in_out_neighbors 90;
+      fully_connected_dfs;
+    ] )

@@ -60,7 +60,9 @@ let initial_analysis_of bb =
     ir_list;
   Analysis.make ~gen:!gen ~kill:!kill
 
-let process work_list liveliness cfg bb =
+(** [pass work_list liveliness cfg bb] performs a single pass of liveliness
+    analysis on a basic block *)
+let pass work_list liveliness cfg bb =
   let analysis = IdMap.find liveliness (Basic_block.id_of bb) in
   let live_in_old = analysis.live_in in
   analysis.live_in <-
@@ -73,19 +75,30 @@ let process work_list liveliness cfg bb =
            let succ_analysis = IdMap.find liveliness (Basic_block.id_of succ) in
            VariableSet.union acc succ_analysis.live_in)
          VariableSet.empty;
-  if analysis.live_in <> live_in_old then
-    List.iter (fun (bb, _) -> Queue.add bb work_list) (Cfg.in_edges cfg bb)
+  if analysis.live_in <> live_in_old then (
+    List.iter (fun (bb, _) -> Queue.add bb work_list) (Cfg.in_edges cfg bb);
+    true)
+  else false
+
+(** [iterate liveliness cfg] performs an iteration of liveliness analysis on
+    [cfg], updating partial results in [liveliness], and returiing whether any
+    changes were made. *)
+let iterate liveliness cfg =
+  let work_list = Queue.create () in
+  List.iter (fun bb -> Queue.add bb work_list) (Cfg.exit_points cfg);
+  let result = ref false in
+  while not (Queue.is_empty work_list) do
+    let top_bb = Queue.take work_list in
+    result := !result || pass work_list liveliness cfg top_bb
+  done;
+  !result
 
 let analysis_of cfg =
   let liveliness = IdMap.create 16 in
   Cfg.iter
     (fun bb ->
-      IdMap.replace liveliness (Basic_block.id_of bb) (initial_analysis_of bb))
+      IdMap.add liveliness (Basic_block.id_of bb) (initial_analysis_of bb))
     cfg;
-  let work_list = Queue.create () in
-  List.iter (fun bb -> Queue.add bb work_list) (Cfg.exit_points cfg);
-  while not (Queue.is_empty work_list) do
-    let top_bb = Queue.take work_list in
-    process work_list liveliness cfg top_bb
-  done;
+  let rec converge () = if iterate liveliness cfg then converge () in
+  converge ();
   liveliness

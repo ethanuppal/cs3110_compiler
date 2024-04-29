@@ -78,16 +78,16 @@ let replace_edge =
   in
   Alcotest.test_case "replace edge" `Quick test
 
-let graph_gen density =
+let gen_graph density =
   let open QCheck2.Gen in
   let* n = small_nat in
   let vertices = Seq.ints 0 |> Seq.take n |> Seq.map Char.chr |> Array.of_seq in
-  let edge_gen =
+  let gen_edge =
     frequency [ (density, int >|= Option.some); (100 - density, pure None) ]
   in
-  let adj_gen = array_size (pure n) (array_size (pure n) edge_gen) in
+  let gen_adj = array_size (pure n) (array_size (pure n) gen_edge) in
 
-  adj_gen >|= fun adjacency ->
+  gen_adj >|= fun adjacency ->
   let graph = Graph.empty () in
   Array.iter (Graph.add_vertex graph) vertices;
   for i = 0 to n - 1 do
@@ -99,11 +99,26 @@ let graph_gen density =
   done;
   graph
 
+let print_graph graph =
+  let verts = Graph.vertices_of graph in
+  let vert_strings = List.map (Printf.sprintf "%c") verts in
+  let edges = Graph.edges_of graph in
+  let edge_strings =
+    List.map (fun (v1, e, v2) -> Printf.sprintf "%c =%i=> %c" v1 e v2) edges
+  in
+  let s =
+    Printf.sprintf "Vertices: %s; Edges: %s"
+      (String.concat ", " vert_strings)
+      (String.concat " " edge_strings)
+  in
+  QCheck2.Print.string s
+
 let in_out_neighbors density =
   let open QCheck2 in
   let name = Printf.sprintf "in out symmetric (density=%i)" density in
   let test =
-    Test.make ~name ~count:100 (graph_gen density) (fun graph ->
+    Test.make ~name ~count:100 ~print:print_graph (gen_graph density)
+      (fun graph ->
         let vertices = Graph.vertices_of graph in
         let results =
           vertices

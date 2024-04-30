@@ -1,6 +1,3 @@
-(* TODO: disallow edge replacement *)
-(* TODO: rep invariant? *)
-
 module Make (V : Hashtbl.HashedType) = struct
   module T = Hashtbl.Make (V)
 
@@ -94,8 +91,7 @@ module Make (V : Hashtbl.HashedType) = struct
       f vertex;
       T.add visited vertex true;
       out_neighbors graph vertex |> List.map fst
-      |> List.filter (T.mem visited)
-      |> List.iter dfs_aux
+      |> List.iter (fun v -> if not (T.mem visited v) then dfs_aux v)
     in
     dfs_aux start
 end

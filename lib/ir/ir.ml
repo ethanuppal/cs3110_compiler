@@ -8,6 +8,7 @@ type t =
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
+(* | Call of string * Operand.t list *)
 
 let to_string =
   let open Printf in

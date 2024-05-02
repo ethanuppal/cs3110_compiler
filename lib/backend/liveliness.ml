@@ -45,11 +45,9 @@ let initial_analysis_of bb =
   List.iter
     (fun ir ->
       match ir with
-      | Assign (var, Operand.Variable oper)
-      | Ref (var, Operand.Variable oper)
-      | Deref (var, Operand.Variable oper) ->
+      | Assign (var, oper) | Ref (var, oper) | Deref (var, oper) ->
           add_kill var;
-          add_gen oper
+          Operand.var_of_opt oper |> Option.map add_gen |> ignore
       | Add (var, oper1, oper2)
       | Sub (var, oper1, oper2)
       | TestEqual (var, oper1, oper2) ->

@@ -93,6 +93,7 @@ module Instruction = struct
     | Cmp of Operand.t * Operand.t
     | Jmp of Operand.t
     | Je of Operand.t
+    | Jne of Operand.t
     | Ret
     | Syscall
     | Label of Label.t
@@ -112,6 +113,7 @@ module Instruction = struct
         "cmp " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Jmp op -> "jmp " ^ Operand.to_nasm op
     | Je op -> "je " ^ Operand.to_nasm op
+    | Jne op -> "jne " ^ Operand.to_nasm op
     | Ret -> "ret"
     | Syscall -> "syscall"
     | Label label -> Label.to_nasm label

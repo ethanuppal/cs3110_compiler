@@ -14,15 +14,19 @@ let type_suite =
   in
   Snapshot.make_test_suite snapshots_root "type" transform
 
-let ir_suite =
-  let transform input =
-    let open X86ISTMB in
-    let statements = Parse_lex.lex_and_parse input in
-    Analysis.infer statements;
-    let ir = Ir_gen.generate statements in
-    let main_cfg = List.hd ir in
-    let simulator = Simulator.make () in
-    Simulator.run simulator main_cfg;
-    Simulator.output_of simulator
-  in
-  Snapshot.make_test_suite snapshots_root "ir" transform
+(** [ir_transform] is the result of running the IR simulator on the source code
+    [input]. *)
+let ir_transform input =
+  let open X86ISTMB in
+  let statements = Parse_lex.lex_and_parse input in
+  Analysis.infer statements;
+  let ir = Ir_gen.generate statements in
+  let main_cfg = List.hd ir in
+  let simulator = Ir_sim.make () in
+  Ir_sim.run simulator main_cfg;
+  Ir_sim.output_of simulator
+
+let ir_suite = Snapshot.make_test_suite snapshots_root "ir" ir_transform
+
+(** not sure why this is separate from [ir_suite]. *)
+let basic_suite = Snapshot.make_test_suite snapshots_root "basic" ir_transform

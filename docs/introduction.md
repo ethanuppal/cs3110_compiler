@@ -1,5 +1,8 @@
 # x86ISTMB Programming Language - Introduction and Tutorial
 
+> [!NOTE]
+> This document is outdated.
+
 ## Overview
 
 x86ISTMB is a minimalistic, strongly typed programming language designed for simplicity and clarity. It focuses on providing a straightforward approach to programming by limiting its features to the core essentials. This document serves as an introductory guide and tutorial to the x86ISTMB programming language.

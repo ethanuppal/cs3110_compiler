@@ -28,4 +28,8 @@ module Make (V : Hashtbl.HashedType) : sig
 
   (** [edges_of graph] are the edges in [graph]. *)
   val edges_of : 'edge t -> (V.t * 'edge * V.t) list
+
+  (** [dfs graph f start] applies [f] on every vertex in [graph] reachable from
+      [start]. *)
+  val dfs : 'edge t -> (V.t -> unit) -> V.t -> unit
 end

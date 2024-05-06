@@ -66,3 +66,17 @@ let take_branch cfg bb cond =
 let blocks_of { graph; _ } = Graph.vertices_of graph
 let edges_of { graph; _ } = Graph.edges_of graph
 let out_edges { graph; _ } block = Graph.out_neighbors graph block
+let in_edges { graph; _ } block = Graph.in_neighbors graph block
+
+let iter f cfg =
+  let cfg = rep_ok cfg in
+  Graph.dfs cfg.graph f cfg.entry;
+  ignore (rep_ok cfg)
+
+let exit_points cfg =
+  let vertices = Graph.vertices_of cfg.graph in
+  List.filter (fun v -> Graph.out_neighbors cfg.graph v = []) vertices
+
+let to_string cfg =
+  "_" ^ cfg.name ^ ":\n"
+  ^ (blocks_of cfg |> List.map Basic_block.to_string |> String.concat "\n")

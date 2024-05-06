@@ -9,6 +9,10 @@ build:
 	@chmod u+x .githooks/pre-commit
 	@make README
 
+.PHONY: protect
+protect:
+	sudo chmod +x .githooks/pre-commit
+
 .PHONY: README
 README:
 	$(PY) readme.py
@@ -20,6 +24,10 @@ test: build
 .PHONY: quick_test
 quick_test: build
 	opam exec -- dune exec ./test/test_x86ISTMB.exe -- -q
+
+.PHONY: utop
+utop:
+	dune utop
 
 .PHONY: bisect
 bisect:

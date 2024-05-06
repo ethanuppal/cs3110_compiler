@@ -73,7 +73,18 @@ val blocks_of : t -> Basic_block.t list
     [v2] follows [v1] when the condition of [v1] is true or false. *)
 val edges_of : t -> (Basic_block.t * bool * Basic_block.t) list
 
-(** [edges_from cfg block] is a list of edges from [block]. *)
+(** [out_edges cfg block] is a list of edges from [block]. *)
 val out_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
 
+(** [in_edges cfg block] is a list of edges into [block]. *)
+val in_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
+
+(** [iter f cfg] calls [f] on every basic block in [cfg]. *)
+val iter : (Basic_block.t -> unit) -> t -> unit
+
+(** [exit_points cfg] is a list of all blocks that exit the program in [cfg]. *)
+val exit_points : t -> Basic_block.t list
+
 (* TODO: pretty print *)
+
+val to_string : t -> string

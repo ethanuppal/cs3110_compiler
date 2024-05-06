@@ -6,7 +6,9 @@
  (preprocess
   (pps ppx_inline_test))
  (instrumentation
-  (backend bisect_ppx)))
+  (backend bisect_ppx))
+ (flags
+  (:standard -w -69)))
 
 (rule
  (targets project_root.ml)

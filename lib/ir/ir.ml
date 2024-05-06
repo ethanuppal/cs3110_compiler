@@ -8,7 +8,8 @@ type t =
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
-(* | Call of string * Operand.t list *)
+  | Call of string * Operand.t list
+  | Return of Operand.t
 
 let to_string =
   let open Printf in
@@ -29,3 +30,7 @@ let to_string =
       sprintf "%s = %s == %s" (Variable.to_string r) (Operand.to_string o1)
         (Operand.to_string o2)
   | DebugPrint op -> sprintf "debug_print %s" (Operand.to_string op)
+  | Call (name, operands) ->
+      sprintf "%s(%s)" name
+        (List.map Operand.to_string operands |> String.concat ", ")
+  | Return op -> sprintf "return %s" (Operand.to_string op)

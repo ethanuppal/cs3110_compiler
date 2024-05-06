@@ -22,9 +22,9 @@ let ir_transform input =
   Analysis.infer statements;
   let ir = Ir_gen.generate statements in
   let main_cfg = List.hd ir in
-  let simulator = Simulator.make () in
-  Simulator.run simulator main_cfg;
-  Simulator.output_of simulator
+  let simulator = Ir_sim.make () in
+  Ir_sim.run simulator main_cfg;
+  Ir_sim.output_of simulator
 
 let ir_suite = Snapshot.make_test_suite snapshots_root "ir" ir_transform
 

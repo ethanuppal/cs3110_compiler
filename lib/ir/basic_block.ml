@@ -30,3 +30,5 @@ let to_string bb =
   ^ BatDynArray.fold_left
       (fun acc ir -> acc ^ "\n  " ^ Ir.to_string ir)
       "" bb.contents
+  ^ "\n  br "
+  ^ Branch_condition.to_string bb.condition

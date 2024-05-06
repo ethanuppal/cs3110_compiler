@@ -20,7 +20,7 @@ module BasicBlockAnalysis = struct
       then the basic block analyzed is an exit point; otherwise, it is
       [Some lon], and [lon] is that set.
 
-      RI: Let [analaysis] be a value of type [t]. Then, if [lon] is [None] for
+      RI: Let [analysis] be a value of type [t]. Then, if [lon] is [None] for
       some [n], then [n < Array.length analysis - 1]. *)
   type t = instr_analysis Array.t
 

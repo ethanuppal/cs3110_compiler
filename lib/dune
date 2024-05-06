@@ -1,6 +1,7 @@
 (include_subdirs unqualified)
 
 (library
+ (public_name x86ISTMB)
  (name x86ISTMB)
  (libraries batteries menhirLib)
  (preprocess

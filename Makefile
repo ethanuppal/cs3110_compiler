@@ -26,11 +26,11 @@ quick_test: build
 	opam exec -- dune exec ./test/test_x86ISTMB.exe -- -q
 
 .PHONY: utop
-utop:
+utop: README
 	dune utop
 
 .PHONY: bisect
-bisect:
+bisect: README
 	@find . -name '*.coverage' | xargs rm -f
 	@OUNIT_CI=true dune test --instrument-with bisect_ppx --force
 	@bisect-ppx-report html
@@ -48,24 +48,24 @@ view:
 # 	echo "open X86ISTMB;;" | dune utop
 
 .PHONY: clean
-clean:
+clean: README
 	opam exec -- dune clean
 	@rm -rf ./main
 
 .PHONY: docs
-docs:
-	@ocamldoc -html -d docs/html lib/*.mli lib/*.ml 2>/dev/null || echo "==> (Error output surpressed for ocamldoc)"
-	@echo '==> Docs written to docs/html'
+docs: README
+	@opam exec -- dune build @doc
+	@echo '==> Docs written to _build/default/_doc/_html/'
 
 .PHONY: deps
-deps:
+deps: 
 	opam install . --deps-only --with-test --with-doc
 
 PORT	:= 8003
 .PHONY: serve 
 serve: docs
 	@echo '==> Serving at localhost:$(PORT)'
-	@cd docs/html; $(shell which python || which python3) -m http.server $(PORT)
+	@cd _build/default/_doc/_html/; $(shell which python || which python3) -m http.server $(PORT)
 
 .PHONY: cloc 
 cloc: 

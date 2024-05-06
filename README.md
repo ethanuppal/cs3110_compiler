@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-06 00:50:43.998646
+> Last updated: 2024-05-06 01:39:50.818851
 
 ```
 $ ./main -h

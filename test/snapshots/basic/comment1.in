@@ -1,7 +1,9 @@
-print 1 // this is a comment
+func main() {
+    print 1 // this is a comment
 
-// this is a comment x2
-print 2
+    // this is a comment x2
+    print 2
 
-// this is another comment
-print 3
+    // this is another comment
+    print 3
+}

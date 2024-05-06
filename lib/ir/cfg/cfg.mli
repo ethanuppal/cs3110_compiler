@@ -86,3 +86,5 @@ val iter : (Basic_block.t -> unit) -> t -> unit
 val exit_points : t -> Basic_block.t list
 
 (* TODO: pretty print *)
+
+val to_string : t -> string

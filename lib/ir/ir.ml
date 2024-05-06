@@ -1,5 +1,6 @@
 type constant = int
 
+(** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t
   | Add of Variable.t * Operand.t * Operand.t

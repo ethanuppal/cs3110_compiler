@@ -1,5 +1,5 @@
 module ConstFold : Pass.PASS = struct
-  let const_fold bb =
+  let const_fold (bb, _) =
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
       | Add (var, Operand.Constant lhs, Operand.Constant rhs) ->
@@ -17,7 +17,7 @@ end
 module CopyProp : Pass.PASS = struct
   module VariableMap = Hashtbl.Make (Variable)
 
-  let copy_prop bb =
+  let copy_prop (bb, _) =
     let vals = VariableMap.create 16 in
     let subs = function
       | Operand.Variable var -> (
@@ -43,5 +43,8 @@ module CopyProp : Pass.PASS = struct
   let pass = Pass.make copy_prop
 end
 
-let apply passes cfg =
-  passes |> List.iter (fun pass -> Cfg.iter (Pass.execute pass) cfg)
+let apply passes cfg liveliness =
+  let apply_pass pass bb =
+    Pass.execute pass bb (Util.IdMap.find liveliness (Basic_block.id_of bb))
+  in
+  passes |> List.iter (fun pass -> Cfg.iter (apply_pass pass) cfg)

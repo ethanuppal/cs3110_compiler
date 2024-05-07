@@ -1,11 +1,11 @@
 open Alcotest
 open X86ISTMB
 
-type transform = string -> string
+type transform = (string -> string) * speed_level
 
 let ignore_file_name = "IGNORE"
 
-let make_test_suite root suite transform =
+let make_test_suite root suite (transform_f, speed) =
   let open Util in
   let snapshots_folder = Util.merge_paths [ Project_root.path; root; suite ] in
   let files = Sys.readdir snapshots_folder in
@@ -33,7 +33,7 @@ let make_test_suite root suite transform =
     let input = read_file input_path in
     let expected = read_file output_path in
     try
-      let actual = transform input in
+      let actual = transform_f input in
       (check string)
         "Using the given input transformer should yield matching output to the \
          expected."
@@ -45,6 +45,6 @@ let make_test_suite root suite transform =
     snapshots
     |> List.filter_map (fun snapshot ->
            if should_ignore_snapshot snapshot then None
-           else Some (snapshot, `Quick, snapshot_test snapshot))
+           else Some (snapshot, speed, snapshot_test snapshot))
   in
   (suite_name, snapshot_tests)

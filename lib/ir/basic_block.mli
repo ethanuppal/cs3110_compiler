@@ -31,6 +31,12 @@ val get_ir : t -> int -> Ir.t
     Requires: [Basic_block.length_of bb > idx]. *)
 val set_ir : t -> int -> Ir.t -> unit
 
+(** [rem_ir bb idx] removes the IR instruction at index [idx] in [bb], shifting
+    all the subsequent indices/IR instructions backward.
+
+    Requires: [Basic_block.length_of bb > idx]. *)
+val rem_ir : t -> int -> unit
+
 (** [to_list basic_block] are the IR operations in [basic_block] in order as a
     list. *)
 val to_list : t -> Ir.t list

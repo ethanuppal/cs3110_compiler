@@ -3,6 +3,8 @@ open Util
 (** A value of type [VariableSet.t] is a set of IR variables. *)
 module VariableSet : sig
   include Set.S with type elt = Variable.t
+
+  val to_string : t -> string
 end
 
 (** Liveliness analysis of a basic block. *)

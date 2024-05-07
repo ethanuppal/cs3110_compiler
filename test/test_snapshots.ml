@@ -12,7 +12,7 @@ let type_suite =
         Printexc.to_string (Analysis.TypeInferenceError err) ^ "\n"
     | e -> raise e
   in
-  Snapshot.make_test_suite snapshots_root "type" transform
+  Snapshot.make_test_suite snapshots_root "type" (transform, `Quick)
 
 (** [ir_transform] is the result of running the IR simulator on the source code
     [input]. *)
@@ -22,11 +22,14 @@ let ir_transform input =
   Analysis.infer statements;
   let ir = Ir_gen.generate statements in
   let main_cfg = List.hd ir in
+  ignore (Liveliness.analysis_of main_cfg);
   let simulator = Ir_sim.make () in
   Ir_sim.run simulator main_cfg;
   Ir_sim.output_of simulator
 
-let ir_suite = Snapshot.make_test_suite snapshots_root "ir" ir_transform
+let ir_suite =
+  Snapshot.make_test_suite snapshots_root "ir" (ir_transform, `Quick)
 
 (** not sure why this is separate from [ir_suite]. *)
-let basic_suite = Snapshot.make_test_suite snapshots_root "basic" ir_transform
+let basic_suite =
+  Snapshot.make_test_suite snapshots_root "basic" (ir_transform, `Quick)

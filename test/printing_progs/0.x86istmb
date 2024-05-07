@@ -1,0 +1,15 @@
+func main() {
+    let x = 0
+    let y = 2
+    let z = x
+    let w = z + y
+    print x
+    print y
+    print z
+    print w
+    z = 10
+    print x
+    print y
+    print z
+    print w
+}

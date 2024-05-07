@@ -20,16 +20,21 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let compile paths flags =
-  ignore paths;
-  ignore flags;
-  failwith "not impl"
-(* let was_passed flag = List.mem flag flags in
+let compile paths _ =
+  Printf.printf "assumes [paths] has one file, ignores flags\n";
+  let source = Util.read_file (List.hd paths) in
+  try
+    let statements = Parse_lex.lex_and_parse source in
+    Analysis.infer statements;
+    let ir = Ir_gen.generate statements in
+    let main_cfg = List.hd ir in
+    ignore (Liveliness.analysis_of main_cfg);
+    let simulator = Ir_sim.make () in
+    Ir_sim.run simulator main_cfg;
+    print_string (Ir_sim.output_of simulator)
+  with Parse_lex.ParseError msg -> print_error (msg ^ "\n")
 
-   let source = Util.read_file path in try let statements =
-   Parse_lex.lex_and_parse source in ignore statements; if List.mem Cli.OnlyIR
-   flags then show_ir statements else failwith "compiler not done yet" with
-   Parse_lex.ParseError msg -> print_error (msg ^ "\n") *)
+(* let was_passed flag = List.mem flag flags in *)
 
 let main args =
   let parse = Cli.parse args in

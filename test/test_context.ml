@@ -105,7 +105,7 @@ let insert_get =
   in
   QCheck_alcotest.to_alcotest ~long:true test
 
-let suite =
+let test_suite =
   ( "lib/frontend/context.ml",
     [
       make_is_empty;

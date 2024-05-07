@@ -10,3 +10,5 @@ val run : t -> Cfg.t -> unit
 (** [dump simulator] is the current standard output of [simulator] as a
     human-readable string. *)
 val output_of : t -> string
+
+val clear_output : t -> unit

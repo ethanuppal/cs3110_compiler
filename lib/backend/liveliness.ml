@@ -2,7 +2,14 @@ open Util
 open Ir
 
 (** A set of IR variables. *)
-module VariableSet = Set.Make (Variable)
+module VariableSet = struct
+  include Set.Make (Variable)
+
+  let to_string set =
+    "{"
+    ^ (to_list set |> List.map Variable.to_string |> String.concat ", ")
+    ^ "}"
+end
 
 (** Liveliness analysis of an IR operation. *)
 type instr_analysis = {
@@ -59,22 +66,14 @@ module BasicBlockAnalysis = struct
 
   let to_string analysis =
     let analysis = rep_ok analysis in
-    let set_to_string set =
-      let elements_string =
-        VariableSet.elements set
-        |> List.map Variable.to_string
-        |> String.concat ", "
-      in
-      "{" ^ elements_string ^ "}"
-    in
     "BasicBlockAnalysis {"
     ^ (Seq.init (Array.length analysis) id
       |> List.of_seq
       |> List.map (fun i ->
              "\n  ir[" ^ string_of_int i ^ "] <=> {live_in = "
-             ^ set_to_string (live_before_instr analysis i)
+             ^ VariableSet.to_string (live_before_instr analysis i)
              ^ ", live_out = "
-             ^ set_to_string (live_after_instr analysis i)
+             ^ VariableSet.to_string (live_after_instr analysis i)
              ^ "}")
       |> String.concat "")
     ^ "\n}"
@@ -84,45 +83,51 @@ end
     liveliness rules for instruction [ir] at index [ir_index] in basic block
     [bb], where [bb] is in [cfg] and has associated liveliness analysis
     [analysis = IdMap.find liveliness (Basic_block.id_of bb)], and where
-    [is_final] if and only if [ir] is the final instruction in [bb], and returns
-    whether any updates were made to liveliness information. *)
+    [is_final] if and only if [ir] is the final instruction in [bb], updating
+    partial results in [liveliness] and returning whether any updates were made
+    to liveliness information. *)
 let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
-  let result = ref false in
   let instr_analysis = analysis.(ir_idx) in
-  let update_live_out new_live_out =
-    let old_live_out = instr_analysis.live_out in
-    instr_analysis.live_out <- new_live_out;
-    if old_live_out <> new_live_out then result := true
+  let old_live_in = instr_analysis.live_in in
+  let old_live_out = instr_analysis.live_out in
+  let check_for_changes () =
+    if
+      VariableSet.cardinal old_live_in
+      > VariableSet.cardinal instr_analysis.live_in
+    then failwith "??";
+    (match (old_live_out, instr_analysis.live_out) with
+    | Some old_live_out, Some new_live_out ->
+        not (VariableSet.equal old_live_out new_live_out)
+    | None, None -> false
+    | _ -> true)
+    || not (VariableSet.equal old_live_in instr_analysis.live_in)
   in
-  let update_live_in new_live_in =
-    let old_live_in = instr_analysis.live_in in
-    instr_analysis.live_in <- new_live_in;
-    if old_live_in <> new_live_in then result := true
+  let bring_incoming () =
+    (if is_final then
+       let live_out_of_succ =
+         Cfg.out_edges cfg bb
+         |> List.fold_left
+              (fun acc (bb_succ, _) ->
+                let incoming_live_partial =
+                  IdMap.find liveliness (Basic_block.id_of bb_succ)
+                  |> BasicBlockAnalysis.live_in
+                in
+                VariableSet.union acc incoming_live_partial)
+              VariableSet.empty
+       in
+       instr_analysis.live_out <- Some live_out_of_succ);
+    instr_analysis.live_in <-
+      VariableSet.union instr_analysis.live_in
+        (BasicBlockAnalysis.live_after_instr analysis ir_idx)
   in
   let read_var var =
-    update_live_in (VariableSet.add var instr_analysis.live_in)
+    instr_analysis.live_in <- VariableSet.add var instr_analysis.live_in
   in
-  let read_op op = Operand.var_of_opt op |> Option.map read_var |> ignore in
+  let read_op = Operand.var_of_opt >> Option.map read_var >> ignore in
   let write_var var =
-    let incoming_live =
-      VariableSet.remove var
-        (BasicBlockAnalysis.live_after_instr analysis ir_idx)
-    in
-    update_live_in (VariableSet.union instr_analysis.live_in incoming_live)
+    instr_analysis.live_in <- VariableSet.remove var instr_analysis.live_in
   in
-  (if is_final then
-     let live_out_of_succ =
-       Cfg.out_edges cfg bb
-       |> List.fold_left
-            (fun acc (bb_succ, _) ->
-              let incoming_live_partial =
-                IdMap.find liveliness (Basic_block.id_of bb_succ)
-                |> BasicBlockAnalysis.live_in
-              in
-              VariableSet.union acc incoming_live_partial)
-            VariableSet.empty
-     in
-     update_live_out (Some live_out_of_succ));
+  bring_incoming ();
   (match ir with
   | DebugPrint op -> read_op op
   | Assign (var, op) | Deref (var, op) | Ref (var, op) ->
@@ -132,10 +137,11 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
       write_var var;
       read_op op1;
       read_op op2);
-  !result
+  check_for_changes ()
 
 (** [pass work_list liveliness cfg bb] performs a single pass of liveliness
-    analysis on a basic block *)
+    analysis on a basic block, updating partial results in [liveliness] and
+    returning whether any updates were made to liveliness information. *)
 let pass work_list liveliness cfg bb =
   let result = ref false in
   let analysis = IdMap.find liveliness (Basic_block.id_of bb) in
@@ -153,7 +159,7 @@ let pass work_list liveliness cfg bb =
   !result
 
 (** [iterate liveliness cfg] performs an iteration of liveliness analysis on
-    [cfg], updating partial results in [liveliness], and returning whether any
+    [cfg], updating partial results in [liveliness] and returning whether any
     changes were made. *)
 let iterate liveliness cfg =
   let work_list = Queue.create () in

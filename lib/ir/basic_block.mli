@@ -20,6 +20,23 @@ val set_condition : t -> Branch_condition.t -> unit
 (** [add_ir basic_block ir] adds [ir] to the end of [basic_block]. *)
 val add_ir : t -> Ir.t -> unit
 
+(** [get_ir bb idx] is the IR instruction at index [idx] in [bb].
+
+    Requires: [Basic_block.length_of bb > idx]. *)
+val get_ir : t -> int -> Ir.t
+
+(** [set_ir bb idx ir] replaces the IR instruction at index [idx] in [bb] with
+    [ir].
+
+    Requires: [Basic_block.length_of bb > idx]. *)
+val set_ir : t -> int -> Ir.t -> unit
+
+(** [rem_ir bb idx] removes the IR instruction at index [idx] in [bb], shifting
+    all the subsequent indices/IR instructions backward.
+
+    Requires: [Basic_block.length_of bb > idx]. *)
+val rem_ir : t -> int -> unit
+
 (** [to_list basic_block] are the IR operations in [basic_block] in order as a
     list. *)
 val to_list : t -> Ir.t list

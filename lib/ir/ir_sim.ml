@@ -44,6 +44,8 @@ let run simulator cfg =
     | Some bb2 -> run_aux bb2
     | None -> ()
   in
-  run_aux entry
+  run_aux entry;
+  Context.pop simulator.context
 
 let output_of simulator = simulator.output
+let clear_output simulator = simulator.output <- ""

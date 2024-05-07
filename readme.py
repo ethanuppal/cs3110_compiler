@@ -1,6 +1,12 @@
 if __name__ == "__main__":
-    import subprocess
+    import subprocess, os
     from datetime import datetime as dt
+    
+    def find_file_in_directory(filename, directory):
+        for root, _, files in os.walk(directory):
+            if filename in files:
+                return os.path.join(root, filename)
+        return None
 
     # requires : ./main has been built
     with open("README.md.template", "r") as f:
@@ -15,7 +21,7 @@ if __name__ == "__main__":
         put(
             "VERSION_NUM",
             subprocess.check_output(
-                "opam exec -- ocaml -e '#use \"./lib/meta.ml\";; print_endline (Version.to_string get.version)'",
+                f"opam exec -- ocaml -e '#use \"{find_file_in_directory('meta.ml', './lib')}\";; print_endline (Version.to_string get.version)'",
                 shell=True,
                 text=True,
             ),

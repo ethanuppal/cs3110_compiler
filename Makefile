@@ -23,7 +23,7 @@ test: build
 
 .PHONY: quick_test
 quick_test: build
-	opam exec -- dune exec ./test/test_x86ISTMB.exe -- -q
+	opam exec -- dune exec ./test/test_x86ISTMB.exe -- --quick-tests
 
 .PHONY: utop
 utop: README
@@ -70,4 +70,4 @@ serve: docs
 .PHONY: cloc 
 cloc: 
 	@make build > /dev/null
-	@echo "$$(cloc bin lib --json | jq .SUM.code) lines of code"
+	@echo "$$(cloc --by-file --include-lang=OCaml bin lib test --json | jq .SUM.code) lines of code"

@@ -7,3 +7,5 @@ let make () = Id.Gen.next var_gen
 let id_of var = var
 let to_string = Id.int_of >> string_of_int >> ( ^ ) "i"
 let compare = Id.compare
+let equal = Id.equal
+let hash = Id.hash

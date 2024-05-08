@@ -17,32 +17,35 @@ let run simulator cfg =
     Basic_block.to_list bb
     |> List.iter (fun ir ->
            match ir with
-           | Ir.Assign (var, operand) ->
+           | Ir.Assign (var, oper) ->
                Context.insert simulator.context (Variable.to_string var)
-                 (eval operand)
-           | Ir.Add (var, operand1, operand2) ->
+                 (eval oper)
+           | Ir.Add (var, oper1, oper2) ->
                Context.insert simulator.context (Variable.to_string var)
-                 (eval operand1 + eval operand2)
-           | Ir.Sub (var, operand1, operand2) ->
+                 (eval oper1 + eval oper2)
+           | Ir.Sub (var, oper1, oper2) ->
                Context.insert simulator.context (Variable.to_string var)
-                 (eval operand1 - eval operand2)
-           | Ir.TestEqual (var, operand1, operand2) ->
+                 (eval oper1 - eval oper2)
+           | Ir.TestEqual (var, oper1, oper2) ->
                Context.insert simulator.context (Variable.to_string var)
-                 (if eval operand1 = eval operand2 then 1 else 0)
-           | Ir.DebugPrint operand ->
+                 (if eval oper1 = eval oper2 then 1 else 0)
+           | Ir.Ref _ | Ir.Deref _ ->
+               failwith "Ir_sim does not support pointers"
+           | Ir.DebugPrint oper ->
                simulator.output <-
-                 simulator.output ^ Printf.sprintf "%d\n" (eval operand)
-           | _ -> failwith "Simulator.run doesn't implement all of IR yet");
+                 simulator.output ^ Printf.sprintf "%d\n" (eval oper));
     let cond =
       match Basic_block.condition_of bb with
       | Always -> true
       | Never -> false
-      | Conditional operand -> eval operand <> 0
+      | Conditional oper -> eval oper <> 0
     in
     match Cfg.take_branch cfg bb cond with
     | Some bb2 -> run_aux bb2
     | None -> ()
   in
-  run_aux entry
+  run_aux entry;
+  Context.pop simulator.context
 
 let output_of simulator = simulator.output
+let clear_output simulator = simulator.output <- ""

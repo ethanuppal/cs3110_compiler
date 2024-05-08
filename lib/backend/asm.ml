@@ -144,7 +144,11 @@ end = struct
     ("section ." ^ section.name)
     :: (display_indent ^ "align " ^ string_of_int section.align)
     :: (BatDynArray.to_list section.contents
-       |> List.map (Instruction.to_nasm >> ( ^ ) display_indent))
+       |> List.map (fun instr ->
+              let str = Instruction.to_nasm instr in
+              match instr with
+              | Label _ -> str
+              | _ -> display_indent ^ str))
     |> String.concat "\n"
 end
 

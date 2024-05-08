@@ -1,9 +1,11 @@
 open Alcotest
 open X86ISTMB
 
-type transform = string -> string
+type transform = (string -> string) * speed_level
 
-let make_test_suite root suite transform =
+let ignore_file_name = "IGNORE"
+
+let make_test_suite root suite (transform_f, speed) =
   let open Util in
   let snapshots_folder = Util.merge_paths [ Project_root.path; root; suite ] in
   let files = Sys.readdir snapshots_folder in
@@ -12,7 +14,18 @@ let make_test_suite root suite transform =
     |> List.map Filename.remove_extension
     |> List.sort_uniq String.compare
   in
-  let snapshot_test (snapshot : string) () =
+  let ignore_path = Util.merge_paths [ snapshots_folder; ignore_file_name ] in
+  let ignored_snapshots =
+    if Sys.file_exists ignore_path then
+      Util.read_file ignore_path
+      |> Str.split (Str.regexp_string "\n")
+      |> List.filter (String.length >> ( < ) 0)
+    else []
+  in
+  let should_ignore_snapshot snapshot =
+    List.mem snapshot ignored_snapshots || snapshot = ignore_file_name
+  in
+  let snapshot_test snapshot () =
     let input_path = Util.merge_paths [ snapshots_folder; snapshot ^ ".in" ] in
     let output_path =
       Util.merge_paths [ snapshots_folder; snapshot ^ ".out" ]
@@ -20,7 +33,7 @@ let make_test_suite root suite transform =
     let input = read_file input_path in
     let expected = read_file output_path in
     try
-      let actual = transform input in
+      let actual = transform_f input in
       (check string)
         "Using the given input transformer should yield matching output to the \
          expected."
@@ -30,6 +43,8 @@ let make_test_suite root suite transform =
   let suite_name = Util.merge_paths [ root; suite ] in
   let snapshot_tests =
     snapshots
-    |> List.map (fun snapshot -> (snapshot, `Quick, snapshot_test snapshot))
+    |> List.filter_map (fun snapshot ->
+           if should_ignore_snapshot snapshot then None
+           else Some (snapshot, speed, snapshot_test snapshot))
   in
   (suite_name, snapshot_tests)

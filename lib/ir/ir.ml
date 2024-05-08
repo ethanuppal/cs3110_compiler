@@ -1,5 +1,6 @@
 type constant = int
 
+(** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t
   | Add of Variable.t * Operand.t * Operand.t
@@ -10,6 +11,17 @@ type t =
   | DebugPrint of Operand.t
   | Call of string * Operand.t list
   | Return of Operand.t
+
+(** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
+    otherwise. *)
+let kill_of = function
+  | Assign (var, _)
+  | Add (var, _, _)
+  | Sub (var, _, _)
+  | Ref (var, _)
+  | Deref (var, _)
+  | TestEqual (var, _, _) -> Some var
+  | DebugPrint _ -> None
 
 let to_string =
   let open Printf in

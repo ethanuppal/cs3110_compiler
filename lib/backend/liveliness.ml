@@ -136,7 +136,9 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
   | Add (var, op1, op2) | Sub (var, op1, op2) | TestEqual (var, op1, op2) ->
       write_var var;
       read_op op1;
-      read_op op2);
+      read_op op2
+  | Call (var, _) -> write_var var
+  | Return op -> read_op op);
   check_for_changes ()
 
 (** [pass work_list liveliness cfg bb] performs a single pass of liveliness

@@ -17,16 +17,19 @@ $ ./main -v
 - Utku Melemetci (um44)
     - IR generation
     - Register allocation
+    - Data structures
+    - Randomized testing
 - Ethan Uppal (eu55)
     - Static analysis
         - Types and type checking
         - Control flow
     - Live variable analysis
-    - Abstraction for x86 assembly
+    - IR representation and abstraction for x86 assembly
     - CLI/user interface
 - Jeffrey Huang (jrh382)
     - Parser and lexer
     - Abstract syntax tree
+    - Type checking
 
 With some contributions from
 - Vijay Shanmugam (vrs29)

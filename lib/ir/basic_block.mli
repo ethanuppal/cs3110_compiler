@@ -4,26 +4,32 @@ type t
 (** [make ()] is a new basic block with a random [id] and a condition of [Never] *)
 val make : unit -> t
 
-(** [id_of basic_block] is the id of [basic_block]. *)
+(** [id_of bb] is the id of [bb]. *)
 val id_of : t -> Id.id
 
-(** [length_of basic_block] is the number of instructions in [basic_block]. *)
+(** [length_of bb] is the number of instructions in [bb]. *)
 val length_of : t -> int
 
-(** [condition_of basic_block] is the condition associated with branching away
-    from this basic block. *)
+(** [condition_of bb] is the condition associated with branching away from this
+    basic block. *)
 val condition_of : t -> Branch_condition.t
 
 (** [set_condition bb cond] sets the condition of [bb] to [cond]. *)
 val set_condition : t -> Branch_condition.t -> unit
 
-(** [add_ir basic_block ir] adds [ir] to the end of [basic_block]. *)
+(** [add_ir bb ir] adds [ir] to the end of [bb]. *)
 val add_ir : t -> Ir.t -> unit
 
 (** [get_ir bb idx] is the IR instruction at index [idx] in [bb].
 
     Requires: [Basic_block.length_of bb > idx]. *)
 val get_ir : t -> int -> Ir.t
+
+(** [get_orig_idx bb idx] is the original index of the IR instruction at index
+    [idx] in [bb]; this original index will never changed.
+
+    Requires: [Basic_block.length_of bb > idx]. *)
+val get_orig_idx : t -> int -> int
 
 (** [set_ir bb idx ir] replaces the IR instruction at index [idx] in [bb] with
     [ir].
@@ -37,12 +43,8 @@ val set_ir : t -> int -> Ir.t -> unit
     Requires: [Basic_block.length_of bb > idx]. *)
 val rem_ir : t -> int -> unit
 
-(** [to_list basic_block] are the IR operations in [basic_block] in order as a
-    list. *)
+(** [to_list bb] are the IR operations in [bb] in order as a list. *)
 val to_list : t -> Ir.t list
-
-(** [as_view bb] is a *)
-val as_view : t -> Ir.t Util.ArrayView.t
 
 (** [equal bb1 bb2] is whether bb1 and bb2 have the same id. *)
 val equal : t -> t -> bool

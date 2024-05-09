@@ -1,1 +1,3 @@
-print x
+func main() {
+    print x
+}

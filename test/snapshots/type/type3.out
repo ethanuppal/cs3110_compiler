@@ -1,1 +1,1 @@
-Type unification error (symbol='y'): attempt to unify Int and Bool
+Type error: no overload for '+' exists with parameter types (Int, Bool)

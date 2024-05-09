@@ -1,2 +1,4 @@
-let x = 4
-let y = *4
+func main() {
+    let x = 4
+    let y = *4
+}

@@ -15,7 +15,7 @@ protect:
 
 .PHONY: README
 README:
-	$(PY) readme.py
+	$(PY) readme.py || echo "==> Failed to create README.md: ./main does not exist"
 
 .PHONY: test 
 test: build 

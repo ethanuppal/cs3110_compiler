@@ -1,2 +1,4 @@
-let x = 5
-x = 5 + y
+func main() {
+    let x = 5
+    x = 5 + y
+}

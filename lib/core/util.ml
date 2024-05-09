@@ -54,6 +54,15 @@ let merge_paths paths =
     |> List.filter (( = ) "" >> not)
     |> String.concat "/"
 
+(** [basename path] is largest suffix of [path] not containing the character
+    ['/']. *)
+let basename =
+  let rec basename_aux = function
+    | [] | '/' :: _ -> ""
+    | head :: tail -> basename_aux tail ^ String.make 1 head
+  in
+  String.to_seq >> List.of_seq >> List.rev >> basename_aux
+
 (** [pp_of string_of] is a pretty printer for a type with the string conversion
     function [string_of] that simply prints the result of [string_of] inline. *)
 let pp_of string_of fmt x = Format.fprintf fmt "%s" (string_of x)

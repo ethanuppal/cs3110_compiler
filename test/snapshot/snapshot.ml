@@ -1,7 +1,7 @@
 open Alcotest
 open X86ISTMB
 
-type transform = (string -> string) * speed_level
+type transform = (string -> string -> string) * Alcotest.speed_level
 
 let ignore_file_name = "IGNORE"
 
@@ -33,7 +33,7 @@ let make_test_suite root suite (transform_f, speed) =
     let input = read_file input_path in
     let expected = read_file output_path in
     try
-      let actual = transform_f input in
+      let actual = transform_f (Util.basename input_path) input in
       (check string)
         "Using the given input transformer should yield matching output to the \
          expected."

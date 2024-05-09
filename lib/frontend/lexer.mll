@@ -7,8 +7,8 @@
 rule read = parse
 | eof { EOF }
 | [' ' '\t' '\r'] { read lexbuf }
-| '\n' { NEWLINE }
-| "//" [^ '\n']* '\n' { NEWLINE }
+| '\n' { Lexing.new_line lexbuf; NEWLINE }
+| "//" [^ '\n']* { NEWLINE } 
 | "==" { EQUALS }
 | '=' { ASSIGN }
 | '+' { PLUS }
@@ -39,8 +39,6 @@ rule read = parse
 | _ as c
     { 
       let pos = Lexing.lexeme_start_p lexbuf in
-      let lnum, cnum = pos.pos_lnum, (pos.pos_cnum - pos.pos_bol) in
-      let l1 = Printf.sprintf "Error at line %d, character %d. " lnum cnum in
-      let l2 = Printf.sprintf "Unrecognized character: [%c]" c in
-      raise (LexerError (l1 ^ l2))
+      let lnum, cnum = pos.pos_lnum, (pos.pos_cnum - pos.pos_bol + 1) in
+      raise (LexerError (Printf.sprintf "Lexer error: unrecognized character '%c' at %s:%d:%d" c pos.pos_fname lnum cnum ))
     }

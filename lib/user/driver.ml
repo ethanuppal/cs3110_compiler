@@ -24,7 +24,7 @@ let compile paths _ =
   Printf.printf "assumes [paths] has one file, ignores flags\n";
   let source = Util.read_file (List.hd paths) in
   try
-    let statements = Parse_lex.lex_and_parse source in
+    let statements = Parse_lex.lex_and_parse ~filename:(List.hd paths) source in
     Analysis.infer statements;
     let ir = Ir_gen.generate statements in
     let main_cfg = List.hd ir in

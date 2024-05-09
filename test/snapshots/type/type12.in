@@ -1,0 +1,12 @@
+func foo(a: Int) {
+    print a
+}
+func bar(a: Int, b: Bool) {
+    print a
+    print b
+}
+func baz(a: Bool, b: Int, c: Int*) {
+    print a
+    print b
+    print c
+}

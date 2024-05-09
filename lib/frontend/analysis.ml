@@ -57,7 +57,7 @@ let deref_rval_error ty ?(msg = "") ast =
     called in analyzing node [ast].
 
     @raise AnalyzerError if [name] has already been bound in the top scope. *)
-let bind_var_to_type ctx name ty ast =
+let bind_name_to_type ctx name ty ast =
   match Context.get_local ctx name with
   | None -> Context.insert ctx name ty
   | Some _ -> raise (name_error name ~msg:"invalid redeclaration" ast)
@@ -172,7 +172,7 @@ let rec infer_stmt (ctx : Type.t Context.t) stmt =
             raise
               (type_mismatch_error hint_ty expr_ty ~msg:"in let statement"
                  (Right stmt)));
-      bind_var_to_type ctx name expr_ty (Right stmt)
+      bind_name_to_type ctx name expr_ty (Right stmt)
   | Print expr -> infer_expr ctx expr |> ignore
   | Function _ ->
       raise
@@ -203,10 +203,21 @@ and infer_body ctx stmts =
 
 let infer prog =
   let ctx : Type.t Context.t = Context.make () in
+  Context.push ctx;
   prog
   |> List.iter (fun stmt ->
          match stmt with
-         | Function { name = _; params = _; body } -> infer_body ctx body
+         | Function { name; params; body } ->
+             let fun_ty =
+               Type.FunctionType { params; return = Type.unit_prim_type }
+             in
+             bind_name_to_type ctx name fun_ty (Right stmt);
+             Context.push ctx;
+             List.iter
+               (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))
+               params;
+             infer_body ctx body;
+             Context.pop ctx
          | _ ->
              raise
                (general_error ~msg:"only functions can be written at top level"

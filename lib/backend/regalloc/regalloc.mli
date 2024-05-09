@@ -1,3 +1,4 @@
+open Util
 module VarMap : Map.S with type key = Variable.t
 
 type var_reg_map = Asm.Register.t VarMap.t

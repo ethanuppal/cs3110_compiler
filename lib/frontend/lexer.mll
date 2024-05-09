@@ -32,6 +32,7 @@ rule read = parse
 | "if" { IF }
 | "else" { ELSE }
 | "while" { WHILE }
+| "return" { RETURN }
 | "true" { CONST_TRUE }
 | "false" { CONST_FALSE }
 | ['a'-'z' 'A'-'Z' '_'] ['0'-'9' 'a'-'z' 'A'-'Z' '_']* { IDEN (Lexing.lexeme lexbuf) }

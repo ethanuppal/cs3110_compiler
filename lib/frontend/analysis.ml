@@ -1,5 +1,4 @@
 open Ast
-open Util
 
 type analysis_error_info =
   | GeneralInfo
@@ -9,6 +8,7 @@ type analysis_error_info =
       | `InvalidSig of string * Type.t list
       | `DerefRValue of Type.t
       ]
+  | HaltInfo of { name : string }
 
 exception
   AnalyzerError of {
@@ -53,6 +53,14 @@ let deref_rval_error ty ?(msg = "") ast =
       ast;
     }
 
+let halt_error name ?(msg = "") ast =
+  AnalyzerError
+    {
+      info = HaltInfo { name };
+      msg = (if msg = "" then None else Some msg);
+      ast;
+    }
+
 (** [bind_var_to_type ctx name ty ast] binds [name] to have [ty] in [ctx] as
     called in analyzing node [ast].
 
@@ -66,7 +74,7 @@ let bind_name_to_type ctx name ty ast =
     analyzing node [ast].
 
     @raise AnalyzerError if [name] is not bound in [ctx]. *)
-let get_var_type ctx name ast =
+let get_type_of_name ctx name ast =
   match Context.get ctx name with
   | Some ty -> ty
   | None -> raise (name_error name ~msg:"unbound variable" ast)
@@ -96,6 +104,9 @@ let analyzer_error_to_string info msg _ =
               (Type.to_string ty)
       in
       start_str ^ ": " ^ rest_str
+  | HaltInfo { name } ->
+      "Halting error: function '" ^ name ^ "' does not return from all paths"
+      ^ msg_str
 
 let () =
   Printexc.register_printer (function
@@ -112,7 +123,7 @@ let () =
 let rec infer_expr (ctx : Type.t Context.t) expr =
   let infer_expr_aux expr =
     match expr with
-    | Var var -> var.ty <- Some (get_var_type ctx var.name (Left expr))
+    | Var var -> var.ty <- Some (get_type_of_name ctx var.name (Left expr))
     | ConstInt _ -> ()
     | ConstBool _ -> ()
     | Infix infix -> (
@@ -151,18 +162,33 @@ let rec infer_expr (ctx : Type.t Context.t) expr =
               raise (deref_rval_error rhs_ty (Left expr));
             prefix.ty <- Some (Type.Pointer rhs_ty)
         | _ -> raise_error ())
+    | Call call ->
+        let arg_tys = List.map (infer_expr ctx) call.args in
+        let exp_ty = get_type_of_name ctx call.name (Left expr) in
+        let exp_params, exp_return =
+          match exp_ty with
+          | FunctionType { params; return } -> (params, return)
+          | _ ->
+              raise
+                (name_error call.name ~msg:"only functions can be called"
+                   (Left expr))
+        in
+        if exp_params <> arg_tys then
+          raise (type_sig_error call.name arg_tys (Left expr));
+        call.ty <- Some exp_return
   in
   infer_expr_aux expr;
   Option.get (type_of_expr expr)
 
 (* TODO: add Terminal and Nonterminal checks *)
 
-(** [infer_stmt ctx stmt] is the type [stmt] will be assigned a type based on
-    [ctx].
+(** [infer_stmt ctx return_ctx stmt] is the type [stmt] will be assigned a type
+    based on [ctx] when the environment intends a return type of [return_ctx].
 
     @raise AnalyzerError on failure. *)
-let rec infer_stmt (ctx : Type.t Context.t) stmt =
-  (match stmt with
+let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
+    Type.stmt_type =
+  match stmt with
   | Declaration { name; hint; expr } ->
       let expr_ty = infer_expr ctx expr in
       (match hint with
@@ -172,8 +198,11 @@ let rec infer_stmt (ctx : Type.t Context.t) stmt =
             raise
               (type_mismatch_error hint_ty expr_ty ~msg:"in let statement"
                  (Right stmt)));
-      bind_name_to_type ctx name expr_ty (Right stmt)
-  | Print expr -> infer_expr ctx expr |> ignore
+      bind_name_to_type ctx name expr_ty (Right stmt);
+      Nonterminal
+  | Print expr ->
+      infer_expr ctx expr |> ignore;
+      Nonterminal
   | Function _ ->
       raise
         (general_error ~msg:"functions can only be written at top level"
@@ -184,22 +213,40 @@ let rec infer_stmt (ctx : Type.t Context.t) stmt =
         raise
           (type_mismatch_error Type.bool_prim_type cond_ty
              ~msg:"in if statement condition" (Right stmt));
-      infer_body ctx body
+      infer_body ctx return_ctx body
   | Assignment (name, expr) ->
-      let exp_ty = get_var_type ctx name (Right stmt) in
+      let exp_ty = get_type_of_name ctx name (Right stmt) in
       let expr_ty = infer_expr ctx expr in
       if exp_ty <> expr_ty then
         raise
           (type_mismatch_error exp_ty expr_ty
-             ~msg:"variable types cannot be modified" (Right stmt))
-  | Call _ -> failwith "not impl");
-  Type.Nonterminal
+             ~msg:"variable types cannot be modified" (Right stmt));
+      Nonterminal
+  | ExprStatement expr ->
+      ignore (infer_expr ctx expr);
+      Nonterminal
+  | Return expr_opt ->
+      let expr_ty =
+        match expr_opt with
+        | None -> Type.unit_prim_type
+        | Some expr -> infer_expr ctx expr
+      in
+      if return_ctx <> expr_ty then
+        raise
+          (type_mismatch_error return_ctx expr_ty ~msg:"invalid return type"
+             (Right stmt));
+      Terminal
 
 (* TODO: final statement always needs to be Terminal *)
-and infer_body ctx stmts =
+and infer_body ctx return_ctx stmts =
   Context.push ctx;
-  List.iter (infer_stmt ctx >> ignore) stmts;
-  Context.pop ctx
+  let ty =
+    List.fold_left
+      (fun _ stmt -> infer_stmt ctx return_ctx stmt)
+      Nonterminal stmts
+  in
+  Context.pop ctx;
+  ty
 
 let infer prog =
   let ctx : Type.t Context.t = Context.make () in
@@ -208,13 +255,20 @@ let infer prog =
   |> List.iter (fun stmt ->
          match stmt with
          | Function { name; params; return; body } ->
-             let fun_ty = Type.FunctionType { params; return } in
+             let fun_ty =
+               Type.FunctionType { params = List.map snd params; return }
+             in
              bind_name_to_type ctx name fun_ty (Right stmt);
              Context.push ctx;
              List.iter
                (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))
                params;
-             infer_body ctx body;
+             let body =
+               if return = Type.unit_prim_type then body @ [ Return None ]
+               else body
+             in
+             if infer_body ctx return body <> Terminal then
+               raise (halt_error name (Right stmt));
              Context.pop ctx
          | _ ->
              raise

@@ -7,7 +7,7 @@
 %token <string> IDEN
 %token PLUS MINUS TIMES DIVIDE MOD EQUALS BITAND
 %token LPAR RPAR LBRACE RBRACE COLON ARROW COMMA
-%token PRINT ASSIGN LET FUNC IF ELSE WHILE
+%token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN
 %token NEWLINE EOF
 %token INT_TYPE BOOL_TYPE
 
@@ -49,6 +49,7 @@ expr:
   | PLUS expr { Prefix {op = Plus; rhs = $2; ty = None} }
   | MINUS expr { Prefix {op = Minus; rhs = $2; ty = None} }
   | TIMES expr { Prefix {op = Times; rhs = $2; ty = None} }
+  | name = IDEN; LPAR; args = separated_list(COMMA, expr); RPAR { Call { name; args; ty = None }}
 
 body_till_rbrace:
   | NEWLINE body_till_rbrace { $2 } 
@@ -64,9 +65,10 @@ return_type:
 
 stmt:
   | IF expr LBRACE body_till_rbrace { If {cond = $2; body = $4 } }
-  | IDEN LPAR RPAR { Call $1 }
   | LET IDEN COLON ty ASSIGN expr { Declaration {name = $2; hint = Some ($4); expr = $6} }
   | LET IDEN ASSIGN expr { Declaration {name = $2; hint = None; expr = $4} }
   | IDEN ASSIGN expr { Assignment ($1, $3) }
   | FUNC; name = IDEN; LPAR; params = separated_list(COMMA, param); RPAR; return_opt = option(return_type); LBRACE; body = body_till_rbrace { Function {name; params; return = if return_opt = None then Type.unit_prim_type else Option.get (return_opt); body} }
   | PRINT expr { Print $2 }
+  | RETURN; return_opt = option(expr) { Return (return_opt) }
+  | expr { ExprStatement $1 }

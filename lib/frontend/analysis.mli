@@ -6,6 +6,7 @@ type analysis_error_info =
       | `InvalidSig of string * Type.t list
       | `DerefRValue of Type.t
       ]
+  | HaltInfo of { name : string }
 
 exception
   AnalyzerError of {

@@ -44,12 +44,12 @@ let rec generate_expr ctx cfg block expr =
       in
       Basic_block.add_ir block ir_instr;
       Operand.make_var result
+  | Call _ -> failwith "no calls in ir gen"
 
 (** [generate_stmt ctx cfg block stmt] adds IR for [stmt] (and potentially more
     blocks) onto [block] in [cfg], and returns the block that program flow
     should continue from. *)
 let rec generate_stmt ctx cfg block = function
-  | Call _ -> failwith "not implemented"
   | Declaration { expr; name; _ } ->
       (* IR for this could probably be improved but it's fine *)
       let result = generate_expr ctx cfg block expr in
@@ -85,6 +85,10 @@ let rec generate_stmt ctx cfg block = function
       let to_print = generate_expr ctx cfg block expr in
       Basic_block.add_ir block (Ir.DebugPrint to_print);
       block
+  | ExprStatement expr ->
+      ignore (generate_expr ctx cfg block expr);
+      block
+  | Return _ -> failwith "ir gen need to gen return"
 
 and generate_stmt_lst ctx cfg block lst =
   let block_ref = ref block in

@@ -30,6 +30,11 @@ type expr =
       rhs : expr;
       mutable ty : Type.t option;
     }
+  | Call of {
+      name : string;
+      args : expr list;
+      mutable ty : Type.t option;
+    }
 
 (** A statement can be executed. *)
 and stmt =
@@ -37,9 +42,7 @@ and stmt =
       cond : expr;
       body : stmt list;
     }
-  | Call of string
-    (* tbd better function support ia ExpressionStatement need to add in stuff
-       baout returns and stuf lol*)
+  | ExprStatement of expr
   | Declaration of {
       name : string;
       hint : Type.t option;
@@ -53,6 +56,7 @@ and stmt =
       body : stmt list;
     }
   | Print of expr
+  | Return of expr option
 
 (** A program is a series of statements. *)
 type prog = stmt list
@@ -65,6 +69,7 @@ let type_of_expr = function
   | ConstBool _ -> Some Type.bool_prim_type
   | Infix { lhs = _; op = _; rhs = _; ty } -> ty
   | Prefix { op = _; rhs = _; ty } -> ty
+  | Call { name = _; args = _; ty } -> ty
 
 (** [expr_is_const expr] if and only if [expr] is a constant (i.e., cannot have
     an address taken of it). *)
@@ -91,12 +96,14 @@ let rec expr_to_string = function
       ^ expr_to_string rhs ^ ")"
   | Prefix { op; rhs; ty = _ } ->
       "(" ^ op_to_string op ^ expr_to_string rhs ^ ")"
+  | Call { name; args; ty = _ } ->
+      name ^ "(" ^ (args |> List.map expr_to_string |> String.concat ", ") ^ ")"
 
 let stmt_to_string =
   let add_indent = String.make 4 ' ' in
   let rec stmt_to_string_aux indent stmt =
     let make_string = function
-      | Call name -> name ^ "()"
+      | ExprStatement expr -> expr_to_string expr
       | Declaration { name; hint; expr } ->
           let expr_type = type_of_expr expr in
           let display_type = if expr_type = None then hint else expr_type in
@@ -116,14 +123,18 @@ let stmt_to_string =
           ^ (body
             |> List.map (stmt_to_string_aux (indent ^ add_indent))
             |> String.concat "")
-          ^ "}"
+          ^ indent ^ "}"
       | Print expr -> "print " ^ expr_to_string expr
       | If { cond; body } ->
           "if " ^ expr_to_string cond ^ " {\n"
           ^ (body
             |> List.map (stmt_to_string_aux (indent ^ add_indent))
             |> String.concat "")
-          ^ "}"
+          ^ indent ^ "}"
+      | Return expr_opt -> (
+          match expr_opt with
+          | None -> "return"
+          | Some expr -> "return " ^ expr_to_string expr)
     in
     indent ^ make_string stmt ^ "\n"
   in

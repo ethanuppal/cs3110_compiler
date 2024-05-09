@@ -25,9 +25,9 @@ let get : t =
     authors =
       [
         "Utku Melemeti";
-        "Jason Klein";
-        "Jeffrey Huang";
-        "Vijay Shanmugam";
         "Ethan Uppal";
+        "Jeffrey Huang";
+        "Jason Klein";
+        "Vijay Shanmugam";
       ];
   }

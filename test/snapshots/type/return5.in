@@ -1,0 +1,6 @@
+func main() -> Int {
+    // last statement here is terminal, since there is no 'else' branch we don't have a problem saying it halts
+    if true {
+        return 0
+    }
+}

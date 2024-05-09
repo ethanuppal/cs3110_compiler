@@ -1,5 +1,3 @@
-open Util
-
 module Primitive = struct
   (** [t] represents a primitive type. *)
   type t =
@@ -24,7 +22,7 @@ type t =
   | Pointer of t
   | Var of string
   | FunctionType of {
-      params : (string * t) list;
+      params : t list;
       return : t;
     }
 
@@ -35,7 +33,7 @@ let rec to_string = function
   | Var tvar -> tvar
   | FunctionType { params; return } ->
       "("
-      ^ (params |> List.map (snd >> to_string) |> String.concat ", ")
+      ^ (params |> List.map to_string |> String.concat ", ")
       ^ ") -> " ^ to_string return
 
 let int_prim_type = Prim Int

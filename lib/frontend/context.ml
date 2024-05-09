@@ -22,4 +22,7 @@ let get ctx key =
   in
   get_aux !ctx
 
+let get_local ctx key =
+  if is_empty ctx then None else Scope.find_opt (top ctx) key
+
 let to_list ctx = !ctx |> List.map (Scope.to_seq >> List.of_seq)

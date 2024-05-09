@@ -48,6 +48,7 @@ and stmt =
   | Assignment of string * expr
   | Function of {
       name : string;
+      params : (string * Type.t) list;
       body : stmt list;
     }
   | Print of expr
@@ -105,8 +106,12 @@ let stmt_to_string =
           in
           "let " ^ name ^ hint_str ^ " = " ^ expr_to_string expr
       | Assignment (name, expr) -> name ^ " = " ^ expr_to_string expr
-      | Function { name; body } ->
-          "func " ^ name ^ "() {\n"
+      | Function { name; params; body } ->
+          "func " ^ name ^ "("
+          ^ (params
+            |> List.map (fun (name, ty) -> name ^ ": " ^ Type.to_string ty)
+            |> String.concat ", ")
+          ^ ") {\n"
           ^ (body
             |> List.map (stmt_to_string_aux (indent ^ add_indent))
             |> String.concat "")
@@ -159,7 +164,7 @@ let rec pp_stmt fmt = function
   | Assignment (name, expr) ->
       Format.fprintf fmt "%s = " name;
       pp_expr fmt expr
-  | Function { name; body } ->
+  | Function { name; params = _; body } ->
       Format.fprintf fmt "func %s() {" name;
       (* Go down a line and indent by two *)
       Format.pp_print_break fmt 0 2;

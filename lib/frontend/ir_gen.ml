@@ -93,7 +93,8 @@ and generate_stmt_lst ctx cfg block lst =
 
 let generate prog =
   match prog with
-  | Function { name = "main"; body } :: _ ->
+  | Function { name = "main"; params; body } :: _ ->
+      if not (List.is_empty params) then failwith "fix params in id gen";
       let ctx = Context.make () in
       Context.push ctx;
       let cfg = Cfg.make "main" in

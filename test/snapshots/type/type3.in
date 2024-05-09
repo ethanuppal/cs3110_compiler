@@ -1,3 +1,5 @@
-let x = 1
-let y = true
-print x + y
+func main() {
+    let x = 1
+    let y = true
+    print x + y
+}

@@ -38,7 +38,7 @@ let make_test_suite root suite (transform_f, speed) =
         "Using the given input transformer should yield matching output to the \
          expected."
         expected actual
-    with Parse_lex.ParseError msg -> fail msg
+    with Parse_lex.ParserError msg -> fail msg
   in
   let suite_name = Util.merge_paths [ root; suite ] in
   let snapshot_tests =

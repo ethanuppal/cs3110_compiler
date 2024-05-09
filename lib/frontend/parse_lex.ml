@@ -1,13 +1,16 @@
-exception ParseError of string
+exception ParserError of string
 
 (** [lex_and_parse input] is the list of statements represented by the source
-    code string [input].contents
+    code string [input].
 
-    @raise ParseError on parsing error. *)
+    @raise ParserError on parsing error. *)
 let lex_and_parse input =
+  let syntax_error_msg lexbuf =
+    let pos = Lexing.lexeme_start_p lexbuf in
+    let lnum, cnum = (pos.pos_lnum, pos.pos_cnum - pos.pos_bol) in
+    Printf.sprintf "Syntax error at line %d, character %d" lnum cnum
+  in
+  let parse lexbuf = Parser.main Lexer.read lexbuf in
   let lexbuf = Lexing.from_string input in
-  try Parser.main Lexer.read lexbuf
-  with Parser.Error -> raise (ParseError "unknown parser error")
-
-(* https://baturin.org/blog/declarative-parse-error-reporting-with-menhir/ *)
-(* https://stackoverflow.com/questions/38505920/get-the-input-string-that-raises-parsing-error-inside-the-parser *)
+  try parse lexbuf
+  with Parser.Error -> raise (ParserError (syntax_error_msg lexbuf))

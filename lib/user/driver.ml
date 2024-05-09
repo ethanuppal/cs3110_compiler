@@ -32,9 +32,7 @@ let compile paths _ =
     let simulator = Ir_sim.make () in
     Ir_sim.run simulator main_cfg;
     print_string (Ir_sim.output_of simulator)
-  with Parse_lex.ParseError msg -> print_error (msg ^ "\n")
-
-(* let was_passed flag = List.mem flag flags in *)
+  with Parse_lex.ParserError msg -> print_error (msg ^ "\n")
 
 let main args =
   let parse = Cli.parse args in

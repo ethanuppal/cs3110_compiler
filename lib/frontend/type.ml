@@ -1,12 +1,12 @@
 module Primitive = struct
-  (** [t] represents primitive type. *)
+  (** [t] represents a primitive type. *)
   type t =
-    | Int63
+    | Int
     | Bool
 
   (** [to_string prim_type] is the string representation of [prim_type]. *)
   let to_string = function
-    | Int63 -> "Int"
+    | Int -> "Int"
     | Bool -> "Bool"
 end
 
@@ -16,25 +16,21 @@ type stmt_type =
 
 (** [t] represents a type. *)
 type t =
-  | Primitive of Primitive.t
+  | Prim of Primitive.t
   | Pointer of t
   | Var of string
-  | Any
 
 (** [to_string ty] is the string representation of [ty]. *)
 let rec to_string = function
-  | Primitive prim -> Primitive.to_string prim
+  | Prim prim -> Primitive.to_string prim
   | Pointer ty -> to_string ty ^ "*"
   | Var tvar -> tvar
-  | Any -> "?"
 
-let int_prim_type = Primitive Int63
-let bool_prim_type = Primitive Bool
-let any_type = Any
+let int_prim_type = Prim Int
+let bool_prim_type = Prim Bool
 
-(** [deref ty] is [ty'] where [ty = Pointer ty'] for some [ty'].
-
-    Requires: [ty] is of the above form. *)
+(** [deref ty] is [Some ty'] if [ty = Pointer ty'] for some [ty'] and [None]
+    otherwise. *)
 let deref = function
-  | Pointer ty -> ty
-  | _ -> failwith "precondition"
+  | Pointer ty' -> Some ty'
+  | _ -> None

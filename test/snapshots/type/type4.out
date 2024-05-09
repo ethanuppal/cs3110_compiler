@@ -1,1 +1,1 @@
-Type resolution error (symbol='x')
+Name error: unbound variable: 'x'

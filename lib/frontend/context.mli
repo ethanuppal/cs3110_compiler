@@ -28,6 +28,10 @@ val insert : 'a t -> string -> 'a -> unit
     top of the stack in which [key] appears, or [None] if [key] is not bound. *)
 val get : 'a t -> string -> 'a option
 
+(** [get_local ctx key] is the value associated with [key] in the top scope in
+    [ctx], or [None] of [key] is not bound. *)
+val get_local : 'a t -> string -> 'a option
+
 (** [to_list ctx] is [ctx] as a list of key-value pair lists, where each list is
     a scope. Scopes that were pushed later are earlier in the result. *)
 val to_list : 'a t -> (string * 'a) list list

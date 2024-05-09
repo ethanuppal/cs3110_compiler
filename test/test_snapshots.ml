@@ -8,8 +8,8 @@ let type_suite =
       Analysis.infer statements;
       statements |> List.map Ast.stmt_to_string |> String.concat ""
     with
-    | Analysis.TypeInferenceError err ->
-        Printexc.to_string (Analysis.TypeInferenceError err) ^ "\n"
+    | Analysis.AnalyzerError err ->
+        Printexc.to_string (Analysis.AnalyzerError err) ^ "\n"
     | e -> raise e
   in
   Snapshot.make_test_suite snapshots_root "type" (transform, `Quick)

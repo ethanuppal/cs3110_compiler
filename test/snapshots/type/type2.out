@@ -1,1 +1,1 @@
-Type unification error: attempt to unify ?* and Int
+Type error: no overload for '*' exists with parameter types (Int)

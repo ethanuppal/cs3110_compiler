@@ -1,4 +1,6 @@
-let x: Bool = true
+func bar() {
+    let x: Bool = true
+}
 func foo() {
     let x: Int = 4
     print (+x)

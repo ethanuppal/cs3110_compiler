@@ -18,5 +18,5 @@ Here are some other commands.
 | `make clean` | Removes all build and executable files |
 | `make docs` | Generates documentation |
 | `make serve PORT=8003` | Hosts the documentation website at `localhost:8003` |
-| `make bisect` | Runs `make test` and outputs the percentage of coverage |
+| `make bisect` | Runs `make test` and outputs the percentage of coverage (requires `pup` to be installed) |
 | `make cloc` | Counts the lines of code in the project.

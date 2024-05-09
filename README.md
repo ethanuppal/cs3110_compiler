@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-08 23:00:51.290592
+> Last updated: 2024-05-08 23:06:31.747043
 
 ```
 $ ./main -h
@@ -32,8 +32,18 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmu
 ## Group
 
 - Utku Melemetci (um44)
+    - IR generation
+    - Register allocation
 - Ethan Uppal (eu55)
+    - Static analysis
+        - Types and type checking
+        - Control flow
+    - Live variable analysis
+    - Abstraction for x86 assembly
+    - CLI/user interface
 - Jeffrey Huang (jrh382)
+    - Parser and lexer
+    - Abstract syntax tree
 
 With some contributions from
 - Vijay Shanmugam (vrs29)

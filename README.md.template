@@ -15,8 +15,18 @@ $ ./main -v
 ## Group
 
 - Utku Melemetci (um44)
+    - IR generation
+    - Register allocation
 - Ethan Uppal (eu55)
+    - Static analysis
+        - Types and type checking
+        - Control flow
+    - Live variable analysis
+    - Abstraction for x86 assembly
+    - CLI/user interface
 - Jeffrey Huang (jrh382)
+    - Parser and lexer
+    - Abstract syntax tree
 
 With some contributions from
 - Vijay Shanmugam (vrs29)

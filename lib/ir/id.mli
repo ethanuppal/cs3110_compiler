@@ -20,6 +20,8 @@ val compare : id -> id -> int
 (** [hash id] is a hash of [id]. *)
 val hash : id -> int
 
+val pp : Format.formatter -> id -> unit
+
 module Gen : sig
   (** Values of type [t] are unique-identifier generators. *)
   type t

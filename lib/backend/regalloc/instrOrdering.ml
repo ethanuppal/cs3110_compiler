@@ -18,6 +18,6 @@ let make cfg =
 let compare ordering id1 id2 =
   let bb_id_1, instr_idx_1 = id1 in
   let bb_id_2, instr_idx_2 = id2 in
-  let bb_order_1 = OrderMap.find bb_id_1 ordering in
-  let bb_order_2 = OrderMap.find bb_id_2 ordering in
+  let bb_order_1 = OrderMap.find ordering bb_id_1 in
+  let bb_order_2 = OrderMap.find ordering bb_id_2 in
   Stdlib.compare (bb_order_1, instr_idx_1) (bb_order_2, instr_idx_2)

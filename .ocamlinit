@@ -3,3 +3,5 @@ open X86ISTMB
 #install_printer Ast.pp_expr
 #install_printer Ast.pp_stmt
 #install_printer Ast.pp_prog
+#install_printer Variable.pp
+#install_printer Id.pp

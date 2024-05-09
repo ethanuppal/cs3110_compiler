@@ -5,6 +5,7 @@ let equal = Int.equal
 let hash = Int.hash
 let compare = Int.compare
 let int_of id = id
+let pp fmt id = Format.fprintf fmt "id[%i]" id
 
 module Gen = struct
   type t = {

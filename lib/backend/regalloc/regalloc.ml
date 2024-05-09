@@ -3,22 +3,18 @@ module VarMap = Map.Make (Variable)
 
 type var_reg_map = Asm.Register.t VarMap.t
 
-(* TODO: standerdize instruction id? *)
+(* TODO: standardize instruction id? *)
 type instr_id = Id.t * int
 
-(* Inclusive bounds *)
-type live_interval = {
+(** [start] is the first instruction (in terms of the arbitrary ordering)
+    *after* which a variable is live. [stop] is the last instruction *after*
+    which a variable is live. *)
+type interval = {
   start : instr_id;
   stop : instr_id;
 }
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
-
-(* for now we're going to construct liveliness and ordering in here--dependency
-   can be injected later if necessary *)
-let allocate_for cfg =
-  ignore cfg;
-  failwith "not implemented"
 
 let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     (ordering : InstrOrdering.t) =
@@ -55,4 +51,12 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
       done)
     cfg;
 
-  tbl
+  VarTbl.to_seq tbl |> List.of_seq
+
+(* for now we're going to construct liveliness and ordering in here--dependency
+   can be injected later if necessary *)
+let allocate_for cfg =
+  let liveliness = Liveliness.analysis_of cfg in
+  let ordering = InstrOrdering.make cfg in
+  let _intervals = live_intervals cfg liveliness ordering in
+  VarMap.empty

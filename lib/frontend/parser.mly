@@ -59,11 +59,14 @@ body_till_rbrace:
 param:
   | IDEN COLON ty { ($1, $3) }
 
+return_type:
+  | ARROW ty { $2 }
+
 stmt:
   | IF expr LBRACE body_till_rbrace { If {cond = $2; body = $4 } }
   | IDEN LPAR RPAR { Call $1 }
   | LET IDEN COLON ty ASSIGN expr { Declaration {name = $2; hint = Some ($4); expr = $6} }
   | LET IDEN ASSIGN expr { Declaration {name = $2; hint = None; expr = $4} }
   | IDEN ASSIGN expr { Assignment ($1, $3) }
-  | FUNC; name = IDEN; LPAR; params = separated_list(COMMA, param); RPAR LBRACE; body = body_till_rbrace { Function {name; params; body} }
+  | FUNC; name = IDEN; LPAR; params = separated_list(COMMA, param); RPAR; return_opt = option(return_type); LBRACE; body = body_till_rbrace { Function {name; params; return = if return_opt = None then Type.unit_prim_type else Option.get (return_opt); body} }
   | PRINT expr { Print $2 }

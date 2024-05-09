@@ -1,11 +1,11 @@
-func foo(a: Int) {
+func foo(a: Int) -> Unit {
     print a
 }
-func bar(a: Int, b: Bool) {
+func bar(a: Int, b: Bool) -> Unit {
     print a
     print b
 }
-func baz(a: Bool, b: Int, c: Int*) {
+func baz(a: Bool, b: Int, c: Int*) -> Unit {
     print a
     print b
     print c

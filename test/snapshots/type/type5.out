@@ -1,7 +1,7 @@
-func bar() {
+func bar() -> Unit {
     let x: Bool = true
 }
-func foo() {
+func foo() -> Unit {
     let x: Int = 4
     print (+x)
 }

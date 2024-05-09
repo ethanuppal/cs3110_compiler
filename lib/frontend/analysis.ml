@@ -207,10 +207,8 @@ let infer prog =
   prog
   |> List.iter (fun stmt ->
          match stmt with
-         | Function { name; params; body } ->
-             let fun_ty =
-               Type.FunctionType { params; return = Type.unit_prim_type }
-             in
+         | Function { name; params; return; body } ->
+             let fun_ty = Type.FunctionType { params; return } in
              bind_name_to_type ctx name fun_ty (Right stmt);
              Context.push ctx;
              List.iter

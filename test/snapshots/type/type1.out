@@ -1,4 +1,4 @@
-func main() {
+func main() -> Unit {
     let x: Int = 1
     let y: Int = 2
     let z: Int = (x + y)

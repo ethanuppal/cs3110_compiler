@@ -31,7 +31,7 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     else original
   in
 
-  let update_table instr_id live_set =
+  let update_table instr_id used_set =
     Liveliness.VariableSet.iter
       (fun live ->
         let current_opt = VarTbl.find_opt tbl live in
@@ -41,7 +41,7 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
           | Some current -> expand_interval current instr_id
         in
         VarTbl.replace tbl live new_interval)
-      live_set
+      used_set
   in
 
   Cfg.iter
@@ -50,7 +50,13 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
       let analysis = IdMap.find liveliness bb_id in
       for instr_idx = 0 to Basic_block.length_of bb - 1 do
         let live_set = BBAnalysis.live_after_instr analysis instr_idx in
-        update_table (bb_id, instr_idx) live_set
+        let kill_var = Basic_block.get_ir bb instr_idx |> Ir.kill_of in
+        let used_set =
+          match kill_var with
+          | Some var -> Liveliness.VariableSet.add var live_set
+          | None -> live_set
+        in
+        update_table (bb_id, instr_idx) used_set
       done)
     cfg;
 

@@ -6,13 +6,11 @@ open X86ISTMB
 #install_printer Variable.pp
 #install_printer Id.pp
 
-let compile file =
+let show_regalloc file =
   let source = Util.read_file file in
   let prog = Parse_lex.lex_and_parse source in
   let cfg = Ir_gen.generate prog |> List.hd in
   let liveliness = Liveliness.analysis_of cfg in
   let ordering = InstrOrdering.make cfg in
   print_endline (Cfg.to_string cfg);
-  Regalloc.allocate_for cfg liveliness ordering
-  |> Regalloc.VarTbl.to_seq 
-  |> List.of_seq
+  Regalloc.allocate_for cfg liveliness ordering |> Regalloc.VarTbl.to_seq |> List.of_seq

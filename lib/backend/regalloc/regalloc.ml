@@ -122,8 +122,6 @@ let linear_scan (intervals : (Variable.t * interval) list)
 
   assigned_alloc
 
-(* for now we're going to construct liveliness and ordering in here--dependency
-   can be injected later if necessary *)
 let allocate_for cfg liveliness ordering =
   let vars_with_intervals = live_intervals cfg liveliness ordering in
   linear_scan vars_with_intervals ordering

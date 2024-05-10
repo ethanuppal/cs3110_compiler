@@ -1,6 +1,12 @@
-module VarMap : Map.S with type key = Variable.t
+open Util
+module VarTbl : Hashtbl.S with type key = Variable.t
 
-(* should this be a hash table? *)
-type var_reg_map = Asm.Register.t VarMap.t
+type allocation =
+  | Register of Asm.Register.t
+  | Spill
 
-val allocate_for : Cfg.t -> var_reg_map
+val allocate_for :
+  Cfg.t ->
+  Liveliness.BasicBlockAnalysis.t IdMap.t ->
+  InstrOrdering.t ->
+  allocation VarTbl.t

@@ -38,6 +38,28 @@ module Register = struct
     | R13 -> "r13"
     | R14 -> "r14"
     | R15 -> "r15"
+
+  let all_registers =
+    [
+      RAX;
+      RBX;
+      RCX;
+      RDX;
+      RBP;
+      RSP;
+      RSI;
+      RDI;
+      R8;
+      R9;
+      R10;
+      R11;
+      R12;
+      R13;
+      R14;
+      R15;
+    ]
+
+  let compare = Stdlib.compare
 end
 
 module Operand = struct

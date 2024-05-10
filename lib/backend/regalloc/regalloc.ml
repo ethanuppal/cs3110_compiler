@@ -98,14 +98,19 @@ let linear_scan (intervals : (Variable.t * interval) list)
 
   let spill_at_interval ((var, interval) : Variable.t * interval) =
     let spill_var, spill_interval = BatRefList.last active in
+
     if compare_instr_id spill_interval.stop interval.stop > 0 then (
       (* spill guaranteed to be assigned an actual register *)
       let alloc = VarTbl.find assigned_alloc spill_var in
       VarTbl.replace assigned_alloc var alloc;
       VarTbl.replace assigned_alloc spill_var Spill;
+
       (* this sucks. can we maybe keep active in reverse order? *)
-      BatRefList.remove active (spill_var, spill_interval);
-      BatRefList.add_sort ~cmp:compare_pair_end active (var, interval))
+      BatRefList.Index.remove_at active (BatRefList.length active - 1);
+
+      (* add_sort is buggy... *)
+      BatRefList.push active (var, interval);
+      BatRefList.sort ~cmp:compare_pair_end active)
     else VarTbl.replace assigned_alloc var Spill
   in
 
@@ -116,7 +121,8 @@ let linear_scan (intervals : (Variable.t * interval) list)
       | Some register ->
           free_registers := RegSet.remove register !free_registers;
           VarTbl.replace assigned_alloc var (Register register);
-          BatRefList.add_sort ~cmp:compare_pair_end active (var, interval)
+          BatRefList.push active (var, interval);
+          BatRefList.sort ~cmp:compare_pair_end active
       | None -> spill_at_interval (var, interval))
     sorted_intervals;
 

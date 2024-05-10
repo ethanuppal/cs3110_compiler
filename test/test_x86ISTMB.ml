@@ -58,5 +58,6 @@ let () =
     Test_passes.test_suite;
     Test_digraph.test_suite;
     Test_context.test_suite;
+    Test_regalloc.test_suite;
   ]
   |> Alcotest.run "x86ISTMB"

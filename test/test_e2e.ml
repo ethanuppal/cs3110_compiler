@@ -9,8 +9,7 @@ let make_e2e_test filename source () =
   Driver.compile [ filename ] [] (Some test_bin);
   let actual =
     Util.get_command_output
-      (Util.read_file
-         (Util.merge_paths [ test_bin; "build_dir/cmd_prefix.txt" ])
+      ((Platform.get_platform () |> Platform.command_prefix)
       ^ " "
       ^ Util.merge_paths [ test_bin; "build_dir/a.out" ])
   in

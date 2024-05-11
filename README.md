@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-11 03:02:13.582897
+> Last updated: 2024-05-11 19:38:49.052744
 
 ```
 $ ./main -h
@@ -24,9 +24,9 @@ Usage: ./main [-h|-v]
 ```
 ```
 $ ./main -v
-x86ISTMB v0.1.0
+x86ISTMB v1.0.0
 
-Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmugam
+Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang
 ```
 
 ## Group

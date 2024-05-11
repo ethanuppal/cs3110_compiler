@@ -29,15 +29,17 @@ let compile paths _ build_dir_loc =
     let statements = Parse_lex.lex_and_parse ~filename:source_path source in
     Analysis.infer statements;
     let cfgs = Ir_gen.generate statements in
-    let main_cfg = List.hd cfgs in
-    let liveliness_analysis = Liveliness.analysis_of main_cfg in
-    let instr_ordering = InstrOrdering.make main_cfg in
-    let regalloc =
-      Regalloc.allocate_for main_cfg liveliness_analysis instr_ordering
-    in
     let text_section = Asm.Section.make "text" 16 in
     Asm_emit.emit_preamble ~text:text_section;
-    Asm_emit.emit_cfg ~text:text_section main_cfg regalloc;
+    List.iter
+      (fun cfg ->
+        let liveliness_analysis = Liveliness.analysis_of cfg in
+        let instr_ordering = InstrOrdering.make cfg in
+        let regalloc =
+          Regalloc.allocate_for cfg liveliness_analysis instr_ordering
+        in
+        Asm_emit.emit_cfg ~text:text_section cfg regalloc)
+      cfgs;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
     let asm_output_path =
@@ -82,8 +84,7 @@ let compile paths _ build_dir_loc =
        "./a.out\n"); *)
     if
       Sys.command
-        (Printf.sprintf "cd %s/ && " build_dir
-        ^ cmd_prefix ^ "make build 2>/dev/null")
+        (Printf.sprintf "cd %s/ && " build_dir ^ cmd_prefix ^ "make build")
       <> 0
     then failwith "compilation failed";
     Printf.printf "==> Wrote build files to %s\n" build_dir;

@@ -1,4 +1,5 @@
-let debug_print_symbol = "_x86istmb_debug_print"
+let mangle name = "_x86istmb_" ^ name
+let debug_print_symbol = mangle "debug_print"
 
 let emit_var regalloc var =
   match Ir.VariableMap.find regalloc var with
@@ -15,13 +16,14 @@ let emit_call text regalloc name args =
     if List.length to_save mod 2 = 0 then to_save
     else List.hd to_save :: to_save
   in
+  let to_pass = [| Asm.Register.RDI; RSI; RDX; RCX; R8; R9 |] in
   Asm.Section.add_all text
     (List.map (fun r -> Asm.Instruction.Push (Register r)) to_save
-    @ [
-        (* double push for 16 byte alignment *)
-        Asm.Instruction.Mov (Register RDI, List.hd args |> emit_oper regalloc);
-        Call (Label name);
-      ]
+    @ List.mapi
+        (fun i arg ->
+          Asm.Instruction.Mov (Register to_pass.(i), emit_oper regalloc arg))
+        args
+    @ [ Asm.Instruction.Call (Label name) ]
     @ (List.map (fun r -> Asm.Instruction.Pop (Register r)) to_save |> List.rev)
     )
 
@@ -44,9 +46,17 @@ let emit_ir text regalloc = function
   | Ref _ -> failwith "ref not impl"
   | Deref _ -> failwith "deref not impl"
   | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ]
-  | Call _ -> failwith "TODO"
-  | Return op ->
-      Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op))
+  | Call (var, name, args) ->
+      emit_call text regalloc (mangle name) args;
+      Asm.Section.add text (Mov (emit_var regalloc var, Register RAX))
+  | Return op_opt ->
+      Option.map
+        (fun op ->
+          Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op)))
+        op_opt
+      |> ignore;
+      Asm.Section.add_all text
+        [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
 
 let emit_bb text cfg regalloc bb =
   Asm.Section.add text
@@ -79,10 +89,8 @@ let emit_cfg ~text cfg regalloc =
     [
       Label
         (Asm.Label.make ~is_global:true ~is_external:false
-           ("_x86istmb_" ^ Cfg.name_of cfg));
+           (mangle (Cfg.name_of cfg)));
       Push (Register RBP);
       Mov (Register RBP, Register RSP);
     ];
-  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc);
-  Asm.Section.add_all text
-    [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
+  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

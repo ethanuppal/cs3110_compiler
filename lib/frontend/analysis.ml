@@ -263,10 +263,6 @@ let infer prog =
              List.iter
                (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))
                params;
-             let body =
-               if return = Type.unit_prim_type then body @ [ Return None ]
-               else body
-             in
              if infer_body ctx return body <> Terminal then
                raise (halt_error name (Right stmt));
              Context.pop ctx

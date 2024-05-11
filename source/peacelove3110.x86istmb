@@ -1,0 +1,7 @@
+func peace_love() {
+    print 3110
+}
+
+func main() {
+    peace_love()
+}

@@ -11,8 +11,8 @@ type t =
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
-  | Call of Variable.t * string
-  | Return of Operand.t
+  | Call of Variable.t * string * Operand.t list
+  | Return of Operand.t option
 
 (** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
     otherwise. *)
@@ -23,7 +23,8 @@ let kill_of = function
   | Ref (var, _)
   | Deref (var, _)
   | TestEqual (var, _, _) -> Some var
-  | DebugPrint _ | Call _ | Return _ -> None
+  | Call (var, _, _) -> Some var
+  | DebugPrint _ | Return _ -> None
 
 let to_string =
   let open Printf in
@@ -44,5 +45,11 @@ let to_string =
       sprintf "%s = %s == %s" (Variable.to_string r) (Operand.to_string o1)
         (Operand.to_string o2)
   | DebugPrint op -> sprintf "debug_print %s" (Operand.to_string op)
-  | Call (r, name) -> sprintf "%s = %s()" (Variable.to_string r) name
-  | Return op -> sprintf "return %s" (Operand.to_string op)
+  | Call (r, name, args) ->
+      sprintf "%s = %s(%s)" (Variable.to_string r) name
+        (args |> List.map Operand.to_string |> String.concat ",")
+  | Return op ->
+      sprintf "return%s"
+        (match op with
+        | Some op -> " " ^ Operand.to_string op
+        | None -> "")

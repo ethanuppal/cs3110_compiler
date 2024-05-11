@@ -20,14 +20,7 @@ type t = {
 let get : t =
   {
     name = "x86ISTMB";
-    version = Version.make 0 1 0;
+    version = Version.make 1 0 0;
     description = "CS 3110 final project";
-    authors =
-      [
-        "Utku Melemeti";
-        "Ethan Uppal";
-        "Jeffrey Huang";
-        "Jason Klein";
-        "Vijay Shanmugam";
-      ];
+    authors = [ "Utku Melemeti"; "Ethan Uppal"; "Jeffrey Huang" ];
   }

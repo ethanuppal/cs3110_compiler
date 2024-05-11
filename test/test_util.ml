@@ -29,9 +29,22 @@ let test_basename () =
   (check string) "Last component is extracted" "foo.baz"
     (Util.basename "bop/bong/birp/bar/foo.baz")
 
+let test_get_command_output () =
+  (check string) "Standard output should be captured" "Hi\n"
+    (Util.get_command_output "echo Hi")
+
+let test_contains_substring () =
+  (check bool) "Every string contains the empty string" true
+    (Util.contains_substring "" "");
+  (check bool) "Every string contains the empty string" true
+    (Util.contains_substring "afladslfd" "");
+  (check bool) "cat contains a" true (Util.contains_substring "cat" "a")
+
 let test_suite =
   ( "lib/util.ml",
     [
       test_case "Util.merge_paths" `Quick test_merge_paths;
       test_case "Util.test_basename" `Quick test_basename;
+      test_case "Util.get_command_output" `Quick test_get_command_output;
+      test_case "Util.contains_substring" `Quick test_contains_substring;
     ] )

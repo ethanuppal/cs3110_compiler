@@ -9,6 +9,33 @@ let ( >> ) f g x = g (f x)
     exist, the behavior is undefined. *)
 let read_file filename = BatFile.with_file_in filename BatIO.read_all
 
+(** [write_file filename content] writes [content] to the file at [filename]. If
+    the file already exists, it is overwritten. *)
+let write_file filename content =
+  BatFile.with_file_out filename (fun oc -> BatIO.write_line oc content)
+
+(** [get_command_output command] is the standard output of running [command] in
+    the shell. *)
+let get_command_output command =
+  let ic = Unix.open_process_in command in
+  let rec read_lines acc =
+    try
+      let line = input_line ic in
+      read_lines (acc ^ line ^ "\n")
+    with End_of_file ->
+      close_in ic;
+      acc
+  in
+  read_lines ""
+
+(** [contains_substring str sub] if and only if [str] contains [sub]. *)
+let contains_substring str sub =
+  let re = Str.regexp_string sub in
+  try
+    ignore (Str.search_forward re str 0);
+    true
+  with Not_found -> false
+
 (** [(uncurry f) (x, y) = f x y]. *)
 let uncurry f (x, y) = f x y
 

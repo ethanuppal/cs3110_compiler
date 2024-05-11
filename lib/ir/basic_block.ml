@@ -29,7 +29,7 @@ let get_orig_idx bb idx = BatDynArray.get bb.contents idx |> snd
 let set_ir bb idx ir = BatDynArray.set bb.contents idx (ir, get_orig_idx bb idx)
 let rem_ir bb idx = BatDynArray.remove_at idx bb.contents
 let to_list bb = BatDynArray.to_list bb.contents |> List.map fst
-let label_for bb = Printf.sprintf ".L_BB%d:" (id_of bb |> Id.int_of)
+let label_for bb = Printf.sprintf ".L_BB%d" (id_of bb |> Id.int_of)
 let equal bb1 bb2 = Id.equal bb1.id bb2.id
 let hash bb = Id.int_of bb.id |> Int.hash
 

@@ -1,21 +1,29 @@
+let debug_print_symbol = "_x86istmb_debug_print"
+
 let emit_var regalloc var =
-  Asm.Operand.Register (Ir.VariableMap.find regalloc var)
+  match Ir.VariableMap.find regalloc var with
+  | Regalloc.Register reg -> Asm.Operand.Register reg
+  | Spill i -> Asm.Operand.Deref (RSP, i)
 
 let emit_oper regalloc = function
   | Operand.Variable var -> emit_var regalloc var
   | Constant int -> Asm.Operand.Intermediate int
 
 let emit_call text regalloc name args =
+  let to_save = Asm.Register.caller_saved in
+  let to_save =
+    if List.length to_save mod 2 = 0 then to_save
+    else List.hd to_save :: to_save
+  in
   Asm.Section.add_all text
-    [
-      Push (Register RDI);
-      Push (Register RDI);
-      (* double push for 16 byte alignment *)
-      Mov (Register RDI, List.hd args |> emit_oper regalloc);
-      Call (Label name);
-      Pop (Register RDI);
-      Pop (Register RDI);
-    ]
+    (List.map (fun r -> Asm.Instruction.Push (Register r)) to_save
+    @ [
+        (* double push for 16 byte alignment *)
+        Asm.Instruction.Mov (Register RDI, List.hd args |> emit_oper regalloc);
+        Call (Label name);
+      ]
+    @ (List.map (fun r -> Asm.Instruction.Pop (Register r)) to_save |> List.rev)
+    )
 
 (** *)
 let emit_ir text regalloc = function
@@ -35,7 +43,7 @@ let emit_ir text regalloc = function
         ]
   | Ref _ -> failwith "ref not impl"
   | Deref _ -> failwith "deref not impl"
-  | DebugPrint op -> emit_call text regalloc "_x86istimb_debug_print" [ op ]
+  | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ]
   | Call _ -> failwith "TODO"
   | Return op ->
       Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op))
@@ -64,8 +72,17 @@ let emit_bb text cfg regalloc bb =
 let emit_preamble ~text =
   Asm.Section.add text
     (Label
-       (Asm.Label.make ~is_global:false ~is_external:true
-          "_x86istimb_debug_print"))
+       (Asm.Label.make ~is_global:false ~is_external:true debug_print_symbol))
 
 let emit_cfg ~text cfg regalloc =
-  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)
+  Asm.Section.add_all text
+    [
+      Label
+        (Asm.Label.make ~is_global:true ~is_external:false
+           ("_x86istmb_" ^ Cfg.name_of cfg));
+      Push (Register RBP);
+      Mov (Register RBP, Register RSP);
+    ];
+  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc);
+  Asm.Section.add_all text
+    [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]

@@ -4,7 +4,7 @@ open Alcotest
 
 let allocations_same alloc1 alloc2 =
   match (alloc1, alloc2) with
-  | Regalloc.Spill, Regalloc.Spill -> false
+  | Regalloc.Spill loc1, Regalloc.Spill loc2 -> loc1 = loc2
   | reg1, reg2 -> reg1 = reg2
 
 let add_ir_list bb lst = List.iter (Basic_block.add_ir bb) lst
@@ -29,8 +29,8 @@ let basic_vars =
     let allocations = Regalloc.allocate_for cfg liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
-         (Regalloc.VarTbl.find allocations var0)
-         (Regalloc.VarTbl.find allocations var1))
+         (Ir.VariableMap.find allocations var0)
+         (Ir.VariableMap.find allocations var1))
   in
   Alcotest.test_case "basic case" `Quick test
 
@@ -54,8 +54,8 @@ let write_after_dead =
     let allocations = Regalloc.allocate_for cfg liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
-         (Regalloc.VarTbl.find allocations var0)
-         (Regalloc.VarTbl.find allocations var1))
+         (Ir.VariableMap.find allocations var0)
+         (Ir.VariableMap.find allocations var1))
   in
   Alcotest.test_case "write after dead" `Quick test
 
@@ -78,7 +78,7 @@ let spill_basic =
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
     let allocations = Regalloc.allocate_for cfg liveliness ordering in
-    let alloc_list = List.map (Regalloc.VarTbl.find allocations) vars in
+    let alloc_list = List.map (Ir.VariableMap.find allocations) vars in
     List.iteri
       (fun i var1 ->
         List.iteri
@@ -120,7 +120,7 @@ let spill_special_case =
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
     let allocations = Regalloc.allocate_for cfg liveliness ordering in
-    let alloc_list = List.map (Regalloc.VarTbl.find allocations) vars in
+    let alloc_list = List.map (Ir.VariableMap.find allocations) vars in
 
     List.iteri
       (fun i var1 ->

@@ -40,17 +40,22 @@ module Register = struct
     | R15 -> "r15"
 
   let compare = Stdlib.compare
+
+  (** Every register but RBX, RSP, RBP, and R12–R15. *)
+  let caller_saved = [ RAX; RCX; RDX; RSI; RDI; R8; R9; R10; R11 ]
 end
 
 module Operand = struct
   type t =
     | Register of Register.t
+    | Deref of Register.t * int
     | Intermediate of int
     | Label of string
     | RelativeLabel of string
 
   let to_nasm = function
     | Register reg -> Register.to_nasm reg
+    | Deref (reg, off) -> Printf.sprintf "[%s + %d]" (Register.to_nasm reg) off
     | Intermediate int -> string_of_int int
     | Label label -> label
     | RelativeLabel rel_label -> "[rel " ^ rel_label ^ "]"
@@ -76,10 +81,9 @@ end = struct
 
   let to_nasm label =
     match (label.is_global, label.is_external) with
-    | false, false -> label.name
-    | true, false -> "global " ^ label.name ^ "\n" ^ display_indent ^ label.name
-    | false, true ->
-        "external " ^ label.name ^ "\n" ^ display_indent ^ label.name
+    | false, false -> label.name ^ ":"
+    | true, false -> "global " ^ label.name ^ "\n" ^ label.name ^ ":"
+    | false, true -> "extern " ^ label.name
     | _ -> failwith "invalid label"
 end
 
@@ -131,6 +135,7 @@ module Section : sig
   (** [add section instr] adds [instr] to the end of [section]. *)
   val add : t -> Instruction.t -> unit
 
+  val add_all : t -> Instruction.t list -> unit
   val to_nasm : t -> string
 end = struct
   type t = {
@@ -141,6 +146,7 @@ end = struct
 
   let make name align = { name; align; contents = BatDynArray.make 16 }
   let add section = BatDynArray.add section.contents
+  let add_all section instrs = List.iter (add section) instrs
 
   let to_nasm section =
     ("section ." ^ section.name)
@@ -157,11 +163,13 @@ end
 module AssemblyFile : sig
   type t
 
+  val make : unit -> t
   val add : t -> Section.t -> unit
   val to_nasm : t -> string
 end = struct
   type t = Section.t BatDynArray.t
 
+  let make () = BatDynArray.make 16
   let add = BatDynArray.add
 
   let to_nasm =

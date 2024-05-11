@@ -1,5 +1,7 @@
 type constant = int
 
+module VariableMap = Hashtbl.Make (Variable)
+
 (** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t

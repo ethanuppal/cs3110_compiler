@@ -1,5 +1,4 @@
 open Util
-module VarTbl = Hashtbl.Make (Variable)
 
 (* TODO: standardize instruction id? *)
 type instr_id = Id.t * int
@@ -16,7 +15,7 @@ type interval = {
 
 type allocation =
   | Register of Asm.Register.t
-  | Spill
+  | Spill of int
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
 
@@ -26,7 +25,7 @@ let registers =
 
 let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     (ordering : InstrOrdering.t) =
-  let tbl = VarTbl.create 16 in
+  let tbl = Ir.VariableMap.create 16 in
 
   let expand_interval original live_id =
     let cmp = InstrOrdering.compare ordering in
@@ -38,13 +37,13 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
   let update_table instr_id used_set =
     Liveliness.VariableSet.iter
       (fun live ->
-        let current_opt = VarTbl.find_opt tbl live in
+        let current_opt = Ir.VariableMap.find_opt tbl live in
         let new_interval =
           match current_opt with
           | None -> { start = instr_id; stop = instr_id }
           | Some current -> expand_interval current instr_id
         in
-        VarTbl.replace tbl live new_interval)
+        Ir.VariableMap.replace tbl live new_interval)
       used_set
   in
 
@@ -64,7 +63,7 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
       done)
     cfg;
 
-  VarTbl.to_seq tbl |> List.of_seq
+  Ir.VariableMap.to_seq tbl |> List.of_seq
 
 (* Algorithm source:
    https://en.wikipedia.org/wiki/Register_allocation#Pseudocode *)
@@ -75,7 +74,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
   let compare_pair_end (_, i1) (_, i2) = compare_instr_id i1.stop i2.stop in
   let sorted_intervals = List.sort compare_pair_start intervals in
 
-  let assigned_alloc : allocation VarTbl.t = VarTbl.create 4 in
+  let assigned_alloc : allocation Ir.VariableMap.t = Ir.VariableMap.create 4 in
 
   let module RegSet = Set.Make (Asm.Register) in
   let free_registers : RegSet.t ref = ref (RegSet.of_list registers) in
@@ -83,16 +82,23 @@ let linear_scan (intervals : (Variable.t * interval) list)
   (* must remain sorted by increasing end point *)
   let active : (Variable.t * interval) BatRefList.t = BatRefList.empty () in
 
+  let cur_loc = ref 0 in
+  let next_spill_loc () =
+    let result = !cur_loc in
+    cur_loc := !cur_loc + 8;
+    result
+  in
+
   let expire_old_intervals (current : interval) =
     (* this is also really annoying because BatRefList has no partition *)
     BatRefList.filter
       (fun (var, interval) ->
         let keep = compare_instr_id interval.stop current.start >= 0 in
         (if not keep then
-           let alloc = VarTbl.find assigned_alloc var in
+           let alloc = Ir.VariableMap.find assigned_alloc var in
            match alloc with
            | Register r -> free_registers := RegSet.add r !free_registers
-           | Spill -> failwith "Interval in active cannot be spilled");
+           | Spill _ -> failwith "Interval in active cannot be spilled");
         keep)
       active
   in
@@ -102,9 +108,15 @@ let linear_scan (intervals : (Variable.t * interval) list)
 
     if compare_instr_id spill_interval.stop interval.stop > 0 then (
       (* spill guaranteed to be assigned an actual register *)
-      let alloc = VarTbl.find assigned_alloc spill_var in
-      VarTbl.replace assigned_alloc var alloc;
-      VarTbl.replace assigned_alloc spill_var Spill;
+      let alloc = Ir.VariableMap.find assigned_alloc spill_var in
+      assert (
+        match alloc with
+        | Spill _ -> false
+        | _ -> true);
+
+      Ir.VariableMap.replace assigned_alloc var alloc;
+      Ir.VariableMap.replace assigned_alloc spill_var
+        (Spill (next_spill_loc ()));
 
       (* this sucks. can we maybe keep active in reverse order? *)
       BatRefList.Index.remove_at active (BatRefList.length active - 1);
@@ -112,7 +124,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
       (* add_sort is buggy... TODO: new impl *)
       BatRefList.push active (var, interval);
       BatRefList.sort ~cmp:compare_pair_end active)
-    else VarTbl.replace assigned_alloc var Spill
+    else Ir.VariableMap.replace assigned_alloc var (Spill (next_spill_loc ()))
   in
 
   List.iter
@@ -121,7 +133,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
       match RegSet.choose_opt !free_registers with
       | Some register ->
           free_registers := RegSet.remove register !free_registers;
-          VarTbl.replace assigned_alloc var (Register register);
+          Ir.VariableMap.replace assigned_alloc var (Register register);
           BatRefList.push active (var, interval);
           BatRefList.sort ~cmp:compare_pair_end active
       | None -> spill_at_interval (var, interval))

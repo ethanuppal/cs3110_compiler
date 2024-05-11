@@ -14,8 +14,9 @@ func main() {
     let m = 12
     let n = 13
     let o = 14
-    let q = 16
     let p = 15
+    let q = 16
+    let r = 17
     print a
     print b
     print c
@@ -33,4 +34,5 @@ func main() {
     print o
     print p
     print q
+    print r
 }

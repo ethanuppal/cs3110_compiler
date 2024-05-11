@@ -46,6 +46,9 @@ val rem_ir : t -> int -> unit
 (** [to_list bb] are the IR operations in [bb] in order as a list. *)
 val to_list : t -> Ir.t list
 
+(** [label_for bb] is the assembler label for [bb]. *)
+val label_for : t -> string
+
 (** [equal bb1 bb2] is whether bb1 and bb2 have the same id. *)
 val equal : t -> t -> bool
 

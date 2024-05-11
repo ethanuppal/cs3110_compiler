@@ -48,9 +48,9 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmu
     - Abstract syntax tree
     - Type checking
 
-With some contributions from
-- Vijay Shanmugam (vrs29)
+With minor contributions from
 - Jason Klein (jak532)
+- Vijay Shanmugam (vrs29)
 
 ## Usage
 

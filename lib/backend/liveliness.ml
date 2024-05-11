@@ -147,12 +147,11 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
 let pass work_list liveliness cfg bb =
   let result = ref false in
   let analysis = IdMap.find liveliness (Basic_block.id_of bb) in
-  let ir_view = Basic_block.as_view bb in
   let ir_count = Basic_block.length_of bb in
   for rev_i = 1 to ir_count do
     let i = ir_count - rev_i in
     result :=
-      apply_rules liveliness analysis cfg bb (ArrayView.get ir_view i) i
+      apply_rules liveliness analysis cfg bb (Basic_block.get_ir bb i) i
         ~is_final:(rev_i = 1)
       || !result
   done;

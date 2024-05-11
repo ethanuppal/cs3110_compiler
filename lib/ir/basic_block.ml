@@ -4,7 +4,7 @@ let bb_gen = Id.Gen.make ()
 
 type t = {
   id : Id.id;
-  contents : Ir.t BatDynArray.t;
+  contents : (Ir.t * int) BatDynArray.t;
   mutable condition : Branch_condition.t;
 }
 
@@ -15,23 +15,27 @@ let make () =
     condition = Branch_condition.Never;
   }
 
-let id_of basic_block = basic_block.id
+let id_of bb = bb.id
 let length_of bb = BatDynArray.length bb.contents
 let condition_of bb = bb.condition
 let set_condition bb cond = bb.condition <- cond
-let add_ir basic_block ir = BatDynArray.add basic_block.contents ir
-let get_ir basic_block index = BatDynArray.get basic_block.contents index
-let set_ir basic_block index ir = BatDynArray.set basic_block.contents index ir
-let rem_ir basic_block index = BatDynArray.remove_at index basic_block.contents
-let to_list basic_block = BatDynArray.to_list basic_block.contents
-let equal bb1 bb2 = bb1.id = bb2.id
+
+let add_ir bb ir =
+  let i = length_of bb in
+  BatDynArray.add bb.contents (ir, i)
+
+let get_ir bb idx = BatDynArray.get bb.contents idx |> fst
+let get_orig_idx bb idx = BatDynArray.get bb.contents idx |> snd
+let set_ir bb idx ir = BatDynArray.set bb.contents idx (ir, get_orig_idx bb idx)
+let rem_ir bb idx = BatDynArray.remove_at idx bb.contents
+let to_list bb = BatDynArray.to_list bb.contents |> List.map fst
+let equal bb1 bb2 = Id.equal bb1.id bb2.id
 let hash bb = Id.int_of bb.id |> Int.hash
-let as_view bb = Util.ArrayView.from_bat_dyn_arr bb.contents
 
 let to_string bb =
   Printf.sprintf ".L%d:" (id_of bb |> Id.int_of)
   ^ BatDynArray.fold_left
-      (fun acc ir -> acc ^ "\n  " ^ Ir.to_string ir)
+      (fun acc (ir, _) -> acc ^ "\n  " ^ Ir.to_string ir)
       "" bb.contents
   ^ "\n  br "
   ^ Branch_condition.to_string bb.condition

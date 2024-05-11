@@ -1,13 +1,20 @@
-exception ParseError of string
+exception ParserError of string
 
-(** [lex_and_parse input] is the list of statements represented by the source
-    code string [input].contents
+(** [lex_and_parse ~filename:filename input] is the list of statements
+    represented by the source code string [input]. Optionally,
+    [~filename:filename] can be passed to indicate that the path of the source
+    was [filename]; by default, it is ["<stdin>"].
 
-    @raise ParseError on parsing error. *)
-let lex_and_parse input =
-  let lexbuf = Lexing.from_string input in
-  try Parser.main Lexer.read lexbuf
-  with Parser.Error -> raise (ParseError "unknown parser error")
-
-(* https://baturin.org/blog/declarative-parse-error-reporting-with-menhir/ *)
-(* https://stackoverflow.com/questions/38505920/get-the-input-string-that-raises-parsing-error-inside-the-parser *)
+    @raise ParserError on parsing error. *)
+let lex_and_parse ?(filename = "<stdin>") input =
+  let syntax_error_msg lexbuf =
+    let pos = Lexing.lexeme_start_p lexbuf in
+    let lnum, cnum = (pos.pos_lnum, pos.pos_cnum - pos.pos_bol + 1) in
+    Printf.sprintf "Syntax error at %s:%d:%d" pos.pos_fname lnum cnum
+  in
+  let parse lexbuf = Parser.main Lexer.read lexbuf in
+  let lexbuf = Lexing.from_string ~with_positions:true input in
+  Lexing.set_filename lexbuf filename;
+  try parse lexbuf with
+  | Parser.Error -> raise (ParserError (syntax_error_msg lexbuf))
+  | Lexer.LexerError err -> raise (ParserError err)

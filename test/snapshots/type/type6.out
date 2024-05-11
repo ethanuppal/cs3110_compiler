@@ -1,5 +1,7 @@
-let x: Int = 1
-func foo() {
+func foo() -> Unit {
     let x: Int = 1
 }
-print x
+func main() -> Unit {
+    let x: Int = 1
+    print x
+}

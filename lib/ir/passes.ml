@@ -49,7 +49,8 @@ module DeadCode : Pass.PASS = struct
     for rev_i = 0 to Basic_block.length_of bb - 1 do
       let i = length - rev_i - 1 in
       let live_out =
-        Liveliness.BasicBlockAnalysis.live_after_instr analysis i
+        Liveliness.BasicBlockAnalysis.live_after_instr analysis
+          (Basic_block.get_orig_idx bb i)
       in
       match Basic_block.get_ir bb i |> Ir.kill_of with
       | Some var ->

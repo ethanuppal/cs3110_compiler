@@ -26,16 +26,31 @@ Usage: ./main [-h|-v]
 $ ./main -v
 x86ISTMB v0.1.0
 
-Written by: Utku Melemeti, Jason Klein, Jeffrey Huang, Vijay Shanmugam, Ethan Uppal
+Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmugam
 ```
 
 ## Group
 
-- Jason Klein (jak532)
 - Utku Melemetci (um44)
-- Jeffrey Huang (jrh382)
-- Vijay Shanmugam (vrs29)
+    - IR generation
+    - Register allocation
+    - Data structures
+    - Randomized testing
 - Ethan Uppal (eu55)
+    - Static analysis
+        - Types and type checking
+        - Control flow
+    - Live variable analysis
+    - IR representation and abstraction for x86 assembly
+    - CLI/user interface
+- Jeffrey Huang (jrh382)
+    - Parser and lexer
+    - Abstract syntax tree
+    - Type checking
+
+With some contributions from
+- Vijay Shanmugam (vrs29)
+- Jason Klein (jak532)
 
 ## Usage
 

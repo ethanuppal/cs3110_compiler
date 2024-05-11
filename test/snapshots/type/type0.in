@@ -1,1 +1,3 @@
-print true
+func main() {
+    print true
+}

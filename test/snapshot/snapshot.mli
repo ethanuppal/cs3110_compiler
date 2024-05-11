@@ -1,7 +1,7 @@
-(** Let [(f, _)] be of type [transform]. Then, [f contents] is the result of
-    transforming the string [contents] (which will usually come from a snapshot
-    file) *)
-type transform = (string -> string) * Alcotest.speed_level
+(** Let [(f, _)] be of type [transform]. Then, [f filename contents] is the
+    result of transforming the string [contents] as contained in the snapshot
+    file [filename] *)
+type transform = (string -> string -> string) * Alcotest.speed_level
 
 (** [make_test_suite root suite f] is a snapshot test suit from snapshots in
     [root/suite] using snapshot transformation [f] (see the documentation for

@@ -1,0 +1,5 @@
+func foo(a: Int) {   
+}
+func bar() {
+    print a
+}

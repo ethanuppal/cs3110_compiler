@@ -1,1 +1,1 @@
-Type unification error: attempt to unify Bool and Int
+Type error: in if statement condition: expected Bool but received Int

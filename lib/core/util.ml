@@ -68,17 +68,3 @@ let basename =
 let pp_of string_of fmt x = Format.fprintf fmt "%s" (string_of x)
 
 module IdMap = Hashtbl.Make (Id)
-
-module ArrayView : sig
-  type 'a t
-
-  val from_bat_dyn_arr : 'a BatDynArray.t -> 'a t
-  val length : 'a t -> int
-  val get : 'a t -> int -> 'a
-  val last : 'a t -> 'a
-  val iteri : (int -> 'a -> unit) -> 'a t -> unit
-end = struct
-  let from_bat_dyn_arr = id
-
-  include BatDynArray
-end

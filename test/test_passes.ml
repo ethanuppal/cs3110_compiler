@@ -32,7 +32,8 @@ let fixed_ir_opts_tests =
       ],
       "combined ir opt" );
     ( [
-        Pass.compose Passes.ConstFold.pass Passes.CopyProp.pass |> Pass.repeat 10;
+        Pass.sequence Passes.ConstFold.pass Passes.CopyProp.pass
+        |> Pass.repeat 10;
         Passes.DeadCode.pass;
       ],
       "complex ir opt" );

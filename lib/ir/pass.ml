@@ -4,7 +4,7 @@ type t =
   | Repeat of t * int
 
 let make f = Basic f
-let compose pass1 pass2 = Combine [ pass1; pass2 ]
+let sequence pass1 pass2 = Combine [ pass1; pass2 ]
 let combine passes = Combine passes
 let repeat n pass = Repeat (pass, n)
 

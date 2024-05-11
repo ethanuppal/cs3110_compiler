@@ -15,20 +15,18 @@ module ConstFold : Pass.PASS = struct
 end
 
 module CopyProp : Pass.PASS = struct
-  module VariableMap = Hashtbl.Make (Variable)
-
   let copy_prop (bb, _) =
-    let vals = VariableMap.create 16 in
+    let vals = Ir.VariableMap.create 16 in
     let subs = function
       | Operand.Variable var -> (
-          match VariableMap.find_opt vals var with
+          match Ir.VariableMap.find_opt vals var with
           | Some oper -> oper
           | None -> Operand.make_var var)
       | oper -> oper
     in
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
-      | Assign (var, oper) -> VariableMap.replace vals var oper
+      | Assign (var, oper) -> Ir.VariableMap.replace vals var oper
       | Add (var, oper1, oper2) ->
           Basic_block.set_ir bb i (Add (var, subs oper1, subs oper2))
       | Sub (var, oper1, oper2) ->

@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-10 22:08:20.895180
+> Last updated: 2024-05-10 22:40:54.673252
 
 ```
 $ ./main -h
@@ -48,9 +48,9 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmu
     - Abstract syntax tree
     - Type checking
 
-With some contributions from
-- Vijay Shanmugam (vrs29)
+With minor contributions from
 - Jason Klein (jak532)
+- Vijay Shanmugam (vrs29)
 
 ## Usage
 

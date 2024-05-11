@@ -1,5 +1,4 @@
 open Util
-module VarTbl : Hashtbl.S with type key = Variable.t
 
 type allocation =
   | Register of Asm.Register.t
@@ -11,4 +10,4 @@ val allocate_for :
   Cfg.t ->
   Liveliness.BasicBlockAnalysis.t IdMap.t ->
   InstrOrdering.t ->
-  allocation VarTbl.t
+  allocation Ir.VariableMap.t

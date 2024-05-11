@@ -131,6 +131,7 @@ module Section : sig
   (** [add section instr] adds [instr] to the end of [section]. *)
   val add : t -> Instruction.t -> unit
 
+  val add_all : t -> Instruction.t list -> unit
   val to_nasm : t -> string
 end = struct
   type t = {
@@ -141,6 +142,7 @@ end = struct
 
   let make name align = { name; align; contents = BatDynArray.make 16 }
   let add section = BatDynArray.add section.contents
+  let add_all section instrs = List.iter (add section) instrs
 
   let to_nasm section =
     ("section ." ^ section.name)

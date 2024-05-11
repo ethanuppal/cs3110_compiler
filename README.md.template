@@ -25,7 +25,8 @@ $ ./main -v
         - Control flow
     - Live variable analysis
     - IR representation and abstraction for x86 assembly
-    - CLI/user interface
+    - Emission to executables following Sys V ABI, integrating C runtime
+    - CLI/user interface and program driver
 - Jeffrey Huang (jrh382)
     - Parser and lexer
     - Abstract syntax tree

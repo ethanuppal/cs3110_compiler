@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-11 02:56:27.276128
+> Last updated: 2024-05-11 03:02:13.582897
 
 ```
 $ ./main -h
@@ -42,7 +42,8 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmu
         - Control flow
     - Live variable analysis
     - IR representation and abstraction for x86 assembly
-    - CLI/user interface
+    - Emission to executables following Sys V ABI, integrating C runtime
+    - CLI/user interface and program driver
 - Jeffrey Huang (jrh382)
     - Parser and lexer
     - Abstract syntax tree

@@ -63,7 +63,7 @@ let spill_basic =
   let test () =
     let cfg = Cfg.make "spill_basic" in
     let entry = Cfg.entry_to cfg in
-    let reg_count = List.length Asm.Register.all_registers in
+    let reg_count = List.length Regalloc.registers in
     let vars =
       Seq.of_dispenser (Variable.make >> Option.some)
       |> Seq.take (reg_count + 1)
@@ -97,7 +97,7 @@ let spill_special_case =
   let test () =
     let cfg = Cfg.make "spill_special_case" in
     let entry = Cfg.entry_to cfg in
-    let reg_count = List.length Asm.Register.all_registers in
+    let reg_count = List.length Regalloc.registers in
     let vars =
       Seq.of_dispenser (Variable.make >> Option.some)
       |> Seq.take (reg_count + 1)

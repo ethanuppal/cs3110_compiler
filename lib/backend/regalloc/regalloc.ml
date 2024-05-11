@@ -20,6 +20,10 @@ type allocation =
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
 
+let registers =
+  let open Asm.Register in
+  [ RAX; RBX; RCX; RDX; RBP; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
+
 let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     (ordering : InstrOrdering.t) =
   let tbl = VarTbl.create 16 in
@@ -71,13 +75,10 @@ let linear_scan (intervals : (Variable.t * interval) list)
   let compare_pair_end (_, i1) (_, i2) = compare_instr_id i1.stop i2.stop in
   let sorted_intervals = List.sort compare_pair_start intervals in
 
-  (* sharing this for registers and spills might be sus *)
   let assigned_alloc : allocation VarTbl.t = VarTbl.create 4 in
 
   let module RegSet = Set.Make (Asm.Register) in
-  let free_registers : RegSet.t ref =
-    ref (RegSet.of_list Asm.Register.all_registers)
-  in
+  let free_registers : RegSet.t ref = ref (RegSet.of_list registers) in
 
   (* must remain sorted by increasing end point *)
   let active : (Variable.t * interval) BatRefList.t = BatRefList.empty () in
@@ -108,7 +109,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
       (* this sucks. can we maybe keep active in reverse order? *)
       BatRefList.Index.remove_at active (BatRefList.length active - 1);
 
-      (* add_sort is buggy... *)
+      (* add_sort is buggy... TODO: new impl *)
       BatRefList.push active (var, interval);
       BatRefList.sort ~cmp:compare_pair_end active)
     else VarTbl.replace assigned_alloc var Spill

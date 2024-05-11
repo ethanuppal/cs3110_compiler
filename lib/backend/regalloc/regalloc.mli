@@ -2,7 +2,7 @@ open Util
 
 type allocation =
   | Register of Asm.Register.t
-  | Spill
+  | Spill of int
 
 val registers : Asm.Register.t list
 

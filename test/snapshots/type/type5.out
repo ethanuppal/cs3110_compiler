@@ -1,7 +1,9 @@
 func bar() -> Unit {
     let x: Bool = true
+    return
 }
 func foo() -> Unit {
     let x: Int = 4
     print (+x)
+    return
 }

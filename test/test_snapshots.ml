@@ -18,13 +18,13 @@ let type_suite =
     the source code [input]. *)
 let ir_transform filename input =
   let open X86ISTMB in
+  let open Util in
   let statements = Parse_lex.lex_and_parse ~filename input in
   Analysis.infer statements;
-  let ir = Ir_gen.generate statements in
-  let main_cfg = List.hd ir in
-  ignore (Liveliness.analysis_of main_cfg);
+  let cfgs = Ir_gen.generate statements in
+  List.iter (Liveliness.analysis_of >> ignore) cfgs;
   let simulator = Ir_sim.make () in
-  Ir_sim.run simulator main_cfg;
+  Ir_sim.run simulator cfgs;
   Ir_sim.output_of simulator
 
 let ir_suite =

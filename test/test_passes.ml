@@ -8,15 +8,15 @@ let make_opts_test passes =
   in
   let statements = Parse_lex.lex_and_parse ir0_source in
   Analysis.infer statements;
-  let ir = Ir_gen.generate statements in
-  let main_cfg = List.hd ir in
+  let cfgs = Ir_gen.generate statements in
+  let main_cfg = List.hd cfgs in
   let liveliness_analysis = Liveliness.analysis_of main_cfg in
   let simulator = Ir_sim.make () in
-  Ir_sim.run simulator main_cfg;
+  Ir_sim.run simulator [ main_cfg ];
   let unopt_output = Ir_sim.output_of simulator in
   Passes.apply passes main_cfg liveliness_analysis;
   Ir_sim.clear_output simulator;
-  Ir_sim.run simulator main_cfg;
+  Ir_sim.run simulator [ main_cfg ];
   let opt_output = Ir_sim.output_of simulator in
   (check string) "optimization should not change program behavior" unopt_output
     opt_output

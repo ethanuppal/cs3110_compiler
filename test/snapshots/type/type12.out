@@ -1,12 +1,15 @@
 func foo(a: Int) -> Unit {
     print a
+    return
 }
 func bar(a: Int, b: Bool) -> Unit {
     print a
     print b
+    return
 }
 func baz(a: Bool, b: Int, c: Int*) -> Unit {
     print a
     print b
     print c
+    return
 }

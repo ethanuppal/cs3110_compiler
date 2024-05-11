@@ -1,3 +1,4 @@
 func main() -> Unit {
     let x: Bool = (1 == 2)
+    return
 }

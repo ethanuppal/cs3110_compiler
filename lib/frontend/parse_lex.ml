@@ -24,13 +24,21 @@ let lex_and_parse ?(filename = "<stdin>") input =
     (fun stmt ->
       match stmt with
       | Ast.Function { name; params; return; body } ->
+          let last_stmt_is_return =
+            if List.is_empty body then false
+            else
+              match List.rev body |> List.hd with
+              | Ast.Return _ -> true
+              | _ -> false
+          in
           Ast.Function
             {
               name;
               params;
               return;
               body =
-                (if return = Type.unit_prim_type then body @ [ Return None ]
+                (if return = Type.unit_prim_type && not last_stmt_is_return then
+                   body @ [ Return None ]
                  else body);
             }
       | other -> other)

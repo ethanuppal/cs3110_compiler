@@ -1,7 +1,9 @@
 func foo() -> Unit {
     let x: Int = 1
+    return
 }
 func main() -> Unit {
     let x: Int = 1
     print x
+    return
 }

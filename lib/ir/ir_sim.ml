@@ -33,7 +33,9 @@ let run simulator cfg =
                failwith "Ir_sim does not support pointers"
            | Ir.DebugPrint oper ->
                simulator.output <-
-                 simulator.output ^ Printf.sprintf "%d\n" (eval oper));
+                 simulator.output ^ Printf.sprintf "%d\n" (eval oper)
+           | Ir.Call _ | Ir.Return _ ->
+               failwith "Ir_sim does not support function calls yet");
     let cond =
       match Basic_block.condition_of bb with
       | Always -> true

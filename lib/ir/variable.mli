@@ -10,6 +10,7 @@ val id_of : t -> Id.t
 (** [to_string var] is [var] as a string. *)
 val to_string : t -> string
 
+val pp : Format.formatter -> t -> unit
 val compare : t -> t -> int
 val equal : t -> t -> bool
 val hash : t -> int

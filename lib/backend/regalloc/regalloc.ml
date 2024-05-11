@@ -16,7 +16,7 @@ type interval = {
 
 type allocation =
   | Register of Asm.Register.t
-  | Spill
+  | Spill of int
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
 
@@ -83,6 +83,13 @@ let linear_scan (intervals : (Variable.t * interval) list)
   (* must remain sorted by increasing end point *)
   let active : (Variable.t * interval) BatRefList.t = BatRefList.empty () in
 
+  let cur_loc = ref 0 in
+  let next_spill_loc () =
+    let result = !cur_loc in
+    cur_loc := !cur_loc + 8;
+    result
+  in
+
   let expire_old_intervals (current : interval) =
     (* this is also really annoying because BatRefList has no partition *)
     BatRefList.filter
@@ -92,7 +99,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
            let alloc = VarTbl.find assigned_alloc var in
            match alloc with
            | Register r -> free_registers := RegSet.add r !free_registers
-           | Spill -> failwith "Interval in active cannot be spilled");
+           | Spill _ -> failwith "Interval in active cannot be spilled");
         keep)
       active
   in
@@ -103,8 +110,13 @@ let linear_scan (intervals : (Variable.t * interval) list)
     if compare_instr_id spill_interval.stop interval.stop > 0 then (
       (* spill guaranteed to be assigned an actual register *)
       let alloc = VarTbl.find assigned_alloc spill_var in
+      assert (
+        match alloc with
+        | Spill _ -> false
+        | _ -> true);
+
       VarTbl.replace assigned_alloc var alloc;
-      VarTbl.replace assigned_alloc spill_var Spill;
+      VarTbl.replace assigned_alloc spill_var (Spill (next_spill_loc ()));
 
       (* this sucks. can we maybe keep active in reverse order? *)
       BatRefList.Index.remove_at active (BatRefList.length active - 1);
@@ -112,7 +124,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
       (* add_sort is buggy... TODO: new impl *)
       BatRefList.push active (var, interval);
       BatRefList.sort ~cmp:compare_pair_end active)
-    else VarTbl.replace assigned_alloc var Spill
+    else VarTbl.replace assigned_alloc var (Spill (next_spill_loc ()))
   in
 
   List.iter

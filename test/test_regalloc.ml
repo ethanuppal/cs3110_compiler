@@ -4,7 +4,7 @@ open Alcotest
 
 let allocations_same alloc1 alloc2 =
   match (alloc1, alloc2) with
-  | Regalloc.Spill, Regalloc.Spill -> false
+  | Regalloc.Spill loc1, Regalloc.Spill loc2 -> loc1 = loc2
   | reg1, reg2 -> reg1 = reg2
 
 let add_ir_list bb lst = List.iter (Basic_block.add_ir bb) lst

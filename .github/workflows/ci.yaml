@@ -25,8 +25,8 @@ jobs:
       - name: Install System Dependencies (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-            rm '/usr/local/bin/2to3'
-            arch -x86_64 /usr/local/bin/brew install llvm nasm
+            arch -x86_64 /usr/local/bin/brew install llvm nasm || true
+            brew link --overwrite python@3.12
       - name: Install System Dependencies (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: brew install llvm nasm

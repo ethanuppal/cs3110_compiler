@@ -1,4 +1,3 @@
-let runtime_lib_loc = Util.merge_paths [ Project_root.path; "lib/runtime" ]
 let print_error = Printf.eprintf "error: %s"
 
 let print_help prog =
@@ -83,6 +82,15 @@ let compile paths _flags build_dir_loc =
     if Sys.command nasm_command <> 0 then failwith "Failed to run NASM.";
 
     (* Run clang *)
+    let runtime_folder_name =
+      match platform.os with
+      | Linux -> "linux"
+      | MacOS -> "macos"
+      | _ -> failwith "OS unknown. Cannot determine correct runtime."
+    in
+    let runtime_lib_loc =
+      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+    in
     let clang_command =
       Printf.sprintf "%s clang build.o %s/* -o a.out" cmd_prefix runtime_lib_loc
     in

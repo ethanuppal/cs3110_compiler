@@ -24,8 +24,7 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install System Dependencies
         run:
-          brew install llvm
-          brew install nasm
+          brew install llvm nasm
       - name: Install OCaml Dependencies
         run: make deps
       - name: Build

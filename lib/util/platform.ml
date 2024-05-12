@@ -27,9 +27,6 @@ let get_platform () =
        else Unknown);
   }
 
-let command_prefix platform =
-  if platform.os = MacOS && platform.cpu_arch = Arm then "arch -x86_64" else ""
-
 let object_format platform =
   match platform.os with
   | Linux -> Some "elf64"

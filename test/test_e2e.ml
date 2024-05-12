@@ -8,10 +8,7 @@ let make_e2e_test filename source () =
   let expected = Test_snapshots.ir_transform filename source in
   Driver.compile [ filename ] [] (Some test_bin);
   let actual =
-    Util.get_command_output
-      ((Platform.get_platform () |> Platform.command_prefix)
-      ^ " "
-      ^ Util.merge_paths [ test_bin; "build_dir/a.out" ])
+    Util.get_command_output (Util.merge_paths [ test_bin; "build_dir/a.out" ])
   in
   (check string) "Compiled output should match IR simulator" expected actual
 

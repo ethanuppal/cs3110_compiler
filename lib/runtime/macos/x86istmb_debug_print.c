@@ -2,5 +2,5 @@
 #include <stdint.h>
 
 void x86istmb_debug_print(int64_t value) {
-    printf("%ld\n", value);
+    printf("%lld\n", value);
 }

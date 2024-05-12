@@ -15,10 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up OCaml
-        uses: ocaml/setup-ocaml@v2.2.7
-        with:
-            ocaml-compiler: "5.1.1"
       - name: Set up Homebrew (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
@@ -32,6 +28,10 @@ jobs:
       - name: Install System Dependencies (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: brew install llvm nasm
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v2.2.7
+        with:
+            ocaml-compiler: "5.1.1"
       - name: Install OCaml Dependencies
         run: make deps
       - name: Build

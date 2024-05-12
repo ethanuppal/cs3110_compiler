@@ -90,7 +90,8 @@ let compile paths _flags build_dir_loc =
       Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
     in
     let clang_command =
-      Printf.sprintf "clang build.o %s/* -o a.out" runtime_lib_loc
+      Printf.sprintf "clang -target x86_64 build.o %s/* -o a.out"
+        runtime_lib_loc
     in
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
 

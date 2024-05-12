@@ -19,10 +19,14 @@ jobs:
         uses: ocaml/setup-ocaml@v2.2.7
         with:
             ocaml-compiler: "5.1.1"
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-      - name: Install System Dependencies
+      - name: Set up Homebrew (MacOS)
+        run: arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - name: Set up Homebrew (Linux)
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+      - name: Install System Dependencies (MacOS)
+        run:
+          arch -x86_64 brew install llvm nasm
+      - name: Install System Dependencies (Linux)
         run:
           brew install llvm nasm
       - name: Install OCaml Dependencies

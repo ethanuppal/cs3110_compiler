@@ -67,6 +67,7 @@ let compile paths _flags build_dir_loc =
     Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file);
 
     let platform = Platform.get_platform () in
+    let cmd_prefix = Platform.command_prefix platform in
 
     (* Run NASM *)
     let object_format =
@@ -75,7 +76,8 @@ let compile paths _flags build_dir_loc =
       | None -> failwith "Could not determine object file format."
     in
     let nasm_command =
-      Printf.sprintf "nasm -f %s %s -o build.o" object_format asm_file_name
+      Printf.sprintf "%s nasm -f %s %s -o build.o" cmd_prefix object_format
+        asm_file_name
     in
     if Sys.command nasm_command <> 0 then failwith "Failed to run NASM.";
 
@@ -90,8 +92,7 @@ let compile paths _flags build_dir_loc =
       Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
     in
     let clang_command =
-      Printf.sprintf "clang -target x86_64 build.o %s/* -o a.out"
-        runtime_lib_loc
+      Printf.sprintf "%s clang build.o %s/* -o a.out" cmd_prefix runtime_lib_loc
     in
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
 

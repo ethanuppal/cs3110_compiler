@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-11 03:02:13.582897
+> Last updated: 2024-05-12 14:20:41.512403
 
 ```
 $ ./main -h
@@ -24,16 +24,16 @@ Usage: ./main [-h|-v]
 ```
 ```
 $ ./main -v
-x86ISTMB v0.1.0
+x86ISTMB v1.0.0
 
-Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmugam
+Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang
 ```
 
 ## Group
 
 - Utku Melemetci (um44)
     - IR generation
-    - Register allocation
+    - Control flow graph and register allocation
     - Data structures
     - Randomized testing
 - Ethan Uppal (eu55)
@@ -48,10 +48,6 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang, Jason Klein, Vijay Shanmu
     - Parser and lexer
     - Abstract syntax tree
     - Type checking
-
-With minor contributions from
-- Jason Klein (jak532)
-- Vijay Shanmugam (vrs29)
 
 ## Usage
 

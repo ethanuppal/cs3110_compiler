@@ -8,15 +8,22 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14, macos-13, macos-12]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Install System Dependencies
+        run: brew install llvm nasm 
       - name: Set up OCaml
         uses: ocaml/setup-ocaml@v2.2.7
         with:
             ocaml-compiler: "5.1.1"
-      - name: Install Dependencies
+      - name: Install OCaml Dependencies
         run: make deps
       - name: Build
         run: make build

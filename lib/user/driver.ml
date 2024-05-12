@@ -1,4 +1,3 @@
-let runtime_lib_loc = Util.merge_paths [ Project_root.path; "lib/runtime" ]
 let print_error = Printf.eprintf "error: %s"
 
 let print_help prog =
@@ -21,11 +20,13 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let compile paths _ build_dir_loc =
+let compile paths _flags build_dir_loc =
   Printf.printf "[DEBUG] assumes [paths] has one file, ignores flags\n";
   let source_path = List.hd paths in
   let source = Util.read_file source_path in
+
   try
+    (* Compile to NASM *)
     let statements = Parse_lex.lex_and_parse ~filename:source_path source in
     Analysis.infer statements;
     let cfgs = Ir_gen.generate statements in
@@ -42,9 +43,8 @@ let compile paths _ build_dir_loc =
       cfgs;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
-    let asm_output_path =
-      BatFilename.(source_path |> basename |> chop_extension) ^ ".nasm"
-    in
+
+    (* Set up build directory *)
     let build_dir =
       Util.merge_paths
         [
@@ -55,45 +55,56 @@ let compile paths _ build_dir_loc =
         ]
     in
     if Sys.command (Printf.sprintf "mkdir -p %s" build_dir) <> 0 then
-      failwith "could not create folder build_dir/ in current directory";
+      failwith "Could not create folder build_dir/ in current directory.";
     if Sys.command (Printf.sprintf "rm -f %s/*" build_dir) <> 0 then
-      failwith "could not remove old build_dir/ contents";
-    Util.write_file
-      (Util.merge_paths [ build_dir; asm_output_path ])
-      (Asm.AssemblyFile.to_nasm asm_file);
-    Util.write_file
-      (Util.merge_paths [ build_dir; "Makefile" ])
-      (Printf.sprintf
-         "build:\n\
-          \t@nasm -f macho64 %s -o build.o\n\
-          \t@clang build.o %s/* -o a.out\n"
-         asm_output_path runtime_lib_loc);
-    let uname = Util.get_command_output "uname" in
-    let processor = Util.get_command_output "uname -p" in
-    let cmd_prefix =
-      if
-        Util.contains_substring uname "Darwin"
-        && Util.contains_substring processor "arm"
-      then "arch -x86_64 "
-      else ""
+      failwith "Could not remove old build_dir/ contents.";
+    Sys.chdir build_dir;
+
+    (* Write NASM *)
+    let asm_file_name =
+      BatFilename.(source_path |> basename |> chop_extension) ^ ".nasm"
     in
-    Util.write_file
-      (Util.merge_paths [ build_dir; "cmd_prefix.txt" ])
-      cmd_prefix;
-    (* Util.write_file "build_dir/exec_helper" ("#!/bin/sh\n" ^ cmd_prefix ^
-       "./a.out\n"); *)
-    if
-      Sys.command
-        (Printf.sprintf "cd %s/ && " build_dir ^ cmd_prefix ^ "make build")
-      <> 0
-    then failwith "compilation failed";
+    Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file);
+
+    let platform = Platform.get_platform () in
+
+    (* Run NASM *)
+    let object_format =
+      match Platform.object_format platform with
+      | Some format -> format
+      | None -> failwith "Could not determine object file format."
+    in
+    let nasm_command =
+      Printf.sprintf "nasm -f %s %s -o build.o" object_format asm_file_name
+    in
+    if Sys.command nasm_command <> 0 then failwith "Failed to run NASM.";
+
+    (* Run clang *)
+    let runtime_folder_name =
+      match platform.os with
+      | Linux -> "linux"
+      | MacOS _ -> "macos"
+      | _ -> failwith "OS unknown. Cannot determine correct runtime."
+    in
+    let clang_target =
+      match Platform.clang_target platform with
+      | Some target -> target
+      | None -> failwith "Unable to determine correct clang target."
+    in
+    let runtime_lib_loc =
+      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+    in
+    let clang_command =
+      Printf.sprintf "clang -target %s build.o %s/* -o a.out" clang_target
+        runtime_lib_loc
+    in
+    if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
+
     Printf.printf "==> Wrote build files to %s\n" build_dir;
     Printf.printf
       "==> You can run the executable with %s, prefixing with Rosetta as \
        appropriate\n"
       (Util.merge_paths [ build_dir; "a.out" ])
-    (* let simulator = Ir_sim.make () in Ir_sim.run simulator main_cfg;
-       print_string (Ir_sim.output_of simulator) *)
   with Parse_lex.ParserError msg -> print_error (msg ^ "\n")
 
 let main args =

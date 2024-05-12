@@ -30,6 +30,12 @@ let get_platform () =
 let command_prefix platform =
   if platform.os = MacOS && platform.cpu_arch = Arm then "arch -x86_64" else ""
 
+let clang_target platform =
+  match platform.os with
+  | MacOS -> Some "x86_64-apple"
+  | Linux -> Some "x86_64"
+  | Unknown -> None
+
 let object_format platform =
   match platform.os with
   | Linux -> Some "elf64"

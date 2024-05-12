@@ -15,21 +15,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Homebrew (MacOS)
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: |
-            NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-      - name: Set up Homebrew (Linux)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@master
-      - name: Install System Dependencies (MacOS)
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: |
-            arch -x86_64 /usr/local/bin/brew install llvm nasm || true
-            brew link --overwrite python@3.12
-      - name: Install System Dependencies (Linux)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: brew install llvm nasm
+      - name: Install System Dependencies
+        run: brew install llvm nasm 
       - name: Set up OCaml
         uses: ocaml/setup-ocaml@v2.2.7
         with:

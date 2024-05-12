@@ -32,7 +32,7 @@ let command_prefix platform =
 
 let clang_target platform =
   match platform.os with
-  | MacOS -> Some "x86_64-apple"
+  | MacOS -> Some "x86_64-apple-macos14"
   | Linux -> Some "x86_64"
   | Unknown -> None
 

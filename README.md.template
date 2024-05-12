@@ -32,10 +32,6 @@ $ ./main -v
     - Abstract syntax tree
     - Type checking
 
-With minor contributions from
-- Jason Klein (jak532)
-- Vijay Shanmugam (vrs29)
-
 ## Usage
 
 The `Makefile` in the project root directory enables easy usage.

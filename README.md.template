@@ -16,7 +16,7 @@ $ ./main -v
 
 - Utku Melemetci (um44)
     - IR generation
-    - Register allocation
+    - Control flow graph and register allocation
     - Data structures
     - Randomized testing
 - Ethan Uppal (eu55)

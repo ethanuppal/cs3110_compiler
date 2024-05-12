@@ -1,5 +1,5 @@
 type os =
-  | MacOS
+  | MacOS of int
   | Linux
   | Unknown
 
@@ -16,28 +16,32 @@ type platform = {
 let get_platform () =
   let uname = Util.get_command_output "uname" in
   let machine = Util.get_command_output "uname -m" in
-  {
-    os =
-      (if Util.contains_substring uname "Darwin" then MacOS
-       else if Util.contains_substring uname "Linux" then Linux
-       else Unknown);
-    cpu_arch =
-      (if Util.contains_substring machine "x86_64" then X86_64
-       else if Util.contains_substring machine "arm" then Arm
-       else Unknown);
-  }
-
-let command_prefix platform =
-  if platform.os = MacOS && platform.cpu_arch = Arm then "arch -x86_64" else ""
+  let os =
+    if Util.contains_substring uname "Darwin" then
+      let major_version =
+        Util.get_command_output "sw_vers -productVersion"
+        |> String.split_on_char '.' |> List.hd |> int_of_string_opt
+      in
+      match major_version with
+      | Some major -> MacOS major
+      | None -> Unknown
+    else Linux
+  in
+  let cpu_arch =
+    if Util.contains_substring machine "x86_64" then X86_64
+    else if Util.contains_substring machine "arm" then Arm
+    else Unknown
+  in
+  { os; cpu_arch }
 
 let clang_target platform =
   match platform.os with
-  | MacOS -> Some "x86_64-apple-macos14"
+  | MacOS ver -> Some (Printf.sprintf "x86_64-apple-macos%i" ver)
   | Linux -> Some "x86_64"
   | Unknown -> None
 
 let object_format platform =
   match platform.os with
   | Linux -> Some "elf64"
-  | MacOS -> Some "macho64"
+  | MacOS _ -> Some "macho64"
   | _ -> None

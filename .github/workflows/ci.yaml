@@ -25,9 +25,7 @@ jobs:
             NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       - name: Set up Homebrew (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        uses: Homebrew/actions/setup-homebrew@master
       - name: Install System Dependencies (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: arch -x86_64 brew install llvm nasm

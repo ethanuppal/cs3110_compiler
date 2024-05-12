@@ -24,7 +24,7 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@master
       - name: Install System Dependencies (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
-        run: arch -x86_64 brew install llvm nasm
+        run: arch -x86_64 /usr/local/bin/brew install llvm nasm
       - name: Install System Dependencies (Linux)
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: brew install llvm nasm

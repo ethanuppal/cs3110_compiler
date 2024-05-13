@@ -106,7 +106,7 @@ module Instruction = struct
 
   let to_nasm = function
     | Mov (op1, op2) ->
-        "mov " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+        "mov qword " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Add (op1, op2) ->
         "add " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Sub (op1, op2) ->

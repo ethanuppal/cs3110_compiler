@@ -1,10 +1,11 @@
 let mangle name = "_x86istmb_" ^ name
 let debug_print_symbol = mangle "debug_print"
+let var_size = 8
 
 let emit_var regalloc var =
   match Ir.VariableMap.find regalloc var with
   | Regalloc.Register reg -> Asm.Operand.Register reg
-  | Spill i -> Asm.Operand.Deref (RSP, i)
+  | Spill i -> Asm.Operand.Deref (RBP, (-var_size * i) - var_size)
 
 let emit_oper regalloc = function
   | Operand.Variable var -> emit_var regalloc var
@@ -27,7 +28,6 @@ let emit_call text regalloc name args =
     @ (List.map (fun r -> Asm.Instruction.Pop (Register r)) to_save |> List.rev)
     )
 
-(** *)
 let emit_ir text regalloc = function
   | Ir.Assign (var, op) ->
       Asm.Section.add text (Mov (emit_var regalloc var, emit_oper regalloc op))
@@ -85,6 +85,20 @@ let emit_preamble ~text =
        (Asm.Label.make ~is_global:false ~is_external:true debug_print_symbol))
 
 let emit_cfg ~text cfg regalloc =
+  let max_spill =
+    Ir.VariableMap.fold
+      (fun _var alloc acc ->
+        match alloc with
+        | Regalloc.Spill count -> max count acc
+        | _ -> acc)
+      regalloc 0
+  in
+  (* max_spill starts at zero but we need to start from rbp-8 *)
+  let spill_bytes = var_size * (max_spill + 1) in
+  (* What we need to spill + however much is needed to round our total up to
+     16 *)
+  let total_bytes = spill_bytes + var_size in
+  let stack_bytes = spill_bytes + (total_bytes mod 16) in
   Asm.Section.add_all text
     [
       Label
@@ -92,5 +106,6 @@ let emit_cfg ~text cfg regalloc =
            (mangle (Cfg.name_of cfg)));
       Push (Register RBP);
       Mov (Register RBP, Register RSP);
+      Sub (Register RSP, Intermediate stack_bytes);
     ];
   Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

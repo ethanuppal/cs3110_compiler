@@ -83,7 +83,7 @@ let compile paths _flags build_dir_loc =
     let runtime_folder_name =
       match platform.os with
       | Linux -> "linux"
-      | MacOS -> "macos"
+      | MacOS _ -> "macos"
       | _ -> failwith "OS unknown. Cannot determine correct runtime."
     in
     let clang_target =

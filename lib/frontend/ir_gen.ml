@@ -1,4 +1,5 @@
 open Ast
+open Util
 
 exception UnboundVariable of { name : string }
 
@@ -47,7 +48,8 @@ let rec generate_expr ctx cfg block expr =
   | Call { name; args; _ } ->
       let call_result = Variable.make () in
       let arg_results = List.map (generate_expr ctx cfg block) args in
-      Basic_block.add_ir block (Ir.Call (call_result, name, arg_results));
+      Basic_block.add_ir block
+        (Ir.Call (call_result, Context.in_namespace ctx name, arg_results));
       Operand.make_var call_result
 
 (** [generate_stmt ctx cfg block stmt] adds IR for [stmt] (and potentially more
@@ -99,21 +101,38 @@ let rec generate_stmt ctx cfg block = function
           Basic_block.add_ir block (Ir.Return (Some to_return))
       | None -> Basic_block.add_ir block (Ir.Return None));
       block
+  | Namespace { name; contents } ->
+      Context.push ctx;
+      Context.add_namespace ctx name;
+      let block = generate_stmt_lst ctx cfg block contents in
+      Context.pop_namespace ctx;
+      Context.pop ctx;
+      block
 
 and generate_stmt_lst ctx cfg block lst =
   let block_ref = ref block in
   List.iter (fun stmt -> block_ref := generate_stmt ctx cfg !block_ref stmt) lst;
   !block_ref
 
+let rec generate_top_level ctx stmt =
+  match stmt with
+  | Function { name; params; return; body } ->
+      if not (List.is_empty params) then failwith "fix params in ir gen";
+      if return <> Type.unit_prim_type then failwith "fix return in ir gen";
+      Context.push ctx;
+      let cfg = Cfg.make (Context.in_namespace ctx name) in
+      ignore (generate_stmt_lst ctx cfg (Cfg.entry_to cfg) body);
+      [ cfg ]
+  | Namespace { name; contents } ->
+      Context.push ctx;
+      Context.add_namespace ctx name;
+      let result = List.map (generate_top_level ctx) contents in
+      Context.pop_namespace ctx;
+      Context.pop ctx;
+      List.concat result
+  | _ -> failwith "?"
+
 let generate =
-  List.map (fun stmt ->
-      match stmt with
-      | Function { name; params; return; body } ->
-          if not (List.is_empty params) then failwith "fix params in ir gen";
-          if return <> Type.unit_prim_type then failwith "fix return in ir gen";
-          let ctx = Context.make () in
-          Context.push ctx;
-          let cfg = Cfg.make name in
-          ignore (generate_stmt_lst ctx cfg (Cfg.entry_to cfg) body);
-          cfg
-      | _ -> failwith "?")
+  let ctx = Context.make () in
+  Context.push ctx;
+  List.map (generate_top_level ctx) >> List.concat

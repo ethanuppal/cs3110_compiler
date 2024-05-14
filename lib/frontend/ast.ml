@@ -57,6 +57,10 @@ and stmt =
     }
   | Print of expr
   | Return of expr option
+  | Namespace of {
+      name : string;
+      contents : stmt list;
+    }
 
 (** A program is a series of statements. *)
 type prog = stmt list
@@ -135,6 +139,12 @@ let stmt_to_string =
           match expr_opt with
           | None -> "return"
           | Some expr -> "return " ^ expr_to_string expr)
+      | Namespace { name; contents } ->
+          "namespace " ^ name ^ " {\n"
+          ^ (contents
+            |> List.map (stmt_to_string_aux (indent ^ add_indent))
+            |> String.concat "")
+          ^ indent ^ "}"
     in
     indent ^ make_string stmt ^ "\n"
   in

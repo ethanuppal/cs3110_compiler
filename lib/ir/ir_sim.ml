@@ -69,7 +69,7 @@ let rec run_cfg simulator cfgs cfg =
   Context.pop simulator.context
 
 let run simulator cfgs =
-  let main_cfg = find_cfg_by_name cfgs "main" in
+  let main_cfg = find_cfg_by_name cfgs [ "main" ] in
   run_cfg simulator cfgs main_cfg
 
 let output_of simulator = simulator.output

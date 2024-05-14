@@ -11,7 +11,7 @@ type t =
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
-  | Call of Variable.t * string * Operand.t list
+  | Call of Variable.t * string list * Operand.t list
   | Return of Operand.t option
 
 (** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
@@ -46,7 +46,8 @@ let to_string =
         (Operand.to_string o2)
   | DebugPrint op -> sprintf "debug_print %s" (Operand.to_string op)
   | Call (r, name, args) ->
-      sprintf "%s = %s(%s)" (Variable.to_string r) name
+      sprintf "%s = %s(%s)" (Variable.to_string r)
+        (name |> String.concat "::")
         (args |> List.map Operand.to_string |> String.concat ",")
   | Return op ->
       sprintf "return%s"

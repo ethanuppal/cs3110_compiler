@@ -4,7 +4,7 @@ module Graph = Digraph.Make (Basic_block)
     have zero out neighbors if its condition is [Never], one if its condition is
     [Always], and two if its condition is [Conditional]. *)
 type t = {
-  name : string;
+  name : string list;
   entry : Basic_block.t;
   graph : bool Graph.t;
 }
@@ -78,5 +78,7 @@ let exit_points cfg =
   List.filter (fun v -> Graph.out_neighbors cfg.graph v = []) vertices
 
 let to_string cfg =
-  "_" ^ cfg.name ^ ":\n"
+  "_"
+  ^ (cfg.name |> String.concat "::")
+  ^ ":\n"
   ^ (blocks_of cfg |> List.map Basic_block.to_string |> String.concat "\n")

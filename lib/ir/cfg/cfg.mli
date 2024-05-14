@@ -9,10 +9,10 @@ type t
 
 (** [make name] is a control-flow graph for a function named [name] with one
     empty block for the entry point. *)
-val make : string -> t
+val make : string list -> t
 
 (** [name_of cfg] is the name of the function represented by [cfg]. *)
-val name_of : t -> string
+val name_of : t -> string list
 
 (** [entry_to cfg] is the block that is the entry point of [cfg].
 

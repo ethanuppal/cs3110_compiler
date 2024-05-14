@@ -35,3 +35,7 @@ val get_local : 'a t -> string -> 'a option
 (** [to_list ctx] is [ctx] as a list of key-value pair lists, where each list is
     a scope. Scopes that were pushed later are earlier in the result. *)
 val to_list : 'a t -> (string * 'a) list list
+
+val add_namespace : 'a t -> string -> unit
+val pop_namespace : 'a t -> unit
+val in_namespace : 'a t -> string -> string list

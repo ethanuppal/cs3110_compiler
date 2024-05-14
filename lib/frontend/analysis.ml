@@ -203,7 +203,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
   | Print expr ->
       infer_expr ctx expr |> ignore;
       Nonterminal
-  | Function _ ->
+  | Function _ | Namespace _ ->
       raise
         (general_error ~msg:"functions can only be written at top level"
            (Right stmt))
@@ -248,25 +248,30 @@ and infer_body ctx return_ctx stmts =
   Context.pop ctx;
   ty
 
+let rec infer_top_level ctx stmt =
+  match stmt with
+  | Namespace { name; contents } ->
+      Context.push ctx;
+      Context.add_namespace ctx name;
+      List.iter (infer_top_level ctx) contents;
+      Context.pop_namespace ctx;
+      Context.pop ctx
+  | Function { name; params; return; body } ->
+      let fun_ty = Type.FunctionType { params = List.map snd params; return } in
+      bind_name_to_type ctx name fun_ty (Right stmt);
+      Context.push ctx;
+      List.iter
+        (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))
+        params;
+      if infer_body ctx return body <> Terminal then
+        raise (halt_error name (Right stmt));
+      Context.pop ctx
+  | _ ->
+      raise
+        (general_error ~msg:"only functions can be written at top level"
+           (Right stmt))
+
 let infer prog =
   let ctx : Type.t Context.t = Context.make () in
   Context.push ctx;
-  prog
-  |> List.iter (fun stmt ->
-         match stmt with
-         | Function { name; params; return; body } ->
-             let fun_ty =
-               Type.FunctionType { params = List.map snd params; return }
-             in
-             bind_name_to_type ctx name fun_ty (Right stmt);
-             Context.push ctx;
-             List.iter
-               (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))
-               params;
-             if infer_body ctx return body <> Terminal then
-               raise (halt_error name (Right stmt));
-             Context.pop ctx
-         | _ ->
-             raise
-               (general_error ~msg:"only functions can be written at top level"
-                  (Right stmt)))
+  List.iter (infer_top_level ctx) prog

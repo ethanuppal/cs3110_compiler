@@ -11,7 +11,7 @@ let set_of_list list =
       one_instruction_test { i0 = i1 + i2 }
     ] *)
 let one_instruction_test () =
-  let cfg = Cfg.make "one_instruction_test" in
+  let cfg = Cfg.make [ "one_instruction_test" ] in
   let bb = Cfg.entry_to cfg in
   let i0 = Variable.make () in
   let i1 = Variable.make () in
@@ -35,7 +35,7 @@ let one_instruction_test () =
       two_instruction_test { i0 = i1 + i2; i4 = i1 + i3 }
     ] *)
 let two_instruction_test () =
-  let cfg = Cfg.make "two_instruction_test" in
+  let cfg = Cfg.make [ "two_instruction_test" ] in
   let bb = Cfg.entry_to cfg in
   let i0 = Variable.make () in
   let i1 = Variable.make () in
@@ -72,7 +72,7 @@ let two_instruction_test () =
        (Liveliness.BasicBlockAnalysis.live_after_instr analysis 1))
 
 let two_basic_block_test () =
-  let cfg = Cfg.make "two_instruction_test" in
+  let cfg = Cfg.make [ "two_instruction_test" ] in
   let bb = Cfg.entry_to cfg in
   let bb2 = Cfg.create_block cfg in
   Cfg.insert_unconditional cfg bb bb2;

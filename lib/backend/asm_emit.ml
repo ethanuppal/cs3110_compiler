@@ -1,5 +1,12 @@
-let mangle name = "_x86istmb_" ^ name
-let debug_print_symbol = mangle "debug_print"
+let mangle name =
+  let rec mangle_helper = function
+    | [ last ] -> "_S" ^ last
+    | namespace :: rest -> "_N" ^ namespace ^ mangle_helper rest
+    | _ -> failwith "empty name"
+  in
+  "_x86istmb" ^ mangle_helper name
+
+let debug_print_symbol = mangle [ "std"; "debug_print" ]
 
 let emit_var regalloc var =
   match Ir.VariableMap.find regalloc var with

@@ -11,7 +11,7 @@ let add_ir_list bb lst = List.iter (Basic_block.add_ir bb) lst
 
 let basic_vars =
   let test () =
-    let cfg = Cfg.make "basic_vars" in
+    let cfg = Cfg.make [ "basic_vars" ] in
     let entry = Cfg.entry_to cfg in
 
     let var0 = Variable.make () in
@@ -36,7 +36,7 @@ let basic_vars =
 
 let write_after_dead =
   let test () =
-    let cfg = Cfg.make "write_after_dead" in
+    let cfg = Cfg.make [ "write_after_dead" ] in
     let entry = Cfg.entry_to cfg in
 
     let var0 = Variable.make () in
@@ -61,7 +61,7 @@ let write_after_dead =
 
 let spill_basic =
   let test () =
-    let cfg = Cfg.make "spill_basic" in
+    let cfg = Cfg.make [ "spill_basic" ] in
     let entry = Cfg.entry_to cfg in
     let reg_count = List.length Regalloc.registers in
     let vars =
@@ -95,7 +95,7 @@ let spill_basic =
 
 let spill_special_case =
   let test () =
-    let cfg = Cfg.make "spill_special_case" in
+    let cfg = Cfg.make [ "spill_special_case" ] in
     let entry = Cfg.entry_to cfg in
     let reg_count = List.length Regalloc.registers in
     let vars =

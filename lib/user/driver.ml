@@ -20,13 +20,10 @@ let print_version () =
   printf "\n";
   printf "Written by: %s\n" (String.concat ", " Meta.get.authors)
 
-let compile paths _flags build_dir_loc =
-  Printf.printf "[DEBUG] assumes [paths] has one file, ignores flags\n";
-  let source_path = List.hd paths in
-  let source = Util.read_file source_path in
-
-  try
-    (* Compile to NASM *)
+let compile paths flags build_dir_loc =
+  let do_opts = List.mem Cli.Optimize flags in
+  let compile_one source_path =
+    let source = Util.read_file source_path in
     let statements = Parse_lex.lex_and_parse ~filename:source_path source in
     Analysis.infer statements;
     let cfgs = Ir_gen.generate statements in
@@ -35,6 +32,14 @@ let compile paths _flags build_dir_loc =
     List.iter
       (fun cfg ->
         let liveliness_analysis = Liveliness.analysis_of cfg in
+        if do_opts then
+          Passes.apply
+            [
+              Passes.DeadCode.pass;
+              Pass.sequence Passes.CopyProp.pass Passes.ConstFold.pass
+              |> Pass.repeat 10;
+            ]
+            cfg liveliness_analysis;
         let instr_ordering = InstrOrdering.make cfg in
         let regalloc =
           Regalloc.allocate_for cfg liveliness_analysis instr_ordering
@@ -43,6 +48,18 @@ let compile paths _flags build_dir_loc =
       cfgs;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
+    let file_name_root =
+      BatFilename.(source_path |> basename |> chop_extension)
+    in
+    let ir_file_name = file_name_root ^ ".x86istmb_ir" in
+    let asm_file_name = file_name_root ^ ".nasm" in
+    (ir_file_name, cfgs, asm_file_name, asm_file)
+  in
+
+  Printf.printf "[DEBUG] ignores some flags but -O works\n";
+
+  try
+    let compiled_files = List.map compile_one paths in
 
     (* Set up build directory *)
     let build_dir =
@@ -60,13 +77,15 @@ let compile paths _flags build_dir_loc =
       failwith "Could not remove old build_dir/ contents.";
     Sys.chdir build_dir;
 
-    (* Write NASM *)
-    let asm_file_name =
-      BatFilename.(source_path |> basename |> chop_extension) ^ ".nasm"
-    in
-    Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file);
-
     let platform = Platform.get_platform () in
+
+    (* Write NASM *)
+    List.iter
+      (fun (ir_file_name, cfgs, asm_file_name, asm_file) ->
+        Util.write_file ir_file_name
+          (cfgs |> List.map Cfg.to_string |> String.concat "\n");
+        Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file))
+      compiled_files;
 
     (* Run NASM *)
     let object_format =
@@ -74,10 +93,14 @@ let compile paths _flags build_dir_loc =
       | Some format -> format
       | None -> failwith "Could not determine object file format."
     in
-    let nasm_command =
-      Printf.sprintf "nasm -f %s %s -o build.o" object_format asm_file_name
-    in
-    if Sys.command nasm_command <> 0 then failwith "Failed to run NASM.";
+    List.iter
+      (fun (_, _, asm_file_name, _) ->
+        let nasm_command =
+          Printf.sprintf "nasm -f %s %s -o %s.o" object_format asm_file_name
+            (BatFilename.chop_extension asm_file_name)
+        in
+        if Sys.command nasm_command <> 0 then failwith "Failed to run NASM.")
+      compiled_files;
 
     (* Run clang *)
     let runtime_folder_name =
@@ -95,7 +118,7 @@ let compile paths _flags build_dir_loc =
       Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
     in
     let clang_command =
-      Printf.sprintf "clang -target %s build.o %s/* -o a.out" clang_target
+      Printf.sprintf "clang -target %s *.o %s/* -o a.out" clang_target
         runtime_lib_loc
     in
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
@@ -107,11 +130,16 @@ let compile paths _flags build_dir_loc =
       (Util.merge_paths [ build_dir; "a.out" ])
   with Parse_lex.ParserError msg -> print_error (msg ^ "\n")
 
+let rec dispatch action prog =
+  match action with
+  | Cli.Help -> print_help prog
+  | Version -> print_version ()
+  | Compile { paths; flags } ->
+      if List.is_empty paths then
+        dispatch (Error { msg = "expected at least one file name" }) prog
+      else compile paths flags None
+  | Error { msg } -> Printf.sprintf "%s\nuse %s -h\n" msg prog |> print_error
+
 let main args =
   let parse = Cli.parse args in
-  match parse.action with
-  | Help -> print_help parse.prog
-  | Version -> print_version ()
-  | Compile { paths; flags } -> compile paths flags None
-  | Error { msg } ->
-      Printf.sprintf "%s\nuse %s -h\n" msg parse.prog |> print_error
+  dispatch parse.action parse.prog

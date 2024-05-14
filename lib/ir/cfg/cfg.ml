@@ -81,4 +81,15 @@ let to_string cfg =
   "_"
   ^ (cfg.name |> String.concat "::")
   ^ ":\n"
-  ^ (blocks_of cfg |> List.map Basic_block.to_string |> String.concat "\n")
+  ^ (blocks_of cfg
+    |> List.map (fun bb ->
+           let bb_string = Basic_block.to_string bb in
+           let dest_strings =
+             out_edges cfg bb
+             |> List.map (fun (dest, cond) ->
+                    "\n    "
+                    ^ (if cond then "true" else "false")
+                    ^ " -> " ^ Basic_block.label_for dest)
+           in
+           bb_string ^ String.concat "" dest_strings)
+    |> String.concat "\n")

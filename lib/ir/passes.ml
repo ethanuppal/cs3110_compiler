@@ -10,6 +10,9 @@ module ConstFold : Pass.PASS = struct
             (Ir.Assign (var, Operand.make_const (lhs - rhs)))
       | _ -> ()
     done
+  (* ; match Basic_block.condition_of bb with | Conditional (Constant cond) ->
+     Basic_block.set_condition bb (if cond = 0 then Never else Always) | _ ->
+     () *)
 
   let pass = Pass.make const_fold
 end
@@ -26,7 +29,9 @@ module CopyProp : Pass.PASS = struct
     in
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
-      | Assign (var, oper) -> Ir.VariableMap.replace vals var oper
+      | Assign (var, oper) ->
+          Ir.VariableMap.replace vals var oper;
+          Basic_block.set_ir bb i (Assign (var, subs oper))
       | Add (var, oper1, oper2) ->
           Basic_block.set_ir bb i (Add (var, subs oper1, subs oper2))
       | Sub (var, oper1, oper2) ->

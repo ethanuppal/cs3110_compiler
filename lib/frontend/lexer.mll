@@ -35,6 +35,7 @@ rule read = parse
 | "return" { RETURN }
 | "true" { CONST_TRUE }
 | "false" { CONST_FALSE }
+| "namespace" { NAMESPACE }
 | ['a'-'z' 'A'-'Z' '_'] ['0'-'9' 'a'-'z' 'A'-'Z' '_']* { IDEN (Lexing.lexeme lexbuf) }
 | ['0'-'9']+ { INT_LIT (int_of_string (Lexing.lexeme lexbuf)) }
 | _ as c

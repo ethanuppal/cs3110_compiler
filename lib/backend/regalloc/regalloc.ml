@@ -52,7 +52,7 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
       let bb_id = Basic_block.id_of bb in
       let analysis = IdMap.find liveliness bb_id in
       for instr_idx = 0 to Basic_block.length_of bb - 1 do
-        let live_set = BBAnalysis.live_after_instr analysis instr_idx in
+        let live_set = BBAnalysis.live_before_instr analysis instr_idx in
         let kill_var = Basic_block.get_ir bb instr_idx |> Ir.kill_of in
         let used_set =
           match kill_var with

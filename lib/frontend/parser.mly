@@ -7,7 +7,7 @@
 %token <string> IDEN
 %token PLUS MINUS TIMES DIVIDE MOD EQUALS BITAND
 %token LPAR RPAR LBRACE RBRACE COLON ARROW COMMA
-%token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN
+%token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN NAMESPACE
 %token NEWLINE EOF
 %token INT_TYPE BOOL_TYPE
 
@@ -72,3 +72,4 @@ stmt:
   | PRINT expr { Print $2 }
   | RETURN; return_opt = option(expr) { Return (return_opt) }
   | expr { ExprStatement $1 }
+  | NAMESPACE; name = IDEN; LBRACE; contents = body_till_rbrace { Namespace { name; contents }}

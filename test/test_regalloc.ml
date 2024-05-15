@@ -26,7 +26,7 @@ let basic_vars =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let registers = Register.data_registers in
+    let registers = Asm.Register.data_registers in
     let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
@@ -52,7 +52,7 @@ let write_after_dead =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let registers = Register.data_registers in
+    let registers = Asm.Register.data_registers in
     let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
@@ -64,7 +64,7 @@ let write_after_dead =
 let spill_basic =
   let test () =
     let cfg = Cfg.make [ "spill_basic" ] in
-    let registers = Register.data_registers in
+    let registers = Asm.Register.data_registers in
     let entry = Cfg.entry_to cfg in
     let reg_count = List.length registers in
     let vars =
@@ -99,7 +99,7 @@ let spill_basic =
 let spill_special_case =
   let test () =
     let cfg = Cfg.make [ "spill_special_case" ] in
-    let registers = Register.data_registers in
+    let registers = Asm.Register.data_registers in
     let entry = Cfg.entry_to cfg in
     let reg_count = List.length registers in
     let vars =

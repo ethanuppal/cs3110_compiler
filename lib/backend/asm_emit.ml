@@ -48,15 +48,15 @@ let emit_restore_registers text registers =
   Asm.Section.add_all text pop_instructions
 
 let emit_call text regalloc name args =
-  emit_save_registers text Register.caller_saved_data_registers;
+  emit_save_registers text Asm.Register.caller_saved_data_registers;
   let param_moves =
-    Util.zip_shortest args Register.parameter_registers
+    Util.zip_shortest args Asm.Register.parameter_registers
     |> List.map (fun (arg, reg) ->
            Asm.Instruction.Mov (Register reg, emit_oper regalloc arg))
   in
   Asm.Section.add_all text param_moves;
   Asm.Section.add text (Asm.Instruction.Call (Label name));
-  emit_restore_registers text Register.caller_saved_data_registers
+  emit_restore_registers text Asm.Register.caller_saved_data_registers
 
 let emit_ir text regalloc = function
   | Ir.Assign (var, op) ->
@@ -85,7 +85,7 @@ let emit_ir text regalloc = function
           Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op)))
         op_opt
       |> ignore;
-      emit_restore_registers text Register.callee_saved_data_registers;
+      emit_restore_registers text Asm.Register.callee_saved_data_registers;
       Asm.Section.add_all text
         [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
 
@@ -142,6 +142,6 @@ let emit_cfg ~text cfg regalloc =
       Sub (Register RSP, Intermediate stack_bytes);
     ];
   (* restore is done at returns *)
-  emit_save_registers text Register.callee_saved_data_registers;
+  emit_save_registers text Asm.Register.callee_saved_data_registers;
   Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));
   Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

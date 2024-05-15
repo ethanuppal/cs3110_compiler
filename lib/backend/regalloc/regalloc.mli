@@ -1,9 +1,9 @@
 (** Represents the hardware allocated for a variable. [Register reg] means the
-    variable has been allocated to a register. [Spill i] means the variable is
-    to be spilled to the stack. The location [i] will be unique and count up
+    variable has been allocated to a Asm.Register. [Spill i] means the variable
+    is to be spilled to the stack. The location [i] will be unique and count up
     from zero for an allocation scheme produced by [allocate_for]. *)
 type allocation =
-  | Register of Register.t
+  | Register of Asm.Register.t
   | Spill of int
 
 (** [allocate_for cfg registers liveliness ordering] allocates a register in
@@ -15,7 +15,7 @@ type allocation =
     the state that it is being passed in. *)
 val allocate_for :
   Cfg.t ->
-  Register.t list ->
+  Asm.Register.t list ->
   Liveliness.BasicBlockAnalysis.t IdMap.t ->
   InstrOrdering.t ->
   allocation VariableMap.t

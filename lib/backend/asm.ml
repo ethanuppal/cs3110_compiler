@@ -2,6 +2,58 @@ open Util
 
 let display_indent = "  "
 
+module Register = struct
+  type t =
+    | RAX
+    | RBX
+    | RCX
+    | RDX
+    | RBP
+    | RSP
+    | RSI
+    | RDI
+    | R8
+    | R9
+    | R10
+    | R11
+    | R12
+    | R13
+    | R14
+    | R15
+
+  let to_nasm = function
+    | RAX -> "rax"
+    | RBX -> "rbx"
+    | RCX -> "rcx"
+    | RDX -> "rdx"
+    | RBP -> "rbp"
+    | RSP -> "rsp"
+    | RSI -> "rsi"
+    | RDI -> "rdi"
+    | R8 -> "r8"
+    | R9 -> "r9"
+    | R10 -> "r10"
+    | R11 -> "r11"
+    | R12 -> "r12"
+    | R13 -> "r13"
+    | R14 -> "r14"
+    | R15 -> "r15"
+
+  let compare = Stdlib.compare
+
+  (** Caller saved registers. rsp is excluded because it is used to manage the
+      stack and usually needs special care. *)
+  let caller_saved_data_registers =
+    [ RAX; RCX; RDX; RDI; RSI; R8; R9; R10; R11 ]
+
+  (** Caller saved registers. rbp is excluded because it is used to manage the
+      stack and usually needs special care. *)
+  let callee_saved_data_registers = [ RBX; R12; R13; R14; R15 ]
+
+  let data_registers = callee_saved_data_registers @ callee_saved_data_registers
+  let parameter_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
+end
+
 module Operand = struct
   type t =
     | Register of Register.t
@@ -18,16 +70,7 @@ module Operand = struct
     | RelativeLabel rel_label -> "[rel " ^ rel_label ^ "]"
 end
 
-module Label : sig
-  type t
-
-  (** [make ~is_global:is_global, ~is_external:is_external name] is a label
-      named [name], global if and only if [is_global], and external if and only
-      if [is_external], but not both. *)
-  val make : is_global:bool -> is_external:bool -> string -> t
-
-  val to_nasm : t -> string
-end = struct
+module Label = struct
   type t = {
     is_global : bool;
     is_external : bool;
@@ -82,19 +125,7 @@ module Instruction = struct
     | Label label -> Label.to_nasm label
 end
 
-module Section : sig
-  (** Values of type [t] are assembly sections. *)
-  type t
-
-  (** `make name align` is new section with name [name] and alignment [align]. *)
-  val make : string -> int -> t
-
-  (** [add section instr] adds [instr] to the end of [section]. *)
-  val add : t -> Instruction.t -> unit
-
-  val add_all : t -> Instruction.t list -> unit
-  val to_nasm : t -> string
-end = struct
+module Section = struct
   type t = {
     name : string;
     align : int;
@@ -117,13 +148,7 @@ end = struct
     |> String.concat "\n"
 end
 
-module AssemblyFile : sig
-  type t
-
-  val make : unit -> t
-  val add : t -> Section.t -> unit
-  val to_nasm : t -> string
-end = struct
+module AssemblyFile = struct
   type t = Section.t BatDynArray.t
 
   let make () = BatDynArray.make 16

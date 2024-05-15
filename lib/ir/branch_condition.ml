@@ -3,7 +3,6 @@ type t =
   | Never
   | Conditional of Operand.t
 
-(* TODO: pretty print *)
 let to_string = function
   | Always -> "true"
   | Conditional (Constant cond) when cond <> 0 -> "true"

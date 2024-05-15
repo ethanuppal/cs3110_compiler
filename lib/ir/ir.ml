@@ -1,8 +1,3 @@
-type constant = int
-
-module VariableMap = Hashtbl.Make (Variable)
-
-(** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t
   | Add of Variable.t * Operand.t * Operand.t
@@ -15,8 +10,6 @@ type t =
   | GetParam of Variable.t
   | Return of Operand.t option
 
-(** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
-    otherwise. *)
 let kill_of = function
   | Assign (var, _)
   | Add (var, _, _)
@@ -53,7 +46,7 @@ let to_string =
         (args |> List.map Operand.to_string |> String.concat ",")
   | GetParam var -> sprintf "%s = <next parameter>" (Variable.to_string var)
   | Return op ->
-      sprintf "return%s"
+      sprintf "return %s"
         (match op with
         | Some op -> " " ^ Operand.to_string op
         | None -> "")

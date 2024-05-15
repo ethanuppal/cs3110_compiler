@@ -19,6 +19,6 @@ let execute pass bb liveliness =
   in
   execute_aux bb pass
 
-module type PASS = sig
+module type Sig = sig
   val pass : t
 end

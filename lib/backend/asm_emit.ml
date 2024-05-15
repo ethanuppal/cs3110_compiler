@@ -4,7 +4,7 @@ module ParameterPassingContext = struct
     mutable regs : Asm.Register.t list;
   }
 
-  let make () = { pos = 0; regs = Asm.Register.parameter_passing_registers }
+  let make () = { pos = 0; regs = Asm.Register.parameter_registers }
 
   let get_next ctx =
     if List.is_empty ctx.regs then (
@@ -35,7 +35,7 @@ let align_offset bytes =
   if amount_over = 0 then 0 else stack_alignment - amount_over
 
 let emit_var regalloc var =
-  match Ir.VariableMap.find regalloc var with
+  match VariableMap.find regalloc var with
   | Regalloc.Register reg -> Asm.Operand.Register reg
   | Spill i -> Asm.Operand.Deref (RBP, (-var_size * i) - var_size)
 
@@ -70,7 +70,7 @@ let emit_restore_registers text registers =
 let emit_call text regalloc name args =
   emit_save_registers text Asm.Register.caller_saved_data_registers;
   let param_moves =
-    Util.zip_shortest args Asm.Register.parameter_passing_registers
+    Util.zip_shortest args Asm.Register.parameter_registers
     |> List.map (fun (arg, reg) ->
            Asm.Instruction.Mov (Register reg, emit_oper regalloc arg))
   in
@@ -143,7 +143,7 @@ let emit_preamble ~text =
 
 let emit_cfg ~text cfg regalloc =
   let max_spill =
-    Ir.VariableMap.fold
+    VariableMap.fold
       (fun _var alloc acc ->
         match alloc with
         | Regalloc.Spill count -> max count acc

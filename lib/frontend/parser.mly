@@ -1,5 +1,5 @@
 %{
-  open Ast
+open AstType
 %}
 
 %token <int> INT_LIT
@@ -14,10 +14,10 @@
 %left PLUS MINUS
 %left TIMES
 
-%start <Ast.stmt list> main
+%start <AstType.stmt list> main
 
-%type <Ast.stmt> stmt
-%type <Ast.expr> expr
+%type <AstType.stmt> stmt
+%type <AstType.expr> expr
 %type <Type.t> ty 
 
 %%

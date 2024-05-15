@@ -1,10 +1,8 @@
-(** Compiler flags *)
 type flag =
   | OnlyIR
   | OnlyObject
   | Optimize
 
-(** The various parses of CLI arguments. *)
 type action =
   | Error of { msg : string }
   | Help
@@ -14,12 +12,11 @@ type action =
       flags : flag list;
     }
 
-type t = {
+type parse_result = {
   prog : string;
   action : action;
 }
 
-(** [parse args] is the command line [args] parsed. *)
 let parse args =
   let parse_aux = function
     | [ "-h" ] | [ "--help" ] -> Help

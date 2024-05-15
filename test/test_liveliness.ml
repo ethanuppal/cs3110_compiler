@@ -18,7 +18,7 @@ let one_instruction_test () =
   let i2 = Variable.make () in
   Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
   let _, analysis =
-    Liveliness.analysis_of cfg |> Util.IdMap.to_seq |> List.of_seq |> List.hd
+    Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq |> List.hd
   in
   (check bool) "live_in should contain read-only variable" true
     (Liveliness.VariableSet.mem i1
@@ -45,7 +45,7 @@ let two_instruction_test () =
   Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
   Basic_block.add_ir bb (Ir.Add (i4, Operand.make_var i1, Operand.make_var i3));
   let _, analysis =
-    Liveliness.analysis_of cfg |> Util.IdMap.to_seq |> List.of_seq |> List.hd
+    Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq |> List.hd
   in
   (* print_endline (Cfg.to_string cfg); print_endline
      (Liveliness.BasicBlockAnalysis.to_string analysis); *)
@@ -83,9 +83,7 @@ let two_basic_block_test () =
   let i4 = Variable.make () in
   Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
   Basic_block.add_ir bb2 (Ir.Add (i0, Operand.make_var i3, Operand.make_var i4));
-  let analyses =
-    Liveliness.analysis_of cfg |> Util.IdMap.to_seq |> List.of_seq
-  in
+  let analyses = Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq in
   (check int)
     "the liveliness analysis should have returned analyses for both basic \
      blocks in the cfg"

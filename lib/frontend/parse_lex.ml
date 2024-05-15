@@ -1,15 +1,15 @@
 exception ParserError of string
 
 let function_auto_unit_return = function
-  | Ast.Function { name; params; return; body } ->
+  | AstType.Function { name; params; return; body } ->
       let last_stmt_is_return =
         if List.is_empty body then false
         else
           match List.rev body |> List.hd with
-          | Ast.Return _ -> true
+          | AstType.Return _ -> true
           | _ -> false
       in
-      Ast.Function
+      AstType.Function
         {
           name;
           params;
@@ -21,12 +21,6 @@ let function_auto_unit_return = function
         }
   | other -> other
 
-(** [lex_and_parse ~filename:filename input] is the list of statements
-    represented by the source code string [input]. Optionally,
-    [~filename:filename] can be passed to indicate that the path of the source
-    was [filename]; by default, it is ["<stdin>"].
-
-    @raise ParserError on parsing error. *)
 let lex_and_parse ?(filename = "<stdin>") input =
   let syntax_error_msg lexbuf =
     let pos = Lexing.lexeme_start_p lexbuf in
@@ -44,9 +38,10 @@ let lex_and_parse ?(filename = "<stdin>") input =
   List.map
     (fun stmt ->
       match stmt with
-      | Ast.Namespace { name; contents } ->
-          Ast.Namespace
+      | AstType.Namespace { name; contents } ->
+          AstType.Namespace
             { name; contents = List.map function_auto_unit_return contents }
-      | Ast.Function func -> function_auto_unit_return (Ast.Function func)
+      | AstType.Function func ->
+          function_auto_unit_return (AstType.Function func)
       | other -> other)
     prog

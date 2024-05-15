@@ -164,18 +164,18 @@ let rec infer_expr (ctx : Type.t Context.t) expr =
             prefix.ty <- Some (Type.Pointer rhs_ty)
         | _ -> raise_error ())
     | Call call ->
+        let name = call.name |> String.concat "::" in
         let arg_tys = List.map (infer_expr ctx) call.args in
-        let exp_ty = get_type_of_name ctx call.name (Left expr) in
+        let exp_ty = get_type_of_name ctx name (Left expr) in
         let exp_params, exp_return =
           match exp_ty with
           | FunctionType { params; return } -> (params, return)
           | _ ->
               raise
-                (name_error call.name ~msg:"only functions can be called"
-                   (Left expr))
+                (name_error name ~msg:"only functions can be called" (Left expr))
         in
         if exp_params <> arg_tys then
-          raise (type_sig_error call.name arg_tys (Left expr));
+          raise (type_sig_error name arg_tys (Left expr));
         call.ty <- Some exp_return
   in
   infer_expr_aux expr;
@@ -252,14 +252,14 @@ and infer_body ctx return_ctx stmts =
 let rec infer_top_level ctx stmt =
   match stmt with
   | Namespace { name; contents } ->
-      Context.push ctx;
       Context.add_namespace ctx name;
       List.iter (infer_top_level ctx) contents;
-      Context.pop_namespace ctx;
-      Context.pop ctx
+      Context.pop_namespace ctx
   | Function { name; params; return; body } ->
       let fun_ty = Type.FunctionType { params = List.map snd params; return } in
-      bind_name_to_type ctx name fun_ty (Right stmt);
+      bind_name_to_type ctx
+        (Context.in_namespace ctx name |> String.concat "::")
+        fun_ty (Right stmt);
       Context.push ctx;
       List.iter
         (fun (name, ty) -> bind_name_to_type ctx name ty (Right stmt))

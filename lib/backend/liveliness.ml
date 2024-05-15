@@ -140,6 +140,7 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
   | Call (var, _, args) ->
       write_var var;
       List.iter read_op args
+  | GetParam var -> write_var var
   | Return opt_op -> Option.map read_op opt_op |> ignore);
   check_for_changes ()
 

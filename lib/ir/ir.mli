@@ -8,6 +8,7 @@ type t =
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
   | Call of Variable.t * string list * Operand.t list
+  | GetParam of Variable.t
   | Return of Operand.t option
 
 (** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]

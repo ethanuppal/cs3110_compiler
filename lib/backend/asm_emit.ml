@@ -1,3 +1,23 @@
+module ParameterPassingContext = struct
+  type t = {
+    mutable pos : int;
+    mutable regs : Asm.Register.t list;
+  }
+
+  let make () = { pos = 0; regs = Asm.Register.parameter_registers }
+
+  let get_next ctx =
+    if List.is_empty ctx.regs then (
+      let pos = ctx.pos in
+      ctx.pos <- ctx.pos + 1;
+      ignore pos;
+      failwith "i think should return spill with negative index")
+    else
+      let result = List.hd ctx.regs in
+      ctx.regs <- List.tl ctx.regs;
+      Regalloc.Register result
+end
+
 let mangle name =
   let rec mangle_helper = function
     | [ last ] -> "_S" ^ last
@@ -79,6 +99,12 @@ let emit_ir text regalloc = function
   | Call (var, name, args) ->
       emit_call text regalloc (mangle name) args;
       Asm.Section.add text (Mov (emit_var regalloc var, Register RAX))
+  | GetParam var -> (
+      let param_passing = ParameterPassingContext.make () in
+      match ParameterPassingContext.get_next param_passing with
+      | Register dest ->
+          Asm.Section.add text (Mov (emit_var regalloc var, Register dest))
+      | Spill _ -> failwith "todo")
   | Return op_opt ->
       Option.map
         (fun op ->

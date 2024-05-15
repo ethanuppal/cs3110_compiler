@@ -1,4 +1,4 @@
-(** Represents a binary operation between two integers. *)
+(** An arithmetic operation. *)
 type op =
   | Plus
   | Minus
@@ -8,7 +8,7 @@ type op =
   | Equals
   | BitAnd
 
-(** Represents an expression that can be evaluated to a value. *)
+(** An expression can be evaluated to a value. *)
 type expr =
   | Var of {
       name : string;
@@ -28,12 +28,12 @@ type expr =
       mutable ty : Type.t option;
     }
   | Call of {
-      name : string;
+      name : string list;
       args : expr list;
       mutable ty : Type.t option;
     }
 
-(** Represents a statement that can be executed. *)
+(** A statement can be executed. *)
 and stmt =
   | If of {
       cond : expr;

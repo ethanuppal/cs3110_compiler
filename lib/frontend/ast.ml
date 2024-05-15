@@ -32,7 +32,10 @@ let rec expr_to_string = function
   | Prefix { op; rhs; ty = _ } ->
       "(" ^ op_to_string op ^ expr_to_string rhs ^ ")"
   | Call { name; args; ty = _ } ->
-      name ^ "(" ^ (args |> List.map expr_to_string |> String.concat ", ") ^ ")"
+      (name |> String.concat "::")
+      ^ "("
+      ^ (args |> List.map expr_to_string |> String.concat ", ")
+      ^ ")"
 
 let stmt_to_string =
   let add_indent = String.make 4 ' ' in

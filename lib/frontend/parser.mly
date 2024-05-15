@@ -6,7 +6,7 @@ open AstType
 %token CONST_TRUE CONST_FALSE
 %token <string> IDEN
 %token PLUS MINUS TIMES DIVIDE MOD EQUALS BITAND
-%token LPAR RPAR LBRACE RBRACE COLON ARROW COMMA
+%token LPAR RPAR LBRACE RBRACE COLON ARROW COMMA SCOPE
 %token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN NAMESPACE
 %token NEWLINE EOF
 %token INT_TYPE BOOL_TYPE
@@ -49,7 +49,8 @@ expr:
   | PLUS expr { Prefix {op = Plus; rhs = $2; ty = None} }
   | MINUS expr { Prefix {op = Minus; rhs = $2; ty = None} }
   | TIMES expr { Prefix {op = Times; rhs = $2; ty = None} }
-  | name = IDEN; LPAR; args = separated_list(COMMA, expr); RPAR { Call { name; args; ty = None }}
+  | name = IDEN; LPAR; args = separated_list(COMMA, expr); RPAR { Call { name = [name]; args; ty = None }}
+  | name = IDEN; SCOPE; rest = separated_list(SCOPE, IDEN); LPAR; args = separated_list(COMMA, expr); RPAR { Call { name = name :: rest; args; ty = None } }
 
 body_till_rbrace:
   | NEWLINE body_till_rbrace { $2 } 

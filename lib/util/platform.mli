@@ -27,3 +27,8 @@ val clang_target : platform -> string option
 (** [object_format platform] is the object file format that should be used on
     [platform]. *)
 val object_format : platform -> string option
+
+(** [command_prefix platform] is the prefix for running executables produced by
+    the compiler. For example, on MacOS with Arm, exectuables must be prefixed
+    with [arch -x86_64]. *)
+val command_prefix : platform -> string

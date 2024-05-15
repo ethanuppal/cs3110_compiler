@@ -41,7 +41,7 @@ let compile paths flags build_dir_loc =
             ]
             cfg liveliness_analysis;
         let instr_ordering = InstrOrdering.make cfg in
-        let registers = Asm.Register.allocation_registers in
+        let registers = Register.data_registers in
         let regalloc =
           Regalloc.allocate_for cfg registers liveliness_analysis instr_ordering
         in

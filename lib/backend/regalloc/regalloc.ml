@@ -12,7 +12,7 @@ type interval = {
 }
 
 type allocation =
-  | Register of Asm.Register.t
+  | Register of Register.t
   | Spill of int
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
@@ -69,7 +69,7 @@ let linear_scan intervals ordering registers =
 
   let assigned_alloc : allocation VariableMap.t = VariableMap.create 4 in
 
-  let module RegSet = Set.Make (Asm.Register) in
+  let module RegSet = Set.Make (Register) in
   let free_registers : RegSet.t ref = ref (RegSet.of_list registers) in
 
   (* must remain sorted by increasing end point *)

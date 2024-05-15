@@ -3,7 +3,7 @@
     to be spilled to the stack. The location [i] will be unique and count up
     from zero for an allocation scheme produced by [allocate_for]. *)
 type allocation =
-  | Register of Asm.Register.t
+  | Register of Register.t
   | Spill of int
 
 (** [allocate_for cfg registers liveliness ordering] allocates a register in
@@ -15,7 +15,7 @@ type allocation =
     the state that it is being passed in. *)
 val allocate_for :
   Cfg.t ->
-  Asm.Register.t list ->
+  Register.t list ->
   Liveliness.BasicBlockAnalysis.t IdMap.t ->
   InstrOrdering.t ->
   allocation VariableMap.t

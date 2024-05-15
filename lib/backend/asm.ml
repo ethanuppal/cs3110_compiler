@@ -2,60 +2,6 @@ open Util
 
 let display_indent = "  "
 
-module Register = struct
-  type t =
-    | RAX
-    | RBX
-    | RCX
-    | RDX
-    | RBP
-    | RSP
-    | RSI
-    | RDI
-    | R8
-    | R9
-    | R10
-    | R11
-    | R12
-    | R13
-    | R14
-    | R15
-
-  let to_nasm = function
-    | RAX -> "rax"
-    | RBX -> "rbx"
-    | RCX -> "rcx"
-    | RDX -> "rdx"
-    | RBP -> "rbp"
-    | RSP -> "rsp"
-    | RSI -> "rsi"
-    | RDI -> "rdi"
-    | R8 -> "r8"
-    | R9 -> "r9"
-    | R10 -> "r10"
-    | R11 -> "r11"
-    | R12 -> "r12"
-    | R13 -> "r13"
-    | R14 -> "r14"
-    | R15 -> "r15"
-
-  let compare = Stdlib.compare
-
-  (** Caller saved registers. rsp is excluded because it is used to manage the
-      stack and usually needs special care. *)
-  let caller_saved_data_registers =
-    [ RAX; RCX; RDX; RDI; RSI; R8; R9; R10; R11 ]
-
-  (** Caller saved registers. rbp is excluded because it is used to manage the
-      stack and usually needs special care. *)
-  let callee_saved_data_registers = [ RBX; R12; R13; R14; R15 ]
-
-  let parameter_passing_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
-
-  let allocation_registers =
-    [ RAX; RBX; RCX; RDX; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
-end
-
 module Operand = struct
   type t =
     | Register of Register.t

@@ -67,7 +67,7 @@ module BasicBlockAnalysis = struct
   let to_string analysis =
     let analysis = rep_ok analysis in
     "BasicBlockAnalysis {"
-    ^ (Seq.init (Array.length analysis) id
+    ^ (Seq.init (Array.length analysis) Fun.id
       |> List.of_seq
       |> List.map (fun i ->
              "\n  ir[" ^ string_of_int i ^ "] <=> {live_in = "

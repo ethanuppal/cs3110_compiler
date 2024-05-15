@@ -1,4 +1,4 @@
-module ConstFold : Pass.PASS = struct
+module ConstFold : Pass.Sig = struct
   let const_fold (bb, _) =
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
@@ -10,14 +10,11 @@ module ConstFold : Pass.PASS = struct
             (Ir.Assign (var, Operand.make_const (lhs - rhs)))
       | _ -> ()
     done
-  (* ; match Basic_block.condition_of bb with | Conditional (Constant cond) ->
-     Basic_block.set_condition bb (if cond = 0 then Never else Always) | _ ->
-     () *)
 
   let pass = Pass.make const_fold
 end
 
-module CopyProp : Pass.PASS = struct
+module CopyProp : Pass.Sig = struct
   let copy_prop (bb, _) =
     let vals = VariableMap.create 16 in
     let subs = function
@@ -46,7 +43,7 @@ module CopyProp : Pass.PASS = struct
   let pass = Pass.make copy_prop
 end
 
-module DeadCode : Pass.PASS = struct
+module DeadCode : Pass.Sig = struct
   let dead_code (bb, analysis) =
     let length = Basic_block.length_of bb in
     for rev_i = 0 to Basic_block.length_of bb - 1 do

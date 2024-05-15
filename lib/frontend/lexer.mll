@@ -21,6 +21,7 @@ rule read = parse
 | ')' { RPAR }
 | '{' { LBRACE }
 | '}' { RBRACE }
+| "::" { SCOPE }
 | ':' { COLON }
 | ',' { COMMA }
 | "->" { ARROW }

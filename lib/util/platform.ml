@@ -45,3 +45,8 @@ let object_format platform =
   | Linux -> Some "elf64"
   | MacOS _ -> Some "macho64"
   | _ -> None
+
+let command_prefix platform =
+  match (platform.os, platform.cpu_arch) with
+  | MacOS _, Arm -> "arch -x86_64 "
+  | _ -> ""

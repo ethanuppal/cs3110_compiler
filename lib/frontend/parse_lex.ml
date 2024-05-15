@@ -1,5 +1,26 @@
 exception ParserError of string
 
+let function_auto_unit_return = function
+  | Ast.Function { name; params; return; body } ->
+      let last_stmt_is_return =
+        if List.is_empty body then false
+        else
+          match List.rev body |> List.hd with
+          | Ast.Return _ -> true
+          | _ -> false
+      in
+      Ast.Function
+        {
+          name;
+          params;
+          return;
+          body =
+            (if return = Type.unit_prim_type && not last_stmt_is_return then
+               body @ [ Return None ]
+             else body);
+        }
+  | other -> other
+
 (** [lex_and_parse ~filename:filename input] is the list of statements
     represented by the source code string [input]. Optionally,
     [~filename:filename] can be passed to indicate that the path of the source
@@ -23,23 +44,9 @@ let lex_and_parse ?(filename = "<stdin>") input =
   List.map
     (fun stmt ->
       match stmt with
-      | Ast.Function { name; params; return; body } ->
-          let last_stmt_is_return =
-            if List.is_empty body then false
-            else
-              match List.rev body |> List.hd with
-              | Ast.Return _ -> true
-              | _ -> false
-          in
-          Ast.Function
-            {
-              name;
-              params;
-              return;
-              body =
-                (if return = Type.unit_prim_type && not last_stmt_is_return then
-                   body @ [ Return None ]
-                 else body);
-            }
+      | Ast.Namespace { name; contents } ->
+          Ast.Namespace
+            { name; contents = List.map function_auto_unit_return contents }
+      | Ast.Function func -> function_auto_unit_return (Ast.Function func)
       | other -> other)
     prog

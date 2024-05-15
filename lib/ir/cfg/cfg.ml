@@ -78,7 +78,7 @@ let exit_points cfg =
   List.filter (fun v -> Graph.out_neighbors cfg.graph v = []) vertices
 
 let to_string cfg =
-  "_"
+  "func "
   ^ (cfg.name |> String.concat "::")
   ^ ":\n"
   ^ (blocks_of cfg

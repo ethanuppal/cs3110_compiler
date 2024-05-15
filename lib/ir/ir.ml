@@ -12,6 +12,7 @@ type t =
   | TestEqual of Variable.t * Operand.t * Operand.t
   | DebugPrint of Operand.t
   | Call of Variable.t * string list * Operand.t list
+  | GetParam of Variable.t
   | Return of Operand.t option
 
 (** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
@@ -22,7 +23,8 @@ let kill_of = function
   | Sub (var, _, _)
   | Ref (var, _)
   | Deref (var, _)
-  | TestEqual (var, _, _) -> Some var
+  | TestEqual (var, _, _)
+  | GetParam var
   | Call (var, _, _) -> Some var
   | DebugPrint _ | Return _ -> None
 
@@ -44,11 +46,12 @@ let to_string =
   | TestEqual (r, o1, o2) ->
       sprintf "%s = %s == %s" (Variable.to_string r) (Operand.to_string o1)
         (Operand.to_string o2)
-  | DebugPrint op -> sprintf "debug_print %s" (Operand.to_string op)
+  | DebugPrint op -> sprintf "debug_print(%s)" (Operand.to_string op)
   | Call (r, name, args) ->
       sprintf "%s = %s(%s)" (Variable.to_string r)
         (name |> String.concat "::")
         (args |> List.map Operand.to_string |> String.concat ",")
+  | GetParam var -> sprintf "%s = <next parameter>" (Variable.to_string var)
   | Return op ->
       sprintf "return%s"
         (match op with

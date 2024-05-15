@@ -3,7 +3,7 @@
 (library
  (public_name x86ISTMB)
  (name x86ISTMB)
- (libraries batteries menhirLib)
+ (libraries batteries menhirLib ANSITerminal)
  (preprocess
   (pps ppx_inline_test))
  (instrumentation

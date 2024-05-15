@@ -119,12 +119,10 @@ let emit_cfg ~text cfg regalloc =
     (Label
        (Asm.Label.make ~is_global:true ~is_external:false
           (mangle (Cfg.name_of cfg))));
+  (* no need to align here, we can assume as a callee that 8 bytes for the
+     return address was already pushed to the stack. *)
   Asm.Section.add_all text
-    [
-      Push (Register RBP);
-      Mov (Register RBP, Register RSP);
-      Sub (Register RSP, Intermediate (align_offset var_size));
-    ];
+    [ Push (Register RBP); Mov (Register RBP, Register RSP) ];
   (* restore is done at returns *)
   emit_save_registers text Asm.Register.callee_saved_data_registers;
   Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));

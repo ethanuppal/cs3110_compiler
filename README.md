@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-15 16:42:39.370097
+> Last updated: 2024-05-15 18:33:04.077638
 
 ```
 $ ./main -h
@@ -54,6 +54,6 @@ Written by: Utku Melemeti, Ethan Uppal, Jeffrey Huang
 The `Makefile` in the project root directory enables easy usage.
 Simply run `make` to build the project executable, `./main`.
 `make clean` will clear all build and executable files.
-Documentation is in [introduction.md](docs/introduction.md).
+Documentation is available online at the [wiki](https://github.com/ethanuppal/cs3110_compiler/wiki).
 Installation instructions are in [INSTALL.md](INSTALL.md).
 A full user manual is in [user_manual.md](docs/user_manual.md).

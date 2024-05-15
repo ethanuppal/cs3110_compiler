@@ -7,6 +7,8 @@ let mangle name =
   "_x86istmb" ^ mangle_helper name
 
 let debug_print_symbol = mangle [ "std"; "debug_print" ]
+let stack_alignment = 16
+let var_size = 8
 
 let emit_var regalloc var =
   match Ir.VariableMap.find regalloc var with
@@ -17,24 +19,43 @@ let emit_oper regalloc = function
   | Operand.Variable var -> emit_var regalloc var
   | Constant int -> Asm.Operand.Intermediate int
 
-let emit_call text regalloc name args =
-  let to_save = Asm.Register.caller_saved in
-  let to_save =
-    if List.length to_save mod 2 = 0 then to_save
-    else List.hd to_save :: to_save
-  in
-  let to_pass = [| Asm.Register.RDI; RSI; RDX; RCX; R8; R9 |] in
-  Asm.Section.add_all text
-    (List.map (fun r -> Asm.Instruction.Push (Register r)) to_save
-    @ List.mapi
-        (fun i arg ->
-          Asm.Instruction.Mov (Register to_pass.(i), emit_oper regalloc arg))
-        args
-    @ [ Asm.Instruction.Call (Label name) ]
-    @ (List.map (fun r -> Asm.Instruction.Pop (Register r)) to_save |> List.rev)
-    )
+let align_offset bytes = stack_alignment - (bytes mod stack_alignment)
 
-(** *)
+(** [emit_save_registers text registers] emits instructions into [text] to save
+    [registers] on the stack. If the register contents are to be restored, they
+    must be restored using [emit_restore_registers]. *)
+let emit_save_registers text registers =
+  let open Asm.Instruction in
+  let push_instructions = List.map (fun reg -> Push (Register reg)) registers in
+  let added_size = var_size * List.length registers in
+  let extra_offset = align_offset added_size in
+  Asm.Section.add_all text push_instructions;
+  Asm.Section.add text (Sub (Register RSP, Intermediate extra_offset))
+
+(** [emit_save_registers text registers] emits instructions into [text] to pop
+    [registers] from the stack. The registers being restored must be the same as
+    those most recently pushed using [emit_save_registers]. *)
+let emit_restore_registers text registers =
+  let open Asm.Instruction in
+  let pop_instructions =
+    List.rev_map (fun reg -> Pop (Register reg)) registers
+  in
+  let added_size = var_size * List.length registers in
+  let extra_offset = align_offset added_size in
+  Asm.Section.add text (Add (Register RSP, Intermediate extra_offset));
+  Asm.Section.add_all text pop_instructions
+
+let emit_call text regalloc name args =
+  emit_save_registers text Asm.Register.caller_saved_data_registers;
+  let param_moves =
+    Util.zip_shortest args Asm.Register.parameter_passing_registers
+    |> List.map (fun (arg, reg) ->
+           Asm.Instruction.Mov (Register reg, emit_oper regalloc arg))
+  in
+  Asm.Section.add_all text param_moves;
+  Asm.Section.add text (Asm.Instruction.Call (Label name));
+  emit_restore_registers text Asm.Register.caller_saved_data_registers
+
 let emit_ir text regalloc = function
   | Ir.Assign (var, op) ->
       Asm.Section.add text (Mov (emit_var regalloc var, emit_oper regalloc op))
@@ -62,6 +83,7 @@ let emit_ir text regalloc = function
           Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op)))
         op_opt
       |> ignore;
+      emit_restore_registers text Asm.Register.callee_saved_data_registers;
       Asm.Section.add_all text
         [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
 
@@ -92,12 +114,12 @@ let emit_preamble ~text =
        (Asm.Label.make ~is_global:false ~is_external:true debug_print_symbol))
 
 let emit_cfg ~text cfg regalloc =
+  Asm.Section.add text
+    (Label
+       (Asm.Label.make ~is_global:true ~is_external:false
+          (mangle (Cfg.name_of cfg))));
   Asm.Section.add_all text
-    [
-      Label
-        (Asm.Label.make ~is_global:true ~is_external:false
-           (mangle (Cfg.name_of cfg)));
-      Push (Register RBP);
-      Mov (Register RBP, Register RSP);
-    ];
+    [ Push (Register RBP); Mov (Register RBP, Register RSP) ];
+  (* restore is done at returns *)
+  emit_save_registers text Asm.Register.callee_saved_data_registers;
   Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

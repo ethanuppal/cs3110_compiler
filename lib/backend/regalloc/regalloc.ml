@@ -19,6 +19,8 @@ type allocation =
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
 
+(* todo make this less awkward why are registers just listed here maybe pass em
+   in or smth *)
 let registers =
   let open Asm.Register in
   [ RAX; RBX; RCX; RDX; RBP; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]

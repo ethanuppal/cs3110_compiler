@@ -90,6 +90,11 @@ let basename =
   in
   String.to_seq >> List.of_seq >> List.rev >> basename_aux
 
+let rec zip_shortest lst1 lst2 =
+  match (lst1, lst2) with
+  | h1 :: t1, h2 :: t2 -> (h1, h2) :: zip_shortest t1 t2
+  | _, _ -> []
+
 (** [pp_of string_of] is a pretty printer for a type with the string conversion
     function [string_of] that simply prints the result of [string_of] inline. *)
 let pp_of string_of fmt x = Format.fprintf fmt "%s" (string_of x)

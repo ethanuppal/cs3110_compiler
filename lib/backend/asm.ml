@@ -41,8 +41,16 @@ module Register = struct
 
   let compare = Stdlib.compare
 
-  (** Every register but RBX, RSP, RBP, and R12–R15. *)
-  let caller_saved = [ RAX; RCX; RDX; RSI; RDI; R8; R9; R10; R11 ]
+  (** Caller saved registers. rsp is excluded because it is used to manage the
+      stack and usually needs special care. *)
+  let caller_saved_data_registers =
+    [ RAX; RCX; RDX; RDI; RSI; R8; R9; R10; R11 ]
+
+  (** Caller saved registers. rbp is excluded because it is used to manage the
+      stack and usually needs special care. *)
+  let callee_saved_data_registers = [ RBX; R12; R13; R14; R15 ]
+
+  let parameter_passing_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
 end
 
 module Operand = struct

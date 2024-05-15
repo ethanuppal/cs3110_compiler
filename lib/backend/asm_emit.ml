@@ -119,7 +119,11 @@ let emit_cfg ~text cfg regalloc =
        (Asm.Label.make ~is_global:true ~is_external:false
           (mangle (Cfg.name_of cfg))));
   Asm.Section.add_all text
-    [ Push (Register RBP); Mov (Register RBP, Register RSP) ];
+    [
+      Push (Register RBP);
+      Mov (Register RBP, Register RSP);
+      Sub (Register RSP, Intermediate (align_offset var_size));
+    ];
   (* restore is done at returns *)
   emit_save_registers text Asm.Register.callee_saved_data_registers;
   Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

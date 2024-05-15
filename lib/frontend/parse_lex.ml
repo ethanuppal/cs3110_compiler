@@ -1,11 +1,5 @@
 exception ParserError of string
 
-(** [lex_and_parse ~filename:filename input] is the list of statements
-    represented by the source code string [input]. Optionally,
-    [~filename:filename] can be passed to indicate that the path of the source
-    was [filename]; by default, it is ["<stdin>"].
-
-    @raise ParserError on parsing error. *)
 let lex_and_parse ?(filename = "<stdin>") input =
   let syntax_error_msg lexbuf =
     let pos = Lexing.lexeme_start_p lexbuf in

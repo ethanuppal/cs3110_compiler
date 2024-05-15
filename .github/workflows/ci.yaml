@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - what-is-happening
 
 jobs:
   build_and_test:

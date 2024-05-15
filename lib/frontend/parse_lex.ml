@@ -23,15 +23,15 @@ let lex_and_parse ?(filename = "<stdin>") input =
   List.map
     (fun stmt ->
       match stmt with
-      | Ast.Function { name; params; return; body } ->
+      | AstType.Function { name; params; return; body } ->
           let last_stmt_is_return =
             if List.is_empty body then false
             else
               match List.rev body |> List.hd with
-              | Ast.Return _ -> true
+              | AstType.Return _ -> true
               | _ -> false
           in
-          Ast.Function
+          AstType.Function
             {
               name;
               params;

@@ -1,4 +1,4 @@
-open Ast
+open AstType
 open Util
 
 exception UnboundVariable of { name : string }

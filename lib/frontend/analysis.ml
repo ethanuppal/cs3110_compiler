@@ -1,3 +1,4 @@
+open AstType
 open Ast
 
 type analysis_error_info =

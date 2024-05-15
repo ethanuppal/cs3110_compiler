@@ -114,6 +114,7 @@ let emit_preamble ~text =
        (Asm.Label.make ~is_global:false ~is_external:true debug_print_symbol))
 
 let emit_cfg ~text cfg regalloc =
+  let entry = Cfg.entry_to cfg in
   Asm.Section.add text
     (Label
        (Asm.Label.make ~is_global:true ~is_external:false
@@ -126,4 +127,5 @@ let emit_cfg ~text cfg regalloc =
     ];
   (* restore is done at returns *)
   emit_save_registers text Asm.Register.callee_saved_data_registers;
+  Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));
   Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)

@@ -84,8 +84,7 @@ let compile paths flags build_dir_loc =
       (fun (ir_file_name, cfgs, asm_file_name, asm_file) ->
         Util.write_file ir_file_name
           (cfgs |> List.map Cfg.to_string |> String.concat "\n");
-        Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file);
-        print_string (Asm.AssemblyFile.to_nasm asm_file))
+        Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file))
       compiled_files;
 
     (* Run NASM *)

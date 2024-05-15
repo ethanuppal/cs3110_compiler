@@ -51,6 +51,9 @@ module Register = struct
   let callee_saved_data_registers = [ RBX; R12; R13; R14; R15 ]
 
   let parameter_passing_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
+
+  let allocation_registers =
+    [ RAX; RBX; RCX; RDX; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
 end
 
 module Operand = struct

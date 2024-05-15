@@ -26,7 +26,8 @@ let basic_vars =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let allocations = Regalloc.allocate_for cfg liveliness ordering in
+    let registers = Asm.Register.allocation_registers in
+    let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
          (VariableMap.find allocations var0)
@@ -51,7 +52,8 @@ let write_after_dead =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let allocations = Regalloc.allocate_for cfg liveliness ordering in
+    let registers = Asm.Register.allocation_registers in
+    let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     (check bool) "var0 and var1 are allocated separately" false
       (allocations_same
          (VariableMap.find allocations var0)
@@ -62,8 +64,9 @@ let write_after_dead =
 let spill_basic =
   let test () =
     let cfg = Cfg.make [ "spill_basic" ] in
+    let registers = Asm.Register.allocation_registers in
     let entry = Cfg.entry_to cfg in
-    let reg_count = List.length Regalloc.registers in
+    let reg_count = List.length registers in
     let vars =
       Seq.of_dispenser (Variable.make >> Option.some)
       |> Seq.take (reg_count + 1)
@@ -77,7 +80,7 @@ let spill_basic =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let allocations = Regalloc.allocate_for cfg liveliness ordering in
+    let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     let alloc_list = List.map (VariableMap.find allocations) vars in
     List.iteri
       (fun i var1 ->
@@ -96,8 +99,9 @@ let spill_basic =
 let spill_special_case =
   let test () =
     let cfg = Cfg.make [ "spill_special_case" ] in
+    let registers = Asm.Register.allocation_registers in
     let entry = Cfg.entry_to cfg in
-    let reg_count = List.length Regalloc.registers in
+    let reg_count = List.length registers in
     let vars =
       Seq.of_dispenser (Variable.make >> Option.some)
       |> Seq.take (reg_count + 1)
@@ -119,7 +123,7 @@ let spill_special_case =
 
     let liveliness = Liveliness.analysis_of cfg in
     let ordering = InstrOrdering.make cfg in
-    let allocations = Regalloc.allocate_for cfg liveliness ordering in
+    let allocations = Regalloc.allocate_for cfg registers liveliness ordering in
     let alloc_list = List.map (VariableMap.find allocations) vars in
 
     List.iteri

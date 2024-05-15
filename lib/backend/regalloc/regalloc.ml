@@ -17,12 +17,6 @@ type allocation =
 
 module BBAnalysis = Liveliness.BasicBlockAnalysis
 
-(* todo make this less awkward why are registers just listed here maybe pass em
-   in or smth *)
-let registers =
-  let open Asm.Register in
-  [ RAX; RBX; RCX; RDX; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
-
 let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     (ordering : InstrOrdering.t) =
   let tbl = VariableMap.create 16 in
@@ -67,8 +61,7 @@ let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
 
 (* Algorithm source:
    https://en.wikipedia.org/wiki/Register_allocation#Pseudocode *)
-let linear_scan (intervals : (Variable.t * interval) list)
-    (ordering : InstrOrdering.t) =
+let linear_scan intervals ordering registers =
   let compare_instr_id = InstrOrdering.compare ordering in
   let compare_pair_start (_, i1) (_, i2) = compare_instr_id i1.start i2.start in
   let compare_pair_end (_, i1) (_, i2) = compare_instr_id i1.stop i2.stop in
@@ -140,6 +133,6 @@ let linear_scan (intervals : (Variable.t * interval) list)
 
   assigned_alloc
 
-let allocate_for cfg liveliness ordering =
+let allocate_for cfg registers liveliness ordering =
   let vars_with_intervals = live_intervals cfg liveliness ordering in
-  linear_scan vars_with_intervals ordering
+  linear_scan vars_with_intervals ordering registers

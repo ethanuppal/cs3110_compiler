@@ -98,5 +98,3 @@ let rec zip_shortest lst1 lst2 =
 (** [pp_of string_of] is a pretty printer for a type with the string conversion
     function [string_of] that simply prints the result of [string_of] inline. *)
 let pp_of string_of fmt x = Format.fprintf fmt "%s" (string_of x)
-
-module IdMap = Hashtbl.Make (Id)

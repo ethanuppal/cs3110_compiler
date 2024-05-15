@@ -19,10 +19,10 @@ end
 
 module CopyProp : Pass.PASS = struct
   let copy_prop (bb, _) =
-    let vals = Ir.VariableMap.create 16 in
+    let vals = VariableMap.create 16 in
     let subs = function
       | Operand.Variable var -> (
-          match Ir.VariableMap.find_opt vals var with
+          match VariableMap.find_opt vals var with
           | Some oper -> oper
           | None -> Operand.make_var var)
       | oper -> oper
@@ -30,7 +30,7 @@ module CopyProp : Pass.PASS = struct
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
       | Assign (var, oper) ->
-          Ir.VariableMap.replace vals var oper;
+          VariableMap.replace vals var oper;
           Basic_block.set_ir bb i (Assign (var, subs oper))
       | Add (var, oper1, oper2) ->
           Basic_block.set_ir bb i (Add (var, subs oper1, subs oper2))
@@ -67,6 +67,6 @@ end
 
 let apply passes cfg liveliness =
   let apply_pass pass bb =
-    Pass.execute pass bb (Util.IdMap.find liveliness (Basic_block.id_of bb))
+    Pass.execute pass bb (IdMap.find liveliness (Basic_block.id_of bb))
   in
   passes |> List.iter (fun pass -> Cfg.iter (apply_pass pass) cfg)

@@ -1,5 +1,3 @@
-open Util
-
 type allocation =
   | Register of Asm.Register.t
   | Spill of int
@@ -10,4 +8,4 @@ val allocate_for :
   Cfg.t ->
   Liveliness.BasicBlockAnalysis.t IdMap.t ->
   InstrOrdering.t ->
-  allocation Ir.VariableMap.t
+  allocation VariableMap.t

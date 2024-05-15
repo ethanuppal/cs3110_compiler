@@ -1,7 +1,5 @@
 type constant = int
 
-module VariableMap = Hashtbl.Make (Variable)
-
 (** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t
@@ -50,7 +48,7 @@ let to_string =
         (name |> String.concat "::")
         (args |> List.map Operand.to_string |> String.concat ",")
   | Return op ->
-      sprintf "return%s"
+      sprintf "return %s"
         (match op with
         | Some op -> " " ^ Operand.to_string op
         | None -> "")

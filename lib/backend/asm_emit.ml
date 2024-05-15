@@ -15,7 +15,7 @@ let align_offset bytes =
   if amount_over = 0 then 0 else stack_alignment - amount_over
 
 let emit_var regalloc var =
-  match Ir.VariableMap.find regalloc var with
+  match VariableMap.find regalloc var with
   | Regalloc.Register reg -> Asm.Operand.Register reg
   | Spill i -> Asm.Operand.Deref (RBP, (-var_size * i) - var_size)
 
@@ -117,7 +117,7 @@ let emit_preamble ~text =
 
 let emit_cfg ~text cfg regalloc =
   let max_spill =
-    Ir.VariableMap.fold
+    VariableMap.fold
       (fun _var alloc acc ->
         match alloc with
         | Regalloc.Spill count -> max count acc

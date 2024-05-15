@@ -10,16 +10,18 @@ let debug_print_symbol = mangle [ "std"; "debug_print" ]
 let stack_alignment = 16
 let var_size = 8
 
+let align_offset bytes =
+  let amount_over = bytes mod stack_alignment in
+  if amount_over = 0 then 0 else stack_alignment - amount_over
+
 let emit_var regalloc var =
   match Ir.VariableMap.find regalloc var with
   | Regalloc.Register reg -> Asm.Operand.Register reg
-  | Spill i -> Asm.Operand.Deref (RSP, i)
+  | Spill i -> Asm.Operand.Deref (RBP, (-var_size * i) - var_size)
 
 let emit_oper regalloc = function
   | Operand.Variable var -> emit_var regalloc var
   | Constant int -> Asm.Operand.Intermediate int
-
-let align_offset bytes = stack_alignment - (bytes mod stack_alignment)
 
 (** [emit_save_registers text registers] emits instructions into [text] to save
     [registers] on the stack. If the register contents are to be restored, they
@@ -114,6 +116,18 @@ let emit_preamble ~text =
        (Asm.Label.make ~is_global:false ~is_external:true debug_print_symbol))
 
 let emit_cfg ~text cfg regalloc =
+  let max_spill =
+    Ir.VariableMap.fold
+      (fun _var alloc acc ->
+        match alloc with
+        | Regalloc.Spill count -> max count acc
+        | _ -> acc)
+      regalloc 0
+  in
+  (* max_spill starts at zero but we need to start from rbp-8 *)
+  let spill_bytes = var_size * (max_spill + 1) in
+  let stack_bytes = spill_bytes + align_offset spill_bytes in
+
   let entry = Cfg.entry_to cfg in
   Asm.Section.add text
     (Label
@@ -122,7 +136,11 @@ let emit_cfg ~text cfg regalloc =
   (* no need to align here, we can assume as a callee that 8 bytes for the
      return address was already pushed to the stack. *)
   Asm.Section.add_all text
-    [ Push (Register RBP); Mov (Register RBP, Register RSP) ];
+    [
+      Push (Register RBP);
+      Mov (Register RBP, Register RSP);
+      Sub (Register RSP, Intermediate stack_bytes);
+    ];
   (* restore is done at returns *)
   emit_save_registers text Asm.Register.callee_saved_data_registers;
   Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));

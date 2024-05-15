@@ -23,7 +23,7 @@ module BBAnalysis = Liveliness.BasicBlockAnalysis
    in or smth *)
 let registers =
   let open Asm.Register in
-  [ RAX; RBX; RCX; RDX; RBP; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
+  [ RAX; RBX; RCX; RDX; RSI; RDI; R8; R9; R10; R11; R12; R13; R14; R15 ]
 
 let live_intervals (cfg : Cfg.t) (liveliness : BBAnalysis.t IdMap.t)
     (ordering : InstrOrdering.t) =
@@ -87,7 +87,7 @@ let linear_scan (intervals : (Variable.t * interval) list)
   let cur_loc = ref 0 in
   let next_spill_loc () =
     let result = !cur_loc in
-    cur_loc := !cur_loc + 8;
+    cur_loc := !cur_loc + 1;
     result
   in
 

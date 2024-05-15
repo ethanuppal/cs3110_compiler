@@ -1,6 +1,3 @@
-type constant = int
-
-(** The kabIR for x86istmb. *)
 type t =
   | Assign of Variable.t * Operand.t
   | Add of Variable.t * Operand.t * Operand.t
@@ -12,8 +9,6 @@ type t =
   | Call of Variable.t * string list * Operand.t list
   | Return of Operand.t option
 
-(** [kill_of ir] is [Some var] if [var] is assigned to in [ir] and [None]
-    otherwise. *)
 let kill_of = function
   | Assign (var, _)
   | Add (var, _, _)

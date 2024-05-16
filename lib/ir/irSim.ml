@@ -27,7 +27,7 @@ let rec run_cfg simulator cfgs cfg =
   in
   let rec run_aux bb =
     let should_exit =
-      Basic_block.to_list bb
+      BasicBlock.to_list bb
       |> List.fold_left
            (fun acc ir ->
              acc
@@ -54,7 +54,7 @@ let rec run_cfg simulator cfgs cfg =
                    (if eval oper1 = eval oper2 then 1 else 0);
                  false
              | Ir.Ref _ | Ir.Deref _ ->
-                 failwith "Ir_sim does not support pointers"
+                 failwith "IrSim does not support pointers"
              | Ir.DebugPrint oper ->
                  simulator.output <-
                    simulator.output ^ Printf.sprintf "%d\n" (eval oper);
@@ -83,7 +83,7 @@ let rec run_cfg simulator cfgs cfg =
     in
     if not should_exit then
       let cond_opt =
-        match Basic_block.condition_of bb with
+        match BasicBlock.condition_of bb with
         | Always -> Some true
         | Never -> None
         | Conditional oper -> Some (eval oper <> 0)

@@ -6,18 +6,18 @@ let make_opts_test passes =
     Util.read_file
       (Util.merge_paths [ Project_root.path; "test/printing_progs/0.x86istmb" ])
   in
-  let statements = Parse_lex.lex_and_parse ir0_source in
+  let statements = ParseLex.lex_and_parse ir0_source in
   Analysis.infer statements;
-  let cfgs = Ir_gen.generate statements in
+  let cfgs = IrGen.generate statements in
   let main_cfg = List.hd cfgs in
   let liveliness_analysis = Liveliness.analysis_of main_cfg in
-  let simulator = Ir_sim.make () in
-  Ir_sim.run simulator [ main_cfg ];
-  let unopt_output = Ir_sim.output_of simulator in
+  let simulator = IrSim.make () in
+  IrSim.run simulator [ main_cfg ];
+  let unopt_output = IrSim.output_of simulator in
   Passes.apply passes main_cfg liveliness_analysis;
-  Ir_sim.clear_output simulator;
-  Ir_sim.run simulator [ main_cfg ];
-  let opt_output = Ir_sim.output_of simulator in
+  IrSim.clear_output simulator;
+  IrSim.run simulator [ main_cfg ];
+  let opt_output = IrSim.output_of simulator in
   (check string) "optimization should not change program behavior" unopt_output
     opt_output
 

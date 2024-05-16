@@ -10,7 +10,7 @@ let make cfg =
   let n = ref 0 in
   Cfg.iter
     (fun bb ->
-      OrderMap.add map (Basic_block.id_of bb) !n;
+      OrderMap.add map (BasicBlock.id_of bb) !n;
       n := !n + 1)
     cfg;
   map

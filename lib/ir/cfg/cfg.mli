@@ -1,7 +1,7 @@
 (** [t] is a control flow graph.
 
     Every basic block yielded through this API must only be modified with
-    through this API. In particular, all accessor functions in the [Basic_block]
+    through this API. In particular, all accessor functions in the [BasicBlock]
     module are permitted. Once the control flow graph generation is complete for
     a set of basic blocks, then it is permitted to modify the contents (but not
     the condition) of the basic blocks. *)
@@ -18,14 +18,14 @@ val name_of : t -> string list
 
     Review the specification for [t] on the basic blocks yielded through this
     API. *)
-val entry_to : t -> Basic_block.t
+val entry_to : t -> BasicBlock.t
 
 (** [create_block cfg] is a new block added to [cfg] with no inputs and no
     outputs.
 
     Review the specification for [t] on the basic blocks yielded through this
     API. *)
-val create_block : t -> Basic_block.t
+val create_block : t -> BasicBlock.t
 
 (* TODO: can any of this be simplified by taking advantage of the type system?
    Especially the requirement on [cond]. *)
@@ -41,10 +41,10 @@ val create_block : t -> Basic_block.t
     [block] must not already be followed by another block. *)
 val insert_branch :
   t ->
-  Basic_block.t ->
+  BasicBlock.t ->
   Branch_condition.t ->
-  Basic_block.t ->
-  Basic_block.t ->
+  BasicBlock.t ->
+  BasicBlock.t ->
   unit
 
 (** [insert_unconditional cfg pred succ] makes [succ] unconditionally follow
@@ -55,7 +55,7 @@ val insert_branch :
 
     Requires: [pred] and [succ] must already be in the graph, and [pred] must
     not already be followed by another block. *)
-val insert_unconditional : t -> Basic_block.t -> Basic_block.t -> unit
+val insert_unconditional : t -> BasicBlock.t -> BasicBlock.t -> unit
 
 (** [take_branch cfg bb cond] is [Some bb2], where [bb2] is basic block
     branching from [bb] in [cfg] with branch condition [cond], or [None] if no
@@ -63,27 +63,27 @@ val insert_unconditional : t -> Basic_block.t -> Basic_block.t -> unit
 
     Review the specification for [t] on the basic blocks yielded through this
     API. *)
-val take_branch : t -> Basic_block.t -> bool -> Basic_block.t option
+val take_branch : t -> BasicBlock.t -> bool -> BasicBlock.t option
 
 (** [blocks_of cfg] is a list of all blocks in [cfg]. *)
-val blocks_of : t -> Basic_block.t list
+val blocks_of : t -> BasicBlock.t list
 
 (** [edges_of cfg] is a list of all edges [(v1, b, v2)] in [cfg] where [v1] is
     the start block, [v2] is the destination block, and [b] indicates wheter
     [v2] follows [v1] when the condition of [v1] is true or false. *)
-val edges_of : t -> (Basic_block.t * bool * Basic_block.t) list
+val edges_of : t -> (BasicBlock.t * bool * BasicBlock.t) list
 
 (** [out_edges cfg block] is a list of edges from [block]. *)
-val out_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
+val out_edges : t -> BasicBlock.t -> (BasicBlock.t * bool) list
 
 (** [in_edges cfg block] is a list of edges into [block]. *)
-val in_edges : t -> Basic_block.t -> (Basic_block.t * bool) list
+val in_edges : t -> BasicBlock.t -> (BasicBlock.t * bool) list
 
 (** [iter f cfg] calls [f] on every basic block in [cfg]. *)
-val iter : (Basic_block.t -> unit) -> t -> unit
+val iter : (BasicBlock.t -> unit) -> t -> unit
 
 (** [exit_points cfg] is a list of all blocks that exit the program in [cfg]. *)
-val exit_points : t -> Basic_block.t list
+val exit_points : t -> BasicBlock.t list
 
 (* TODO: pretty print *)
 

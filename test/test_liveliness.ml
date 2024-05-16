@@ -16,7 +16,7 @@ let one_instruction_test () =
   let i0 = Variable.make () in
   let i1 = Variable.make () in
   let i2 = Variable.make () in
-  Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
+  BasicBlock.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
   let _, analysis =
     Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq |> List.hd
   in
@@ -42,8 +42,8 @@ let two_instruction_test () =
   let i2 = Variable.make () in
   let i3 = Variable.make () in
   let i4 = Variable.make () in
-  Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
-  Basic_block.add_ir bb (Ir.Add (i4, Operand.make_var i1, Operand.make_var i3));
+  BasicBlock.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
+  BasicBlock.add_ir bb (Ir.Add (i4, Operand.make_var i1, Operand.make_var i3));
   let _, analysis =
     Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq |> List.hd
   in
@@ -81,8 +81,8 @@ let two_basic_block_test () =
   let i2 = Variable.make () in
   let i3 = Variable.make () in
   let i4 = Variable.make () in
-  Basic_block.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
-  Basic_block.add_ir bb2 (Ir.Add (i0, Operand.make_var i3, Operand.make_var i4));
+  BasicBlock.add_ir bb (Ir.Add (i0, Operand.make_var i1, Operand.make_var i2));
+  BasicBlock.add_ir bb2 (Ir.Add (i0, Operand.make_var i3, Operand.make_var i4));
   let analyses = Liveliness.analysis_of cfg |> IdMap.to_seq |> List.of_seq in
   (check int)
     "the liveliness analysis should have returned analyses for both basic \
@@ -96,7 +96,7 @@ let two_basic_block_test () =
     analyses;
   List.iter
     (fun (id, analysis) ->
-      if id = Basic_block.id_of bb then (
+      if id = BasicBlock.id_of bb then (
         (check bool)
           "variables are live if they are read from in this instruction and if \
            they are live in the next instruction and not modified in this \

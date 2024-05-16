@@ -191,21 +191,21 @@ let emit_bb text cfg regalloc param_ctx bb =
   Asm.Section.add text
     (Label
        (Asm.Label.make ~is_global:false ~is_external:false
-          (Basic_block.label_for bb)));
-  bb |> Basic_block.to_list |> List.iter (emit_ir text regalloc param_ctx);
-  match Basic_block.condition_of bb with
+          (BasicBlock.label_for bb)));
+  bb |> BasicBlock.to_list |> List.iter (emit_ir text regalloc param_ctx);
+  match BasicBlock.condition_of bb with
   | Never | Conditional (Constant 0) -> ()
   | Always | Conditional (Constant _) ->
       let dest_bb = Cfg.take_branch cfg bb true |> Option.get in
-      Asm.Section.add text (Jmp (Label (Basic_block.label_for dest_bb)))
+      Asm.Section.add text (Jmp (Label (BasicBlock.label_for dest_bb)))
   | Conditional op -> (
       let true_bb = Cfg.take_branch cfg bb true |> Option.get in
       let false_bb = Cfg.take_branch cfg bb false |> Option.get in
       match op with
       | Variable var ->
           Asm.Section.add text (Cmp (emit_var regalloc var, Intermediate 0));
-          Asm.Section.add text (Je (Label (Basic_block.label_for true_bb)));
-          Asm.Section.add text (Jmp (Label (Basic_block.label_for false_bb)))
+          Asm.Section.add text (Je (Label (BasicBlock.label_for true_bb)));
+          Asm.Section.add text (Jmp (Label (BasicBlock.label_for false_bb)))
       | Constant _ -> failwith "failure")
 
 let emit_preamble ~text =
@@ -243,7 +243,7 @@ let emit_cfg ~text cfg regalloc =
 
   (* now that we've set up the stack and saved callee-save registers, we can
      jump to the entrypoint. *)
-  Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));
+  Asm.Section.add text (Jmp (Label (BasicBlock.label_for entry)));
 
   (* we'll need a parameter passing context so that the GetParam IR can work *)
   let param_ctx = ParameterPassingContext.make () in

@@ -44,7 +44,7 @@ let compile paths flags build_dir_loc =
         in
         Asm_emit.emit_cfg ~text:text_section cfg regalloc)
       cfgs;
-    Asm_clean.clean text_section;
+    if do_opts then Asm_clean.clean text_section;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
     let file_name_root =

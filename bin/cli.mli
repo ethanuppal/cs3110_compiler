@@ -1,8 +1,4 @@
-(** Compiler flags *)
-type flag =
-  | OnlyIR
-  | OnlyObject
-  | Optimize
+open X86ISTMB
 
 (** The various actions the program can take. *)
 type action =
@@ -11,7 +7,7 @@ type action =
   | Version
   | Compile of {
       paths : string list;
-      flags : flag list;
+      flags : Driver.flag list;
     }
 
 (** The result of parsing CLI arguments. [prog] is the name/path of the running

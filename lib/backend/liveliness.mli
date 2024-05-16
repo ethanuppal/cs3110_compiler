@@ -13,8 +13,8 @@ module BasicBlockAnalysis : sig
   (** [make bb] is an empty liveliness analysis for the basic block [bb]. It is
       guaranteed to never mutate or copy [bb] internally.
 
-      Requires: [Basic_block.length_of bb > 0]. *)
-  val make : Basic_block.t -> t
+      Requires: [BasicBlock.length_of bb > 0]. *)
+  val make : BasicBlock.t -> t
 
   (** [live_in analysis] is the set of variables live at the start of the the
       analyzed basic block.
@@ -47,7 +47,7 @@ end
 (** [analysis_of cfg] is an association between the basic blocks in [cfg] and
     their liveliness analyses. In particular, let [a] be the result of this
     function and let [bb] be a basic block in [cfg] Then,
-    [Util.IdMap.find a (Basic_block.id_of bb)] is the liveliness analysis of
+    [Util.IdMap.find a (BasicBlock.id_of bb)] is the liveliness analysis of
     [bb].
 
     Requires: every basic block in [cfg] has at least one IR instruction. *)

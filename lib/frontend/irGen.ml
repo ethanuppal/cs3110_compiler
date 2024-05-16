@@ -31,7 +31,7 @@ let rec generate_expr ctx cfg block expr =
         | Equals -> Ir.TestEqual (result, lhs_result, rhs_result)
         | _ -> failwith "not implemented"
       in
-      Basic_block.add_ir block ir_instr;
+      BasicBlock.add_ir block ir_instr;
       Operand.make_var result
   | Prefix { op; rhs; _ } ->
       let result = Variable.make () in
@@ -44,12 +44,12 @@ let rec generate_expr ctx cfg block expr =
         | BitAnd -> Ir.Ref (result, rhs_result)
         | _ -> failwith "not implemented"
       in
-      Basic_block.add_ir block ir_instr;
+      BasicBlock.add_ir block ir_instr;
       Operand.make_var result
   | Call { name; args; _ } ->
       let call_result = Variable.make () in
       let arg_results = List.map (generate_expr ctx cfg block) args in
-      Basic_block.add_ir block (Ir.Call (call_result, name, arg_results));
+      BasicBlock.add_ir block (Ir.Call (call_result, name, arg_results));
       Operand.make_var call_result
 
 (** [generate_stmt ctx cfg block stmt] adds IR for [stmt] (and potentially more
@@ -61,7 +61,7 @@ let rec generate_stmt ctx cfg block = function
       let result = generate_expr ctx cfg block expr in
       let result_var = Variable.make () in
       let assign = Ir.Assign (result_var, result) in
-      Basic_block.add_ir block assign;
+      BasicBlock.add_ir block assign;
       Context.insert ctx name result_var;
       block
   | Assignment (name, expr) ->
@@ -70,7 +70,7 @@ let rec generate_stmt ctx cfg block = function
         Context.get ctx name |> get_or_else (UnboundVariable { name })
       in
       let assign = Ir.Assign (result_var, result) in
-      Basic_block.add_ir block assign;
+      BasicBlock.add_ir block assign;
       block
   | If { cond; body } ->
       let cond_result = generate_expr ctx cfg block cond in
@@ -90,7 +90,7 @@ let rec generate_stmt ctx cfg block = function
       failwith "not allowed"
   | Print expr ->
       let to_print = generate_expr ctx cfg block expr in
-      Basic_block.add_ir block (Ir.DebugPrint to_print);
+      BasicBlock.add_ir block (Ir.DebugPrint to_print);
       block
   | ExprStatement expr ->
       ignore (generate_expr ctx cfg block expr);
@@ -99,8 +99,8 @@ let rec generate_stmt ctx cfg block = function
       (match expr_opt with
       | Some expr ->
           let to_return = generate_expr ctx cfg block expr in
-          Basic_block.add_ir block (Ir.Return (Some to_return))
-      | None -> Basic_block.add_ir block (Ir.Return None));
+          BasicBlock.add_ir block (Ir.Return (Some to_return))
+      | None -> BasicBlock.add_ir block (Ir.Return None));
       block
   | Namespace { name; contents } ->
       Context.push ctx;
@@ -127,7 +127,7 @@ let rec generate_top_level ctx ffi_names_ref decl_names_ref stmt =
           let param_var = Variable.make () in
           Context.insert ctx param param_var;
           let entry = Cfg.entry_to cfg in
-          Basic_block.add_ir entry (Ir.GetParam param_var))
+          BasicBlock.add_ir entry (Ir.GetParam param_var))
         params;
       ignore (generate_stmt_lst ctx cfg (Cfg.entry_to cfg) body);
       [ cfg ]

@@ -1,11 +1,11 @@
-module Graph = Digraph.Make (Basic_block)
+module Graph = Digraph.Make (BasicBlock)
 
 (** RI: [entry] is in [graph] and has no in neighbors. A block in [graph] must
     have zero out neighbors if its condition is [Never], one if its condition is
     [Always], and two if its condition is [Conditional]. *)
 type t = {
   name : string list;
-  entry : Basic_block.t;
+  entry : BasicBlock.t;
   graph : bool Graph.t;
 }
 
@@ -14,14 +14,14 @@ let rep_ok cfg =
     let vertices = Graph.vertices_of cfg.graph in
     if
       List.find_opt
-        (fun bb -> Basic_block.id_of bb = Basic_block.id_of cfg.entry)
+        (fun bb -> BasicBlock.id_of bb = BasicBlock.id_of cfg.entry)
         vertices
       = None
     then failwith "rep_ok";
     List.iter
       (fun bb ->
         let out_degree = Graph.out_neighbors cfg.graph bb |> List.length in
-        match Basic_block.condition_of bb with
+        match BasicBlock.condition_of bb with
         | Never -> if out_degree <> 0 then failwith "rep_ok"
         | Always -> if out_degree <> 1 then failwith "rep_ok"
         | Conditional _ -> if out_degree <> 2 then failwith "rep_ok")
@@ -30,7 +30,7 @@ let rep_ok cfg =
 
 let make name =
   let graph = Graph.empty () in
-  let entry = Basic_block.make () in
+  let entry = BasicBlock.make () in
   Graph.add_vertex graph entry;
   { name; entry; graph } |> rep_ok
 
@@ -39,22 +39,22 @@ let entry_to { entry; _ } = entry
 
 let create_block cfg =
   let cfg = rep_ok cfg in
-  let block = Basic_block.make () in
+  let block = BasicBlock.make () in
   Graph.add_vertex cfg.graph block;
   block
 
 let insert_branch cfg block cond bt bf =
   let cfg = rep_ok cfg in
-  assert (Basic_block.condition_of block = Never);
+  assert (BasicBlock.condition_of block = Never);
   Graph.add_edge cfg.graph block true bt;
   Graph.add_edge cfg.graph block false bf;
-  Basic_block.set_condition block cond
+  BasicBlock.set_condition block cond
 
 let insert_unconditional cfg pred succ =
   let cfg = rep_ok cfg in
-  assert (Basic_block.condition_of pred = Never);
+  assert (BasicBlock.condition_of pred = Never);
   Graph.add_edge cfg.graph pred true succ;
-  Basic_block.set_condition pred Branch_condition.Always
+  BasicBlock.set_condition pred Branch_condition.Always
 
 let take_branch cfg bb cond =
   let cfg = rep_ok cfg in
@@ -83,13 +83,13 @@ let to_string cfg =
   ^ ":\n"
   ^ (blocks_of cfg
     |> List.map (fun bb ->
-           let bb_string = Basic_block.to_string bb in
+           let bb_string = BasicBlock.to_string bb in
            let dest_strings =
              out_edges cfg bb
              |> List.map (fun (dest, cond) ->
                     "\n    "
                     ^ (if cond then "true" else "false")
-                    ^ " -> " ^ Basic_block.label_for dest)
+                    ^ " -> " ^ BasicBlock.label_for dest)
            in
            bb_string ^ String.concat "" dest_strings)
     |> String.concat "\n")

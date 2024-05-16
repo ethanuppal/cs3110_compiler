@@ -1,5 +1,5 @@
 type t =
-  | Basic of (Basic_block.t * Liveliness.BasicBlockAnalysis.t -> unit)
+  | Basic of (BasicBlock.t * Liveliness.BasicBlockAnalysis.t -> unit)
   | Combine of t list
   | Repeat of t * int
 

@@ -7,7 +7,7 @@
 ![CI Status](https://github.com/ethanuppal/cs3110_compiler/actions/workflows/ci.yaml/badge.svg)
 
 > "x86 is simple trust me bro"  
-> Last updated: 2024-05-16 13:25:30.792439
+> Last updated: 2024-05-16 13:46:39.281139
 
 ```
 $ ./main -h
@@ -20,7 +20,6 @@ Usage: ./main [-h|-v]
 -v,--version      prints version info
 -g,--gen          only produces IR
 -O,--optimize     runs optimizations
--c,--compile      only produces object files
 ```
 ```
 $ ./main -v

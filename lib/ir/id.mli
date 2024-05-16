@@ -40,5 +40,6 @@ module Gen : sig
       generator; see [make]. *)
   val next : t -> id
 
+  (** [hard_reset ()] resets the global value to 0. *)
   val hard_reset : unit -> unit
 end

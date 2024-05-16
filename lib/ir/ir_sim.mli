@@ -11,4 +11,5 @@ val run : t -> Cfg.t list -> unit
     human-readable string. *)
 val output_of : t -> string
 
+(** [clear_output simulator] clears the output of the simulator. *)
 val clear_output : t -> unit

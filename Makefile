@@ -7,7 +7,7 @@ build:
 	@cp _build/install/default/bin/x86ISTMB ./main
 	@chmod u+x ./main
 	@chmod u+x .githooks/pre-commit
-	@make README
+	@make README 1> /dev/null
 
 .PHONY: protect
 protect:

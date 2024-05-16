@@ -45,6 +45,10 @@ let rec run_cfg simulator cfgs cfg =
                  Context.insert simulator.context (Variable.to_string var)
                    (eval oper1 - eval oper2);
                  false
+             | Ir.Mul (var, oper1, oper2) ->
+                 Context.insert simulator.context (Variable.to_string var)
+                   (eval oper1 * eval oper2);
+                 false
              | Ir.TestEqual (var, oper1, oper2) ->
                  Context.insert simulator.context (Variable.to_string var)
                    (if eval oper1 = eval oper2 then 1 else 0);

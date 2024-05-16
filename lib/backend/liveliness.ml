@@ -1,5 +1,4 @@
 open Util
-open Ir
 
 (** A set of IR variables. *)
 module VariableSet = struct
@@ -128,20 +127,8 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
     instr_analysis.live_in <- VariableSet.remove var instr_analysis.live_in
   in
   bring_incoming ();
-  (match ir with
-  | DebugPrint op -> read_op op
-  | Assign (var, op) | Deref (var, op) | Ref (var, op) ->
-      write_var var;
-      read_op op
-  | Add (var, op1, op2) | Sub (var, op1, op2) | TestEqual (var, op1, op2) ->
-      write_var var;
-      read_op op1;
-      read_op op2
-  | Call (var, _, args) ->
-      write_var var;
-      List.iter read_op args
-  | GetParam var -> write_var var
-  | Return opt_op -> Option.map read_op opt_op |> ignore);
+  Option.map write_var (Ir.kill_of ir) |> ignore;
+  List.iter read_op (Ir.gen_of ir);
   check_for_changes ()
 
 (** [pass work_list liveliness cfg bb] performs a single pass of liveliness

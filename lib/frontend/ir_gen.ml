@@ -27,6 +27,7 @@ let rec generate_expr ctx cfg block expr =
         match op with
         | Plus -> Ir.Add (result, lhs_result, rhs_result)
         | Minus -> Ir.Sub (result, lhs_result, rhs_result)
+        | Times -> Ir.Mul (result, lhs_result, rhs_result)
         | Equals -> Ir.TestEqual (result, lhs_result, rhs_result)
         | _ -> failwith "not implemented"
       in

@@ -67,8 +67,16 @@ let emit_restore_registers text registers =
   Asm.Section.add text (Add (Register RSP, Intermediate extra_offset));
   Asm.Section.add_all text pop_instructions
 
-let emit_call text regalloc name args =
-  emit_save_registers text Asm.Register.caller_saved_data_registers;
+let emit_call text regalloc name args return_loc_opt =
+  let save_registers =
+    List.filter
+      (fun reg ->
+        match return_loc_opt with
+        | Some (Asm.Operand.Register return_reg) -> reg <> return_reg
+        | _ -> true)
+      Asm.Register.caller_saved_data_registers
+  in
+  emit_save_registers text save_registers;
   let param_moves =
     Util.zip_shortest args Asm.Register.parameter_registers
     |> List.map (fun (arg, reg) ->
@@ -76,7 +84,10 @@ let emit_call text regalloc name args =
   in
   Asm.Section.add_all text param_moves;
   Asm.Section.add text (Asm.Instruction.Call (Label name));
-  emit_restore_registers text Asm.Register.caller_saved_data_registers
+  (match return_loc_opt with
+  | Some return_loc -> Asm.Section.add text (Mov (return_loc, Register RAX))
+  | None -> ());
+  emit_restore_registers text save_registers
 
 let emit_ir text regalloc = function
   | Ir.Assign (var, op) ->
@@ -93,12 +104,17 @@ let emit_ir text regalloc = function
           Mov (emit_var regalloc var, emit_oper regalloc op);
           Sub (emit_var regalloc var, emit_oper regalloc op2);
         ]
+  | Mul (var, op, op2) ->
+      Asm.Section.add_all text
+        [
+          Mov (emit_var regalloc var, emit_oper regalloc op);
+          IMul (emit_var regalloc var, emit_oper regalloc op2);
+        ]
   | Ref _ -> failwith "ref not impl"
   | Deref _ -> failwith "deref not impl"
-  | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ]
+  | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ] None
   | Call (var, name, args) ->
-      emit_call text regalloc (mangle name) args;
-      Asm.Section.add text (Mov (emit_var regalloc var, Register RAX))
+      emit_call text regalloc (mangle name) args (Some (emit_var regalloc var))
   | GetParam var -> (
       let param_passing = ParameterPassingContext.make () in
       match ParameterPassingContext.get_next param_passing with

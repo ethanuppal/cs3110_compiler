@@ -39,7 +39,7 @@ module BasicBlockAnalysis = struct
     analysis
 
   let make bb =
-    Array.init (Basic_block.length_of bb) (fun _ ->
+    Array.init (BasicBlock.length_of bb) (fun _ ->
         { live_in = VariableSet.empty; live_out = None })
     |> rep_ok
 
@@ -81,7 +81,7 @@ end
 (** [apply_rules liveliness analysis cfg bb ir ir_index ~is_final] applies
     liveliness rules for instruction [ir] at index [ir_index] in basic block
     [bb], where [bb] is in [cfg] and has associated liveliness analysis
-    [analysis = IdMap.find liveliness (Basic_block.id_of bb)], and where
+    [analysis = IdMap.find liveliness (BasicBlock.id_of bb)], and where
     [is_final] if and only if [ir] is the final instruction in [bb], updating
     partial results in [liveliness] and returning whether any updates were made
     to liveliness information. *)
@@ -108,7 +108,7 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
          |> List.fold_left
               (fun acc (bb_succ, _) ->
                 let incoming_live_partial =
-                  IdMap.find liveliness (Basic_block.id_of bb_succ)
+                  IdMap.find liveliness (BasicBlock.id_of bb_succ)
                   |> BasicBlockAnalysis.live_in
                 in
                 VariableSet.union acc incoming_live_partial)
@@ -136,12 +136,12 @@ let apply_rules liveliness analysis cfg bb ir ir_idx ~is_final =
     returning whether any updates were made to liveliness information. *)
 let pass work_list liveliness cfg bb =
   let result = ref false in
-  let analysis = IdMap.find liveliness (Basic_block.id_of bb) in
-  let ir_count = Basic_block.length_of bb in
+  let analysis = IdMap.find liveliness (BasicBlock.id_of bb) in
+  let ir_count = BasicBlock.length_of bb in
   for rev_i = 1 to ir_count do
     let i = ir_count - rev_i in
     result :=
-      apply_rules liveliness analysis cfg bb (Basic_block.get_ir bb i) i
+      apply_rules liveliness analysis cfg bb (BasicBlock.get_ir bb i) i
         ~is_final:(rev_i = 1)
       || !result
   done;
@@ -166,7 +166,7 @@ let analysis_of cfg =
   let liveliness = IdMap.create 16 in
   Cfg.iter
     (fun bb ->
-      IdMap.add liveliness (Basic_block.id_of bb) (BasicBlockAnalysis.make bb))
+      IdMap.add liveliness (BasicBlock.id_of bb) (BasicBlockAnalysis.make bb))
     cfg;
   let rec converge () = if iterate liveliness cfg then converge () in
   converge ();

@@ -3,7 +3,7 @@ type t
 
 (** [make f] is a basic pass that runs a basic block and its liveliness analysis
     through [f]. *)
-val make : (Basic_block.t * Liveliness.BasicBlockAnalysis.t -> unit) -> t
+val make : (BasicBlock.t * Liveliness.BasicBlockAnalysis.t -> unit) -> t
 
 (** [sequence p1 p2] is a pass that first runs [p1] then [p2]. *)
 val sequence : t -> t -> t
@@ -17,7 +17,7 @@ val repeat : int -> t -> t
 (** [execute pass block liveliness] runs [block] and its analysis [liveliness]
     through [pass]. [block] may be mutated. [liveliness] must correspond to the
     analysis of [block] in its current state. *)
-val execute : t -> Basic_block.t -> Liveliness.BasicBlockAnalysis.t -> unit
+val execute : t -> BasicBlock.t -> Liveliness.BasicBlockAnalysis.t -> unit
 
 (** A signature for modules that implement optimization passes. *)
 module type Sig = sig

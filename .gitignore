@@ -7,7 +7,6 @@ gitlog.txt
 docs/html/*
 !docs/html/.gitkeep
 build_dir/
-bin/*
 !bin/.gitkeep
 demo/*
 *.coverage

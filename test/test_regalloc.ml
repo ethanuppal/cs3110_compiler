@@ -7,7 +7,7 @@ let allocations_same alloc1 alloc2 =
   | Regalloc.Spill loc1, Regalloc.Spill loc2 -> loc1 = loc2
   | reg1, reg2 -> reg1 = reg2
 
-let add_ir_list bb lst = List.iter (Basic_block.add_ir bb) lst
+let add_ir_list bb lst = List.iter (BasicBlock.add_ir bb) lst
 
 let basic_vars =
   let test () =
@@ -112,11 +112,10 @@ let spill_special_case =
       (List.map (fun var -> Ir.Assign (var, Operand.make_const 0)) vars);
 
     (* switch last two vars to trigger optimized spill behavior *)
-    let bb_len = Basic_block.length_of entry in
-    let last_ir = Basic_block.get_ir entry (bb_len - 1) in
-    Basic_block.set_ir entry (bb_len - 1)
-      (Basic_block.get_ir entry (bb_len - 2));
-    Basic_block.set_ir entry (bb_len - 2) last_ir;
+    let bb_len = BasicBlock.length_of entry in
+    let last_ir = BasicBlock.get_ir entry (bb_len - 1) in
+    BasicBlock.set_ir entry (bb_len - 1) (BasicBlock.get_ir entry (bb_len - 2));
+    BasicBlock.set_ir entry (bb_len - 2) last_ir;
 
     add_ir_list entry
       (List.map (fun var -> Ir.DebugPrint (Operand.make_var var)) vars);

@@ -20,7 +20,6 @@ Usage: ./main [-h|-v]
 -v,--version      prints version info
 -g,--gen          only produces IR
 -O,--optimize     runs optimizations
--c,--compile      only produces object files
 ```
 ```
 $ ./main -v

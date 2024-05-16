@@ -22,25 +22,25 @@ val add_ir : t -> Ir.t -> unit
 
 (** [get_ir bb idx] is the IR instruction at index [idx] in [bb].
 
-    Requires: [Basic_block.length_of bb > idx]. *)
+    Requires: [BasicBlock.length_of bb > idx]. *)
 val get_ir : t -> int -> Ir.t
 
 (** [get_orig_idx bb idx] is the original index of the IR instruction at index
     [idx] in [bb]; this original index will never changed.
 
-    Requires: [Basic_block.length_of bb > idx]. *)
+    Requires: [BasicBlock.length_of bb > idx]. *)
 val get_orig_idx : t -> int -> int
 
 (** [set_ir bb idx ir] replaces the IR instruction at index [idx] in [bb] with
     [ir].
 
-    Requires: [Basic_block.length_of bb > idx]. *)
+    Requires: [BasicBlock.length_of bb > idx]. *)
 val set_ir : t -> int -> Ir.t -> unit
 
 (** [rem_ir bb idx] removes the IR instruction at index [idx] in [bb], shifting
     all the subsequent indices/IR instructions backward.
 
-    Requires: [Basic_block.length_of bb > idx]. *)
+    Requires: [BasicBlock.length_of bb > idx]. *)
 val rem_ir : t -> int -> unit
 
 (** [to_list bb] are the IR operations in [bb] in order as a list. *)

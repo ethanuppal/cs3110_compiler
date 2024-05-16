@@ -43,7 +43,7 @@ let align_offset bytes =
 let emit_var regalloc var =
   match VariableMap.find regalloc var with
   | Regalloc.Register reg -> Asm.Operand.Register reg
-  | Spill i -> Asm.Operand.Deref (RBP, (-var_size * i) - var_size)
+  | Spill i -> Asm.Operand.Deref (RBP, -var_size * i)
 
 let emit_oper regalloc = function
   | Operand.Variable var -> emit_var regalloc var

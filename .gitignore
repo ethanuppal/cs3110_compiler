@@ -10,3 +10,4 @@ build_dir/
 bin/*
 !bin/.gitkeep
 demo/*
+*.coverage

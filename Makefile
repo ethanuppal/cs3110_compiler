@@ -32,7 +32,7 @@ utop: README
 .PHONY: bisect
 bisect: README
 	@find . -name '*.coverage' | xargs rm -f
-	@OUNIT_CI=true dune test --instrument-with bisect_ppx --force
+	@OUNIT_CI=true BISECT_FILE=`pwd`/bisect dune test --instrument-with bisect_ppx --force
 	@bisect-ppx-report html
 	@if [ $$(command -v pup) ]; then \
 		printf "Overall Coverage: "; \

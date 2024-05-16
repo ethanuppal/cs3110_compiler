@@ -4,7 +4,7 @@ open Alcotest
 let make_opts_test passes =
   let ir0_source =
     Util.read_file
-      (Util.merge_paths [ Project_root.path; "test/printing_progs/0.x86istmb" ])
+      (Util.merge_paths [ Project_root.path; "test/opt_tests/0.x86istmb" ])
   in
   let statements = ParseLex.lex_and_parse ir0_source in
   Analysis.infer statements;

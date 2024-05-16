@@ -73,7 +73,7 @@ let emit_restore_registers text registers =
   Asm.Section.add text (Add (Register RSP, Intermediate extra_offset));
   Asm.Section.add_all text pop_instructions
 
-let emit_call text regalloc name args =
+let emit_call text regalloc name args return_loc_opt =
   let open Asm.Instruction in
   let module ParamCtx = ParameterPassingContext in
   let param_ctx = ParamCtx.make () in
@@ -109,18 +109,30 @@ let emit_call text regalloc name args =
   let spill_size = var_size * max_spill in
   let offset = align_offset spill_size in
 
-  emit_save_registers text Asm.Register.caller_saved_data_registers;
+  let save_registers =
+    List.filter
+      (fun reg ->
+        match return_loc_opt with
+        | Some (Asm.Operand.Register return_reg) -> reg <> return_reg
+        | _ -> true)
+      Asm.Register.caller_saved_data_registers
+  in
+
+  emit_save_registers text save_registers;
   Asm.Section.add text (Sub (Register RSP, Intermediate offset));
   Asm.Section.add_all text spill_pushes;
   Asm.Section.add_all text reg_movs;
   Asm.Section.add text (Call (Label name));
+  (match return_loc_opt with
+  | Some return_loc -> Asm.Section.add text (Mov (return_loc, Register RAX))
+  | None -> ());
   Asm.Section.add text (Add (Register RSP, Intermediate (offset + spill_size)));
-  emit_restore_registers text Asm.Register.caller_saved_data_registers
+  emit_restore_registers text save_registers
 
 let emit_get_param text regalloc param_ctx var =
   match ParameterPassingContext.get_next param_ctx with
-  | RegisterParam dest ->
-      Asm.Section.add text (Mov (emit_var regalloc var, Register dest))
+  | RegisterParam src ->
+      Asm.Section.add text (Mov (emit_var regalloc var, Register src))
   | SpilledParam i -> (
       let rbp_offset = var_size + (var_size * i) in
       let src = Asm.Operand.Deref (RBP, rbp_offset) in
@@ -139,8 +151,7 @@ let emit_get_param text regalloc param_ctx var =
 
 let emit_return text regalloc op_opt =
   (match op_opt with
-  | Some value ->
-      Asm.Section.add text (Mov (Register RAX, emit_oper regalloc value))
+  | Some op -> Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op))
   | None -> ());
 
   emit_restore_registers text Asm.Register.callee_saved_data_registers;
@@ -162,12 +173,17 @@ let emit_ir text regalloc param_ctx = function
           Mov (emit_var regalloc var, emit_oper regalloc op);
           Sub (emit_var regalloc var, emit_oper regalloc op2);
         ]
+  | Mul (var, op, op2) ->
+      Asm.Section.add_all text
+        [
+          Mov (emit_var regalloc var, emit_oper regalloc op);
+          IMul (emit_var regalloc var, emit_oper regalloc op2);
+        ]
   | Ref _ -> failwith "ref not impl"
   | Deref _ -> failwith "deref not impl"
-  | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ]
+  | DebugPrint op -> emit_call text regalloc debug_print_symbol [ op ] None
   | Call (var, name, args) ->
-      emit_call text regalloc (mangle name) args;
-      Asm.Section.add text (Mov (emit_var regalloc var, Register RAX))
+      emit_call text regalloc (mangle name) args (Some (emit_var regalloc var))
   | GetParam var -> emit_get_param text regalloc param_ctx var
   | Return op_opt -> emit_return text regalloc op_opt
 
@@ -188,8 +204,8 @@ let emit_bb text cfg regalloc param_ctx bb =
       match op with
       | Variable var ->
           Asm.Section.add text (Cmp (emit_var regalloc var, Intermediate 0));
-          Asm.Section.add text (Je (Label (Basic_block.label_for false_bb)));
-          Asm.Section.add text (Jmp (Label (Basic_block.label_for true_bb)))
+          Asm.Section.add text (Je (Label (Basic_block.label_for true_bb)));
+          Asm.Section.add text (Jmp (Label (Basic_block.label_for false_bb)))
       | Constant _ -> failwith "failure")
 
 let emit_preamble ~text =

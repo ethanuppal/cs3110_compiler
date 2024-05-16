@@ -26,5 +26,5 @@ let test_suite =
     Sys.readdir e2e_root |> Array.to_list
     |> List.map (fun filename ->
            let path = Util.merge_paths [ e2e_root; filename ] in
-           test_case filename `Slow (make_e2e_test path (Util.read_file path)))
+           test_case filename `Quick (make_e2e_test path (Util.read_file path)))
   )

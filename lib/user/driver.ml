@@ -62,6 +62,7 @@ let compile paths flags build_dir_loc =
         in
         Asm_emit.emit_cfg ~text:text_section cfg regalloc)
       cfgs;
+    Asm_clean.clean text_section;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
     let file_name_root =
@@ -117,7 +118,8 @@ let compile paths flags build_dir_loc =
         in
         if Sys.command nasm_command <> 0 then failwith "Failed to run NASM."
         else
-          Printf.printf "==> \x1B[32mGenerated \x1B[4m%s\x1B[m\n" asm_file_name)
+          Printf.printf "==> \x1B[32mGenerated \x1B[4m%s/%s\x1B[m\n" build_dir
+            asm_file_name)
       compiled_files;
 
     (* Run clang *)

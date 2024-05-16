@@ -78,6 +78,7 @@ module Label = struct
   }
 
   let make ~is_global ~is_external name = { is_global; is_external; name }
+  let name_of label = label.name
 
   let to_nasm label =
     match (label.is_global, label.is_external) with
@@ -92,7 +93,7 @@ module Instruction = struct
     | Mov of Operand.t * Operand.t
     | Add of Operand.t * Operand.t
     | Sub of Operand.t * Operand.t
-    | IMul of Operand.t
+    | IMul of Operand.t * Operand.t
     | Push of Operand.t
     | Pop of Operand.t
     | Call of Operand.t
@@ -111,7 +112,8 @@ module Instruction = struct
         "add " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Sub (op1, op2) ->
         "sub " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
-    | IMul op -> "imul " ^ Operand.to_nasm op
+    | IMul (op1, op2) ->
+        "imul " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Push op -> "push " ^ Operand.to_nasm op
     | Pop op -> "pop " ^ Operand.to_nasm op
     | Call op -> "call " ^ Operand.to_nasm op
@@ -146,6 +148,11 @@ module Section = struct
               | Label _ -> str
               | _ -> display_indent ^ str))
     |> String.concat "\n"
+
+  let get_instr section idx = BatDynArray.get section.contents idx
+  let set_instr section idx instr = BatDynArray.set section.contents idx instr
+  let rem_instr section idx = BatDynArray.delete section.contents idx
+  let length_of section = BatDynArray.length section.contents
 end
 
 module AssemblyFile = struct

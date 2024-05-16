@@ -64,6 +64,9 @@ module Label : sig
       if [is_external], but not both. *)
   val make : is_global:bool -> is_external:bool -> string -> t
 
+  (** [name_of label] is the name of [label]. *)
+  val name_of : t -> string
+
   (** [to_nasm label] is the NASM representation of [label]. *)
   val to_nasm : t -> string
 end
@@ -75,7 +78,7 @@ module Instruction : sig
     | Mov of Operand.t * Operand.t
     | Add of Operand.t * Operand.t
     | Sub of Operand.t * Operand.t
-    | IMul of Operand.t
+    | IMul of Operand.t * Operand.t
     | Push of Operand.t
     | Pop of Operand.t
     | Call of Operand.t
@@ -109,6 +112,21 @@ module Section : sig
 
   (** [to_nasm section] is the NASM representation of [section]. *)
   val to_nasm : t -> string
+
+  (** [get_instr section idx] is the instruction at index [idx] in [section]. *)
+  val get_instr : t -> int -> Instruction.t
+
+  (** [set_instr section idx instr] sets the instruction at index [idx] in
+      [section] to [instr]. *)
+  val set_instr : t -> int -> Instruction.t -> unit
+
+  (** [rem_instr section idx] deletes the instruction at index [idx] in
+      [section], invalidating all subsequent indices for [get_instr] and
+      [set_instr]. *)
+  val rem_instr : t -> int -> unit
+
+  (** [length_of section] is the number of instructions in [section]. *)
+  val length_of : t -> int
 end
 
 (** Contains functionality for creating assembly files. *)

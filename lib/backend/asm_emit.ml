@@ -4,18 +4,24 @@ module ParameterPassingContext = struct
     mutable regs : Asm.Register.t list;
   }
 
-  let make () = { pos = 0; regs = Asm.Register.parameter_registers }
+  (* this has different semantics from the regalloc allocation type, which is
+     why i'm separating it. register allocation and parameter passing actually
+     have very similar requirements but they're not exactly the same. *)
+  type alloc =
+    | RegisterParam of Asm.Register.t
+    | SpilledParam of int
+
+  let make () = { pos = 1; regs = Asm.Register.parameter_registers }
 
   let get_next ctx =
     if List.is_empty ctx.regs then (
       let pos = ctx.pos in
       ctx.pos <- ctx.pos + 1;
-      ignore pos;
-      failwith "i think should return spill with negative index")
+      SpilledParam pos)
     else
       let result = List.hd ctx.regs in
       ctx.regs <- List.tl ctx.regs;
-      Regalloc.Register result
+      RegisterParam result
 end
 
 let mangle name =
@@ -68,17 +74,80 @@ let emit_restore_registers text registers =
   Asm.Section.add_all text pop_instructions
 
 let emit_call text regalloc name args =
-  emit_save_registers text Asm.Register.caller_saved_data_registers;
-  let param_moves =
-    Util.zip_shortest args Asm.Register.parameter_registers
-    |> List.map (fun (arg, reg) ->
-           Asm.Instruction.Mov (Register reg, emit_oper regalloc arg))
+  let open Asm.Instruction in
+  let module ParamCtx = ParameterPassingContext in
+  let param_ctx = ParamCtx.make () in
+  let allocs = List.map (fun arg -> (ParamCtx.get_next param_ctx, arg)) args in
+
+  let regs =
+    List.filter_map
+      (fun (alloc, arg) ->
+        match alloc with
+        | ParamCtx.RegisterParam reg -> Some (reg, arg)
+        | SpilledParam _ -> None)
+      allocs
   in
-  Asm.Section.add_all text param_moves;
-  Asm.Section.add text (Asm.Instruction.Call (Label name));
+  (* since parameter passing registers are a subset of caller saved registers,
+     we should have no problems moving parameters in. *)
+  let reg_movs =
+    List.map (fun (reg, arg) -> Mov (Register reg, emit_oper regalloc arg)) regs
+  in
+
+  let spills =
+    List.filter_map
+      (fun (alloc, arg) ->
+        match alloc with
+        | ParamCtx.RegisterParam _ -> None
+        | SpilledParam i -> Some (i, arg))
+      allocs
+  in
+  (* need to push in reverse order *)
+  let spill_pushes =
+    List.rev_map (fun (_, arg) -> Push (emit_oper regalloc arg)) spills
+  in
+  let max_spill = List.fold_left (fun acc (i, _) -> max acc i) 0 spills in
+  let spill_size = var_size * max_spill in
+  let offset = align_offset spill_size in
+
+  emit_save_registers text Asm.Register.caller_saved_data_registers;
+  Asm.Section.add text (Sub (Register RSP, Intermediate offset));
+  Asm.Section.add_all text spill_pushes;
+  Asm.Section.add_all text reg_movs;
+  Asm.Section.add text (Call (Label name));
+  Asm.Section.add text (Add (Register RSP, Intermediate (offset + spill_size)));
   emit_restore_registers text Asm.Register.caller_saved_data_registers
 
-let emit_ir text regalloc = function
+let emit_get_param text regalloc param_ctx var =
+  match ParameterPassingContext.get_next param_ctx with
+  | RegisterParam dest ->
+      Asm.Section.add text (Mov (emit_var regalloc var, Register dest))
+  | SpilledParam i -> (
+      let rbp_offset = var_size + (var_size * i) in
+      let src = Asm.Operand.Deref (RBP, rbp_offset) in
+      let dest = emit_var regalloc var in
+      match dest with
+      | Deref _ ->
+          (* we'll have to use RAX as a temporary *)
+          Asm.Section.add_all text
+            [
+              Push (Register RAX);
+              Mov (Register RAX, src);
+              Mov (dest, Register RAX);
+              Pop (Register RAX);
+            ]
+      | _ -> Asm.Section.add text (Mov (dest, src)))
+
+let emit_return text regalloc op_opt =
+  (match op_opt with
+  | Some value ->
+      Asm.Section.add text (Mov (Register RAX, emit_oper regalloc value))
+  | None -> ());
+
+  emit_restore_registers text Asm.Register.callee_saved_data_registers;
+  Asm.Section.add_all text
+    [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
+
+let emit_ir text regalloc param_ctx = function
   | Ir.Assign (var, op) ->
       Asm.Section.add text (Mov (emit_var regalloc var, emit_oper regalloc op))
   | Add (var, op, op2) ->
@@ -99,28 +168,15 @@ let emit_ir text regalloc = function
   | Call (var, name, args) ->
       emit_call text regalloc (mangle name) args;
       Asm.Section.add text (Mov (emit_var regalloc var, Register RAX))
-  | GetParam var -> (
-      let param_passing = ParameterPassingContext.make () in
-      match ParameterPassingContext.get_next param_passing with
-      | Register dest ->
-          Asm.Section.add text (Mov (emit_var regalloc var, Register dest))
-      | Spill _ -> failwith "todo")
-  | Return op_opt ->
-      Option.map
-        (fun op ->
-          Asm.Section.add text (Mov (Register RAX, emit_oper regalloc op)))
-        op_opt
-      |> ignore;
-      emit_restore_registers text Asm.Register.callee_saved_data_registers;
-      Asm.Section.add_all text
-        [ Mov (Register RSP, Register RBP); Pop (Register RBP); Ret ]
+  | GetParam var -> emit_get_param text regalloc param_ctx var
+  | Return op_opt -> emit_return text regalloc op_opt
 
-let emit_bb text cfg regalloc bb =
+let emit_bb text cfg regalloc param_ctx bb =
   Asm.Section.add text
     (Label
        (Asm.Label.make ~is_global:false ~is_external:false
           (Basic_block.label_for bb)));
-  bb |> Basic_block.to_list |> List.iter (emit_ir text regalloc);
+  bb |> Basic_block.to_list |> List.iter (emit_ir text regalloc param_ctx);
   match Basic_block.condition_of bb with
   | Never | Conditional (Constant 0) -> ()
   | Always | Conditional (Constant _) ->
@@ -150,8 +206,7 @@ let emit_cfg ~text cfg regalloc =
         | _ -> acc)
       regalloc 0
   in
-  (* max_spill starts at zero but we need to start from rbp-8 *)
-  let spill_bytes = var_size * (max_spill + 1) in
+  let spill_bytes = var_size * max_spill in
   let stack_bytes = spill_bytes + align_offset spill_bytes in
 
   let entry = Cfg.entry_to cfg in
@@ -169,5 +224,11 @@ let emit_cfg ~text cfg regalloc =
     ];
   (* restore is done at returns *)
   emit_save_registers text Asm.Register.callee_saved_data_registers;
+
+  (* now that we've set up the stack and saved callee-save registers, we can
+     jump to the entrypoint. *)
   Asm.Section.add text (Jmp (Label (Basic_block.label_for entry)));
-  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc)
+
+  (* we'll need a parameter passing context so that the GetParam IR can work *)
+  let param_ctx = ParameterPassingContext.make () in
+  Cfg.blocks_of cfg |> List.iter (emit_bb text cfg regalloc param_ctx)

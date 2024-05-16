@@ -30,10 +30,6 @@ let ir_transform filename input =
 let ir_suite =
   Snapshot.make_test_suite snapshots_root "ir" (ir_transform, `Quick)
 
-(** not sure why this is separate from [ir_suite]. *)
-let basic_suite =
-  Snapshot.make_test_suite snapshots_root "basic" (ir_transform, `Quick)
-
 let parse_transform filename input =
   let open X86ISTMB in
   try

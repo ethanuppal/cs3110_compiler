@@ -165,6 +165,8 @@ let emit_call text_section data_section regalloc name args return_loc_opt =
   | Some return_loc ->
       Asm.Section.add text_section (Mov (return_loc, Register RAX))
   | None -> ());
+  Asm.Section.add text_section
+    (Add (Register RSP, Intermediate (offset + spill_size)));
   emit_restore_registers text_section save_registers
 
 let emit_get_param text regalloc param_ctx var =

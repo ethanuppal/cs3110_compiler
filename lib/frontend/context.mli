@@ -36,14 +36,14 @@ val get_local : 'a t -> string -> 'a option
     a scope. Scopes that were pushed later are earlier in the result. *)
 val to_list : 'a t -> (string * 'a) list list
 
-(** [add_namespace ctx name] adds a namespace [name] to the context [ctx].
-    The namespace is added to the top of the namespace stack in the context. *)
+(** [add_namespace ctx name] adds a namespace [name] to the context [ctx]. The
+    namespace is added to the top of the namespace stack in the context. *)
 val add_namespace : 'a t -> string -> unit
 
-(** [pop_namespace ctx] pops the top namespace from the given context [ctx].
-    It updates the namespace field of [ctx] by removing the first element. *)
+(** [pop_namespace ctx] pops the top namespace from the given context [ctx]. It
+    updates the namespace field of [ctx] by removing the first element. *)
 val pop_namespace : 'a t -> unit
 
-(** [in_namespace ctx symbol] returns the list of symbols in the namespace of [ctx] with [symbol] included.
-    The symbols are returned in reverse order. *)
+(** [in_namespace ctx symbol] returns the list of symbols in the namespace of
+    [ctx] with [symbol] included. The symbols are returned in reverse order. *)
 val in_namespace : 'a t -> string -> string list

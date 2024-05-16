@@ -56,9 +56,9 @@ val equal : t -> t -> bool
     [bb1 = bb2]. *)
 val hash : t -> int
 
-(** [to_string bb] returns a string representation of the basic block [bb].
-    The string representation includes the label of the basic block, followed
-    by the string representation of each instruction in the basic block.
-    If the basic block has a branch condition, it is also included in the
-    string representation. *)
+(** [to_string bb] returns a string representation of the basic block [bb]. The
+    string representation includes the label of the basic block, followed by the
+    string representation of each instruction in the basic block. If the basic
+    block has a branch condition, it is also included in the string
+    representation. *)
 val to_string : t -> string

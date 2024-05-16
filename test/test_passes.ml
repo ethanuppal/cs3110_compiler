@@ -25,32 +25,15 @@ let fixed_ir_opts_tests =
   [
     ([ Passes.ConstFold.pass ], "const fold ir opt");
     ([ Passes.CopyProp.pass ], "copy prop ir opt");
-    ([ Passes.DeadCode.pass ], "dead code ir opt");
-    ( [
-        Pass.combine
-          [ Passes.ConstFold.pass; Passes.CopyProp.pass; Passes.DeadCode.pass ];
-      ],
+    ( [ Pass.combine [ Passes.ConstFold.pass; Passes.CopyProp.pass ] ],
       "combined ir opt" );
     ( [
         Pass.sequence Passes.ConstFold.pass Passes.CopyProp.pass
         |> Pass.repeat 10;
-        Passes.DeadCode.pass;
       ],
       "complex ir opt" );
   ]
   |> List.map (fun (passes, name) ->
          test_case name `Quick (fun () -> make_opts_test passes))
-
-(* let qcheck_ir_opts () = let open QCheck in let test = let open QCheck.Gen in
-   let pass_options = [| Passes.ConstFold.pass; Passes.CopyProp.pass;
-   Passes.DeadCode.pass |] in let get_pass () = let* idx = int_bound
-   (Array.length pass_options) in pass_options.(idx) in let gen_pass () = let
-   rec gen_pass_aux temp pass = let* prob = float 1.0 in if prob < exp (-.temp)
-   then pass else let* mutation = int_bound 3 in (match mutation with | 0 ->
-   let* n = int_bound 10 in Pass.repeat n pass | 1 -> Pass.compose pass
-   (get_pass ()) | 2 -> Pass.combine pass :: Seq.unfold () | _ -> pass) |>
-   gen_pass_aux (temp +. 1.0) in gen_pass_aux 1.0 (get_pass ()) in let pass =
-   gen_pass () in make_opts_test [ pass ] in QCheck_alcotest.to_alcotest
-   ~long:true (Test.make ~name:"random ir opt passes" ~count:100 test) *)
 
 let test_suite = ("lib/ir/passes.ml", fixed_ir_opts_tests)

@@ -43,30 +43,6 @@ module CopyProp : Pass.Sig = struct
   let pass = Pass.make copy_prop
 end
 
-module DeadCode : Pass.Sig = struct
-  let dead_code (bb, analysis) =
-    let length = Basic_block.length_of bb in
-    for rev_i = 0 to Basic_block.length_of bb - 1 do
-      let i = length - rev_i - 1 in
-      let live_out =
-        Liveliness.BasicBlockAnalysis.live_after_instr analysis
-          (Basic_block.get_orig_idx bb i)
-      in
-      let ir = Basic_block.get_ir bb i in
-      (* things with potential side effects should never be eliminated. *)
-      match ir with
-      | Call _ | DebugPrint _ | GetParam _ | Return _ -> ()
-      | instr -> (
-          match Ir.kill_of instr with
-          | Some var ->
-              if not (Liveliness.VariableSet.mem var live_out) then
-                Basic_block.rem_ir bb i
-          | None -> ())
-    done
-
-  let pass = Pass.make dead_code
-end
-
 let apply passes cfg liveliness =
   let apply_pass pass bb =
     Pass.execute pass bb (IdMap.find liveliness (Basic_block.id_of bb))

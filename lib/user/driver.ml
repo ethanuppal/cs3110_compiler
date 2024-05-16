@@ -25,7 +25,6 @@ let compile paths flags build_dir_loc =
         if do_opts then
           Passes.apply
             [
-              Passes.DeadCode.pass;
               Pass.sequence Passes.CopyProp.pass Passes.ConstFold.pass
               |> Pass.repeat 10;
             ]

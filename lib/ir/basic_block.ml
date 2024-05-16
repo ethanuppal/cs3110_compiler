@@ -1,5 +1,3 @@
-(** TODO: needs tests *)
-
 let bb_gen = Id.Gen.make ()
 
 type t = {

@@ -4,9 +4,6 @@ module ConstFold : Pass.Sig
 (** Copy propagation optimization pass. *)
 module CopyProp : Pass.Sig
 
-(** Dead code elimination optimization pass. *)
-module DeadCode : Pass.Sig
-
 (** [apply passes cfg liveliness] applies each pass in [passes] to [cfg] in
     order, using the liveliness information for [cfg] ([liveliness]).
 

@@ -1,0 +1,36 @@
+func one_spill(a: Int, b: Int, c: Int, d: Int, e: Int, f: Int, g: Int) {
+    let h = 7
+    let i = 8
+    let j = 9
+    let k = 10
+    let l = 11
+    let m = 12
+    let n = 13
+    let o = 14
+    let p = 15
+    let q = 16
+    let r = 17
+
+    print a
+    print b
+    print c
+    print d
+    print e
+    print f
+    print g
+    print h
+    print i
+    print j
+    print k
+    print l
+    print m
+    print n
+    print o
+    print p
+    print q
+    print r
+}
+
+func main() {
+	one_spill(1, 2, 3, 4, 5, 6, 7)
+}

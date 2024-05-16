@@ -1,0 +1,9 @@
+namespace my {
+	func display() {
+		print 3110
+	}
+}
+
+func main() {
+	my::display()
+}

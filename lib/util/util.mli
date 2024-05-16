@@ -42,10 +42,6 @@ val merge_paths : string list -> string
     ['/']. *)
 val basename : string -> string
 
-(** [zip_shortest [a1; a2; ... an] [b1; b2; ... bm]] is
-    [(a1, b1); (a2, b2); ... (ak, bk)] where [k = min(n, m)]. *)
-val zip_shortest : 'a list -> 'b list -> ('a * 'b) list
-
 (** [pp_of string_of] is a pretty printer for a type with the string conversion
     function [string_of] that simply prints the result of [string_of] inline. *)
 val pp_of : ('a -> string) -> Format.formatter -> 'a -> unit

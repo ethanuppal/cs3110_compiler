@@ -61,7 +61,7 @@ let rec run_cfg simulator cfgs cfg =
                  false
              | Ir.Call (result, name, args) ->
                  let called_cfg = find_cfg_by_name cfgs name in
-                 simulator.args <- List.rev_map eval args :: simulator.args;
+                 simulator.args <- List.map eval args :: simulator.args;
                  run_cfg simulator cfgs called_cfg;
                  simulator.args <- List.tl simulator.args;
                  Context.insert simulator.context

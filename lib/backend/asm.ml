@@ -50,7 +50,7 @@ module Register = struct
       stack and usually needs special care. *)
   let callee_saved_data_registers = [ RBX; R12; R13; R14; R15 ]
 
-  let data_registers = callee_saved_data_registers @ callee_saved_data_registers
+  let data_registers = callee_saved_data_registers @ caller_saved_data_registers
   let parameter_registers = [ RDI; RSI; RDX; RCX; R8; R9 ]
 end
 

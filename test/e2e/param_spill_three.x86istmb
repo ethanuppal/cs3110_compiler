@@ -1,0 +1,15 @@
+func three_spill(a: Int, b: Int, c: Int, d: Int, e: Int, f: Int, g: Int, h: Int, i: Int) {
+    print a
+    print b
+    print c
+    print d
+    print e
+    print f
+    print g
+    print h
+    print i
+}
+
+func main() {
+	three_spill(1, 2, 3, 4, 5, 6, 7, 8, 9)
+}

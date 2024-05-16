@@ -75,7 +75,7 @@ let linear_scan intervals ordering registers =
   (* must remain sorted by increasing end point *)
   let active : (Variable.t * interval) BatRefList.t = BatRefList.empty () in
 
-  let cur_loc = ref 0 in
+  let cur_loc = ref 1 in
   let next_spill_loc () =
     let result = !cur_loc in
     cur_loc := !cur_loc + 1;

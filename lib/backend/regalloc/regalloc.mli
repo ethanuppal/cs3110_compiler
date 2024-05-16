@@ -1,7 +1,7 @@
 (** Represents the hardware allocated for a variable. [Register reg] means the
     variable has been allocated to a Asm.Register. [Spill i] means the variable
     is to be spilled to the stack. The location [i] will be unique and count up
-    from zero for an allocation scheme produced by [allocate_for]. *)
+    from *one* for an allocation scheme produced by [allocate_for]. *)
 type allocation =
   | Register of Asm.Register.t
   | Spill of int

@@ -9,8 +9,8 @@ module ConstFold : Pass.Sig = struct
           Basic_block.set_ir bb i
             (Ir.Assign (var, Operand.make_const (lhs - rhs)))
       | Mul (var, Operand.Constant lhs, Operand.Constant rhs) ->
-        Basic_block.set_ir bb i
-          (Ir.Assign (var, Operand.make_const (lhs * rhs)))
+          Basic_block.set_ir bb i
+            (Ir.Assign (var, Operand.make_const (lhs * rhs)))
       | _ -> ()
     done
 
@@ -66,21 +66,18 @@ module DeadCode : Pass.Sig = struct
 end
 
 module IntMult : Pass.Sig = struct
-  let is_power_of_two x =
-    (x > 0) && (x land (x - 1) = 0)
+  let is_power_of_two x = x > 0 && x land (x - 1) = 0
 
   let log2 x =
-    let rec aux n acc =
-      if acc >= x then n
-      else aux (n + 1) (acc * 2)
-    in
+    let rec aux n acc = if acc >= x then n else aux (n + 1) (acc * 2) in
     aux 0 1
 
   let int_mult (bb, _) =
     for i = 0 to Basic_block.length_of bb - 1 do
       match Basic_block.get_ir bb i with
       | Mul (var, Operand.Constant lhs, Operand.Variable rhs)
-      | Mul (var, Operand.Variable rhs, Operand.Constant lhs) when is_power_of_two lhs ->
+      | Mul (var, Operand.Variable rhs, Operand.Constant lhs)
+        when is_power_of_two lhs ->
           let shift_amount = log2 lhs in
           Basic_block.set_ir bb i
             (Ir.Shl (var, Operand.Variable rhs, Operand.Constant shift_amount))

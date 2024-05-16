@@ -29,7 +29,12 @@ let fixed_ir_opts_tests =
     ([ Passes.IntMult.pass ], "int mult ir opt");
     ( [
         Pass.combine
-          [ Passes.ConstFold.pass; Passes.CopyProp.pass; Passes.DeadCode.pass ; Passes.IntMult.pass ];
+          [
+            Passes.ConstFold.pass;
+            Passes.CopyProp.pass;
+            Passes.DeadCode.pass;
+            Passes.IntMult.pass;
+          ];
       ],
       "combined ir opt" );
     ( [

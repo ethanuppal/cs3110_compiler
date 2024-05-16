@@ -2,7 +2,7 @@
 #include "../include/x86istmb.h"
 
 void X86ISTMB_NAMESPACE_SYM(std, print_int)(x86istmb_int value) {
-    printf("%ld", value);
+    printf("%lld", value);
 }
 
 void X86ISTMB_NAMESPACE_SYM(std, print_bool)(x86istmb_bool value) {

@@ -36,7 +36,7 @@ let compile paths flags build_dir_loc =
   let preamble_statements =
     Parse_lex.lex_and_parse ~filename:"preamble.x" preamble_source
   in
-  let compile_one source_path =
+  let compile_one preamble_statements source_path =
     Printf.printf "==> \x1B[32mCompiling \x1B[4m%s\x1B[m\n" source_path;
     let source = Util.read_file source_path in
     let statements =
@@ -59,7 +59,14 @@ let compile paths flags build_dir_loc =
             ]
             cfg liveliness_analysis;
         let instr_ordering = InstrOrdering.make cfg in
-        let registers = Asm.Register.data_registers in
+
+        (* Don't let the allocator use parameter registers, we'll need those in
+           emission. *)
+        let registers =
+          List.filter
+            (fun reg -> not (List.mem reg Asm.Register.parameter_registers))
+            Asm.Register.data_registers
+        in
         let regalloc =
           Regalloc.allocate_for cfg registers liveliness_analysis instr_ordering
         in
@@ -80,7 +87,11 @@ let compile paths flags build_dir_loc =
   Printf.printf "\x1B[2m[DEBUG] ignores some flags but -O works\x1B[m\n";
 
   try
-    let compiled_files = List.map compile_one paths in
+    let compiled_files =
+      compile_one []
+        (Util.merge_paths [ Project_root.path; "lib/runtime/linkonce.x" ])
+      :: List.map (compile_one preamble_statements) paths
+    in
 
     (* Set up build directory *)
     let build_dir =
@@ -133,17 +144,28 @@ let compile paths flags build_dir_loc =
       | MacOS _ -> "macos"
       | _ -> failwith "OS unknown. Cannot determine correct runtime."
     in
+    let runtime_lib_loc =
+      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+    in
+
+    let nasm_command =
+      Printf.sprintf "nasm -f %s %s -o %s" object_format
+        (Util.merge_paths [ Project_root.path; "lib/runtime/integrity.nasm" ])
+        "_integrity.o"
+    in
+    if Sys.command nasm_command <> 0 then
+      failwith
+        ("Failed to run NASM to handle integrity.nasm runtime: " ^ nasm_command);
+
     let clang_target =
       match Platform.clang_target platform with
       | Some target -> target
       | None -> failwith "Unable to determine correct clang target."
     in
-    let runtime_lib_loc =
-      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
-    in
+
     let clang_command =
-      Printf.sprintf "clang -target %s *.o %s/* -o a.out 2>/dev/null"
-        clang_target runtime_lib_loc
+      Printf.sprintf "clang -target %s *.o %s/* -o a.out" clang_target
+        runtime_lib_loc
     in
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
 

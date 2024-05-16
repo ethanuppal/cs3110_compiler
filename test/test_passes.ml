@@ -26,9 +26,10 @@ let fixed_ir_opts_tests =
     ([ Passes.ConstFold.pass ], "const fold ir opt");
     ([ Passes.CopyProp.pass ], "copy prop ir opt");
     ([ Passes.DeadCode.pass ], "dead code ir opt");
+    ([ Passes.IntMult.pass ], "int mult ir opt");
     ( [
         Pass.combine
-          [ Passes.ConstFold.pass; Passes.CopyProp.pass; Passes.DeadCode.pass ];
+          [ Passes.ConstFold.pass; Passes.CopyProp.pass; Passes.DeadCode.pass ; Passes.IntMult.pass ];
       ],
       "combined ir opt" );
     ( [

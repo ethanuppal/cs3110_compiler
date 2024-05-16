@@ -106,6 +106,9 @@ module Instruction = struct
     | Syscall
     | Label of Label.t
     | DataBytes of int list
+    | Shl of Operand.t * Operand.t
+    | Shr of Operand.t * Operand.t
+    | Sar of Operand.t * Operand.t
 
   let to_nasm = function
     | Mov (op1, op2) ->
@@ -131,6 +134,12 @@ module Instruction = struct
     | Label label -> Label.to_nasm label
     | DataBytes data ->
         "db " ^ (data |> List.map string_of_int |> String.concat ", ")
+    | Shl (op1, op2) ->
+        "shl " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+    | Shr (op1, op2) ->
+        "shr " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+    | Sar (op1, op2) ->
+        "sar " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
 end
 
 module Section = struct

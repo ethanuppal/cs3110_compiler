@@ -225,6 +225,24 @@ let emit_ir text_section data_section regalloc param_ctx = function
           Mov (emit_var regalloc var, emit_oper regalloc data_section op);
           IMul (emit_var regalloc var, emit_oper regalloc data_section op2);
         ]
+  | Shl (var, op, op2) ->
+      Asm.Section.add_all text_section
+        [
+          Mov (emit_var regalloc var, emit_oper regalloc data_section op);
+          Shl (emit_var regalloc var, emit_oper regalloc data_section op2);
+        ]
+  | Shr (var, op, op2) ->
+      Asm.Section.add_all text_section
+        [
+          Mov (emit_var regalloc var, emit_oper regalloc data_section op);
+          Shr (emit_var regalloc var, emit_oper regalloc data_section op2);
+        ]
+  | Sar (var, op, op2) ->
+      Asm.Section.add_all text_section
+        [
+          Mov (emit_var regalloc var, emit_oper regalloc data_section op);
+          Sar (emit_var regalloc var, emit_oper regalloc data_section op2);
+        ]
   | Ref _ -> failwith "ref not impl"
   | Deref _ -> failwith "deref not impl"
   | DebugPrint op ->

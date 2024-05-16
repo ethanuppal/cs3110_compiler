@@ -54,7 +54,7 @@ let compile paths flags build_dir_loc =
           Passes.apply
             [
               Passes.DeadCode.pass;
-              Pass.sequence Passes.CopyProp.pass Passes.ConstFold.pass
+              Pass.combine [Passes.CopyProp.pass; Passes.ConstFold.pass; Passes.IntMult.pass]
               |> Pass.repeat 10;
             ]
             cfg liveliness_analysis;

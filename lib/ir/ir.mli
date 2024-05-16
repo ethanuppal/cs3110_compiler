@@ -4,6 +4,9 @@ type t =
   | Add of Variable.t * Operand.t * Operand.t
   | Sub of Variable.t * Operand.t * Operand.t
   | Mul of Variable.t * Operand.t * Operand.t
+  | Shl of Variable.t * Operand.t * Operand.t
+  | Shr of Variable.t * Operand.t * Operand.t
+  | Sar of Variable.t * Operand.t * Operand.t
   | Ref of Variable.t * Operand.t
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t

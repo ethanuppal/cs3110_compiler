@@ -65,6 +65,31 @@ module DeadCode : Pass.Sig = struct
   let pass = Pass.make dead_code
 end
 
+module IntMult : Pass.Sig = struct
+  let is_power_of_two x =
+    (x > 0) && (x land (x - 1) = 0)
+
+  let log2 x =
+    let rec aux n acc =
+      if acc >= x then n
+      else aux (n + 1) (acc * 2)
+    in
+    aux 0 1
+
+  let int_mult (bb, _) =
+    for i = 0 to Basic_block.length_of bb - 1 do
+      match Basic_block.get_ir bb i with
+      | Mul (var, Operand.Constant lhs, Operand.Variable rhs)
+      | Mul (var, Operand.Variable rhs, Operand.Constant lhs) when is_power_of_two lhs ->
+          let shift_amount = log2 lhs in
+          Basic_block.set_ir bb i
+            (Ir.Shl (var, Operand.Variable rhs, Operand.Constant shift_amount))
+      | _ -> ()
+    done
+
+  let pass = Pass.make int_mult
+end
+
 let apply passes cfg liveliness =
   let apply_pass pass bb =
     Pass.execute pass bb (IdMap.find liveliness (Basic_block.id_of bb))

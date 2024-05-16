@@ -3,6 +3,9 @@ type t =
   | Add of Variable.t * Operand.t * Operand.t
   | Sub of Variable.t * Operand.t * Operand.t
   | Mul of Variable.t * Operand.t * Operand.t
+  | Shl of Variable.t * Operand.t * Operand.t
+  | Shr of Variable.t * Operand.t * Operand.t
+  | Sar of Variable.t * Operand.t * Operand.t
   | Ref of Variable.t * Operand.t
   | Deref of Variable.t * Operand.t
   | TestEqual of Variable.t * Operand.t * Operand.t
@@ -16,6 +19,9 @@ let kill_of = function
   | Add (var, _, _)
   | Sub (var, _, _)
   | Mul (var, _, _)
+  | Shl (var, _, _)
+  | Shr (var, _, _)
+  | Sar (var, _, _)
   | Ref (var, _)
   | Deref (var, _)
   | TestEqual (var, _, _)
@@ -32,6 +38,9 @@ let gen_of = function
   | Add (_, op1, op2)
   | Sub (_, op1, op2)
   | Mul (_, op1, op2)
+  | Shl (_, op1, op2)
+  | Shr (_, op1, op2)
+  | Sar (_, op1, op2)
   | TestEqual (_, op1, op2) -> [ op1; op2 ]
   | Call (_, _, ops) -> ops
   | GetParam _ | Return None -> []
@@ -49,6 +58,15 @@ let to_string =
         (Operand.to_string o2)
   | Mul (r, o1, o2) ->
       sprintf "%s = %s * %s" (Variable.to_string r) (Operand.to_string o1)
+        (Operand.to_string o2)
+  | Shl (r, o1, o2) ->
+      sprintf "%s = %s << %s" (Variable.to_string r) (Operand.to_string o1)
+        (Operand.to_string o2)
+  | Shr (r, o1, o2) ->
+      sprintf "%s = %s >> %s" (Variable.to_string r) (Operand.to_string o1)
+        (Operand.to_string o2)
+  | Sar (r, o1, o2) ->
+      sprintf "%s = %s >> %s" (Variable.to_string r) (Operand.to_string o1)
         (Operand.to_string o2)
   | Ref (r, o) ->
       sprintf "%s = &%s" (Variable.to_string r) (Operand.to_string o)

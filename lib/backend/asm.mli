@@ -91,6 +91,9 @@ module Instruction : sig
     | Syscall
     | Label of Label.t
     | DataBytes of int list
+    | Shl of Operand.t * Operand.t
+    | Shr of Operand.t * Operand.t
+    | Sar of Operand.t * Operand.t
 
   (** [to_nasm instr] is the NASM representation of [instr]. *)
   val to_nasm : t -> string

@@ -7,6 +7,11 @@ module CopyProp : Pass.Sig
 (** Dead code elimination optimization pass. *)
 module DeadCode : Pass.Sig
 
+(** Integer multiplication optimization pass. *)
+module IntMult : Pass.Sig
+
+(** Liveness analysis pass. *)
+
 (** [apply passes cfg liveliness] applies each pass in [passes] to [cfg] in
     order, using the liveliness information for [cfg] ([liveliness]).
 

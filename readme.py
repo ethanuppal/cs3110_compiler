@@ -1,7 +1,7 @@
 if __name__ == "__main__":
     import subprocess, os
     from datetime import datetime as dt
-    
+
     def find_file_in_directory(filename, directory):
         for root, _, files in os.walk(directory):
             if filename in files:
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         put(
             "VERSION_NUM",
             subprocess.check_output(
-                f"opam exec -- ocaml -e '#use \"{find_file_in_directory('meta.ml', './lib')}\";; print_endline (Version.to_string get.version)'",
+                f"opam exec -- ocaml -e '#use \"{find_file_in_directory('meta.ml', './bin')}\";; print_endline (Version.to_string get.version)'",
                 shell=True,
                 text=True,
             ),

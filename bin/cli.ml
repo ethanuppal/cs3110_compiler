@@ -1,7 +1,4 @@
-type flag =
-  | OnlyIR
-  | OnlyObject
-  | Optimize
+open X86ISTMB
 
 type action =
   | Error of { msg : string }
@@ -9,7 +6,7 @@ type action =
   | Version
   | Compile of {
       paths : string list;
-      flags : flag list;
+      flags : Driver.flag list;
     }
 
 type parse_result = {
@@ -27,9 +24,8 @@ let parse args =
         List.iter
           (fun s ->
             match s with
-            | "-g" | "--gen" -> flags := OnlyIR :: !flags
-            | "-O" | "--optimize" -> flags := Optimize :: !flags
-            | "-c" | "--compile" -> flags := OnlyObject :: !flags
+            | "-g" | "--gen" -> flags := Driver.OnlyIR :: !flags
+            | "-O" | "--optimize" -> flags := Driver.Optimize :: !flags
             | _ -> paths := s :: !paths)
           args;
         Compile { paths = !paths; flags = !flags }

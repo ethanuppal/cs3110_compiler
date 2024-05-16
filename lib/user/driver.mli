@@ -1,5 +1,6 @@
-(** [main argv] *)
-val main : string array -> unit
+type flag =
+  | OnlyIR
+  | Optimize
 
 (** [compile paths flags build_dir_loc] *)
-val compile : string list -> Cli.flag list -> string option -> unit
+val compile : string list -> flag list -> string option -> unit

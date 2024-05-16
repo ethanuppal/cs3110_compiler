@@ -1,8 +1,8 @@
 #include <stdint.h>
-#include "../include/mangle.h"
+#include "../include/x86istmb.h"
 
-extern int64_t X86ISTMB_SYM(main)(void);
+extern x86istmb_int X86ISTMB_SYM(main)(x86istmb_int, x86istmb_char**);
 
-int main() {
-    return X86ISTMB_SYM(main)();
+int main(int argc, char** argv) {
+    return X86ISTMB_SYM(main)(argc, argv);
 }

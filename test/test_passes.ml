@@ -8,7 +8,7 @@ let make_opts_test passes =
   in
   let statements = Parse_lex.lex_and_parse ir0_source in
   Analysis.infer statements;
-  let cfgs = Ir_gen.generate statements in
+  let cfgs, _, _ = Ir_gen.generate statements in
   let main_cfg = List.hd cfgs in
   let liveliness_analysis = Liveliness.analysis_of main_cfg in
   let simulator = Ir_sim.make () in

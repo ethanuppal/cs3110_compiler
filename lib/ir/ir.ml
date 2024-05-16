@@ -57,7 +57,7 @@ let to_string =
   | TestEqual (r, o1, o2) ->
       sprintf "%s = %s == %s" (Variable.to_string r) (Operand.to_string o1)
         (Operand.to_string o2)
-  | DebugPrint op -> sprintf "debug_print(%s)" (Operand.to_string op)
+  | DebugPrint op -> sprintf "std::debug_print(%s)" (Operand.to_string op)
   | Call (r, name, args) ->
       sprintf "%s = %s(%s)" (Variable.to_string r)
         (name |> String.concat "::")

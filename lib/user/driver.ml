@@ -29,14 +29,24 @@ let compile paths flags build_dir_loc =
       then failwith "please use .x or .x86istmb file extensions")
     paths;
   let do_opts = List.mem Cli.Optimize flags in
+  let preamble_source =
+    Util.read_file
+      (Util.merge_paths [ Project_root.path; "lib/runtime/preamble.x" ])
+  in
+  let preamble_statements =
+    Parse_lex.lex_and_parse ~filename:"preamble.x" preamble_source
+  in
   let compile_one source_path =
     Printf.printf "==> \x1B[32mCompiling \x1B[4m%s\x1B[m\n" source_path;
     let source = Util.read_file source_path in
-    let statements = Parse_lex.lex_and_parse ~filename:source_path source in
+    let statements =
+      preamble_statements @ Parse_lex.lex_and_parse ~filename:source_path source
+    in
     Analysis.infer statements;
-    let cfgs = Ir_gen.generate statements in
+    let cfgs, ffi_names, decl_names = Ir_gen.generate statements in
     let text_section = Asm.Section.make "text" 16 in
-    Asm_emit.emit_preamble ~text:text_section;
+    let data_section = Asm.Section.make "data" 16 in
+    Asm_emit.emit_preamble ~text_section ~data_section ffi_names decl_names;
     List.iter
       (fun cfg ->
         let liveliness_analysis = Liveliness.analysis_of cfg in
@@ -53,11 +63,12 @@ let compile paths flags build_dir_loc =
         let regalloc =
           Regalloc.allocate_for cfg registers liveliness_analysis instr_ordering
         in
-        Asm_emit.emit_cfg ~text:text_section cfg regalloc)
+        Asm_emit.emit_cfg ~text_section ~data_section cfg regalloc)
       cfgs;
     Asm_clean.clean text_section;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
+    Asm.AssemblyFile.add asm_file data_section;
     let file_name_root =
       BatFilename.(source_path |> basename |> chop_extension)
     in

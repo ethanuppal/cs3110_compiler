@@ -21,7 +21,7 @@ let ir_transform filename input =
   let open Util in
   let statements = Parse_lex.lex_and_parse ~filename input in
   Analysis.infer statements;
-  let cfgs = Ir_gen.generate statements in
+  let cfgs, _, _ = Ir_gen.generate statements in
   List.iter (Liveliness.analysis_of >> ignore) cfgs;
   let simulator = Ir_sim.make () in
   Ir_sim.run simulator cfgs;
@@ -43,3 +43,14 @@ let parse_transform filename input =
 
 let parse_suite =
   Snapshot.make_test_suite snapshots_root "parse" (parse_transform, `Quick)
+
+let compile_transform filename _ =
+  let open X86ISTMB in
+  Driver.compile [ filename ] [] (Some Test_bin.path);
+  Util.get_command_output
+    (Platform.(get_platform () |> command_prefix)
+    ^ " "
+    ^ Util.merge_paths [ Test_bin.path; "build_dir/a.out" ])
+
+let compile_suite =
+  Snapshot.make_test_suite snapshots_root "compile" (ir_transform, `Quick)

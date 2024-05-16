@@ -3,6 +3,7 @@ module Primitive : sig
   (** [t] represents a primitive type. *)
   type t =
     | Int
+    | Char
     | Bool
     | Unit
 
@@ -34,9 +35,15 @@ val int_prim_type : t
 (** A type representing a boolean. *)
 val bool_prim_type : t
 
+(** A type representing a byte. *)
+val char_prim_type : t
+
 (** A type representing a unit. *)
 val unit_prim_type : t
 
 (** [deref ty] is [Some ty'] if [ty = Pointer ty'] for some [ty'] and [None]
     otherwise. *)
 val deref : t -> t option
+
+(** [equal t1 t2] if and only if [t1] and [t2] are the same type. *)
+val equal : t -> t -> bool

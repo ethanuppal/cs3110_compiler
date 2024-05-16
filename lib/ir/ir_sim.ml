@@ -1,8 +1,10 @@
+type sim_value = (int, string) Either.t
+
 type t = {
-  context : int Context.t;
+  context : sim_value Context.t;
   mutable current : Cfg.t option;
-  mutable args : int list list;
-  mutable return_value : int;
+  mutable args : sim_value list list;
+  mutable return_value : sim_value;
   mutable output : string;
 }
 
@@ -11,7 +13,7 @@ let make () =
     context = Context.make ();
     current = None;
     args = [];
-    return_value = 0;
+    return_value = Left 0;
     output = "";
   }
 
@@ -23,8 +25,16 @@ let rec run_cfg simulator cfgs cfg =
   let eval = function
     | Operand.Variable var ->
         Context.get simulator.context (Variable.to_string var) |> Option.get
-    | Operand.Constant int -> int
+    | Operand.Constant int -> Left int
+    | Operand.StringLiteral value -> Right (StringLiteral.value_of value)
   in
+  let eval_int op =
+    match eval op with
+    | Left int -> int
+    | Right _ -> failwith "Ir_sim: attempt to access string as int"
+  in
+  (* let eval_str op = match eval op with | Left _ -> failwith "Ir_sim: attempt
+     to access int as string" | Right str -> str in *)
   let rec run_aux bb =
     let should_exit =
       Basic_block.to_list bb
@@ -39,25 +49,28 @@ let rec run_cfg simulator cfgs cfg =
                  false
              | Ir.Add (var, oper1, oper2) ->
                  Context.insert simulator.context (Variable.to_string var)
-                   (eval oper1 + eval oper2);
+                   (Left (eval_int oper1 + eval_int oper2));
                  false
              | Ir.Sub (var, oper1, oper2) ->
                  Context.insert simulator.context (Variable.to_string var)
-                   (eval oper1 - eval oper2);
+                   (Left (eval_int oper1 - eval_int oper2));
                  false
              | Ir.Mul (var, oper1, oper2) ->
                  Context.insert simulator.context (Variable.to_string var)
-                   (eval oper1 * eval oper2);
+                   (Left (eval_int oper1 * eval_int oper2));
                  false
              | Ir.TestEqual (var, oper1, oper2) ->
                  Context.insert simulator.context (Variable.to_string var)
-                   (if eval oper1 = eval oper2 then 1 else 0);
+                   (if eval oper1 = eval oper2 then Left 1 else Left 0);
                  false
              | Ir.Ref _ | Ir.Deref _ ->
                  failwith "Ir_sim does not support pointers"
              | Ir.DebugPrint oper ->
                  simulator.output <-
-                   simulator.output ^ Printf.sprintf "%d\n" (eval oper);
+                   simulator.output
+                   ^ Printf.sprintf "%s\n"
+                       (eval oper
+                       |> Either.fold ~left:string_of_int ~right:Fun.id);
                  false
              | Ir.Call (result, name, args) ->
                  let called_cfg = find_cfg_by_name cfgs name in
@@ -86,7 +99,7 @@ let rec run_cfg simulator cfgs cfg =
         match Basic_block.condition_of bb with
         | Always -> Some true
         | Never -> None
-        | Conditional oper -> Some (eval oper <> 0)
+        | Conditional oper -> Some (eval_int oper <> 0)
       in
       match cond_opt with
       | Some cond -> (

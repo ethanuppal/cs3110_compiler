@@ -3,7 +3,6 @@ open Alcotest
 open Platform
 
 let e2e_root = Util.merge_paths [ Project_root.path; "test/e2e" ]
-let test_bin = Util.merge_paths [ Project_root.path; "test/bin" ]
 
 let command_prefix platform =
   match (platform.os, platform.cpu_arch) with
@@ -12,12 +11,12 @@ let command_prefix platform =
 
 let make_e2e_test filename source () =
   let expected = Test_snapshots.ir_transform filename source in
-  Driver.compile [ filename ] [] (Some test_bin);
+  Driver.compile [ filename ] [] (Some Test_bin.path);
   let actual =
     Util.get_command_output
       ((Platform.get_platform () |> command_prefix)
       ^ " "
-      ^ Util.merge_paths [ test_bin; "build_dir/a.out" ])
+      ^ Util.merge_paths [ Test_bin.path; "build_dir/a.out" ])
   in
   (check string) "Compiled output should match IR simulator" expected actual
 

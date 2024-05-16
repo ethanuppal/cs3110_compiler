@@ -1,0 +1,5 @@
+@ffi puts(Char*) -> Unit
+func main() -> Unit {
+    let val: Char* = "hi"
+    return
+}

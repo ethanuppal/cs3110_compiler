@@ -16,6 +16,10 @@ type expr =
     }
   | ConstInt of int
   | ConstBool of bool
+  | StringLiteral of {
+      value : string;
+      mutable ty : Type.t option;
+    }
   | Infix of {
       lhs : expr;
       op : op;
@@ -51,6 +55,16 @@ and stmt =
       params : (string * Type.t) list;
       return : Type.t;
       body : stmt list;
+    }
+  | ForeignFunction of {
+      name : string;
+      params : Type.t list;
+      return : Type.t;
+    }
+  | DeclaredFunction of {
+      name : string;
+      params : Type.t list;
+      return : Type.t;
     }
   | Print of expr
   | Return of expr option

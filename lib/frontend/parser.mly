@@ -3,11 +3,12 @@ open AstType
 %}
 
 %token <int> INT_LIT
+%token <string> STRING_LIT
 %token CONST_TRUE CONST_FALSE
 %token <string> IDEN
 %token PLUS MINUS TIMES DIVIDE MOD EQUALS BITAND
 %token LPAR RPAR LBRACE RBRACE COLON ARROW COMMA SCOPE
-%token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN NAMESPACE
+%token PRINT ASSIGN LET FUNC IF ELSE WHILE RETURN NAMESPACE FFI DECL
 %token NEWLINE EOF
 %token INT_TYPE BOOL_TYPE
 
@@ -39,6 +40,7 @@ expr:
   | CONST_TRUE { ConstBool true }
   | CONST_FALSE { ConstBool false }
   | IDEN { Var {name = $1; ty = None} }
+  | STRING_LIT { StringLiteral { value = $1; ty = Some (Type.Pointer (Type.char_prim_type)) } }
   | expr PLUS expr { Infix {lhs = $1; op = Plus; rhs = $3; ty = None} }
   | expr MINUS expr { Infix {lhs = $1; op = Minus; rhs = $3; ty = None} }
   | expr TIMES expr { Infix {lhs = $1; op = Times; rhs = $3; ty = None} }
@@ -74,3 +76,5 @@ stmt:
   | RETURN; return_opt = option(expr) { Return (return_opt) }
   | expr { ExprStatement $1 }
   | NAMESPACE; name = IDEN; LBRACE; contents = body_till_rbrace { Namespace { name; contents }}
+  | FFI; name = IDEN; LPAR; params = separated_list(COMMA, ty); RPAR; return_opt = option(return_type) { ForeignFunction {name; params; return = if return_opt = None then Type.unit_prim_type else Option.get (return_opt); } }
+  | DECL; name = IDEN; LPAR; params = separated_list(COMMA, ty); RPAR; return_opt = option(return_type) { DeclaredFunction {name; params; return = if return_opt = None then Type.unit_prim_type else Option.get (return_opt); } }

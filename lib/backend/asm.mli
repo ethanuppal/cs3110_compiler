@@ -76,6 +76,7 @@ module Instruction : sig
   (** Represents and x86-64 instruction. *)
   type t =
     | Mov of Operand.t * Operand.t
+    | Lea of Operand.t * Operand.t
     | Add of Operand.t * Operand.t
     | Sub of Operand.t * Operand.t
     | IMul of Operand.t * Operand.t
@@ -89,6 +90,7 @@ module Instruction : sig
     | Ret
     | Syscall
     | Label of Label.t
+    | DataBytes of int list
 
   (** [to_nasm instr] is the NASM representation of [instr]. *)
   val to_nasm : t -> string

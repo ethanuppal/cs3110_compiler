@@ -52,11 +52,16 @@ module DeadCode : Pass.Sig = struct
         Liveliness.BasicBlockAnalysis.live_after_instr analysis
           (Basic_block.get_orig_idx bb i)
       in
-      match Basic_block.get_ir bb i |> Ir.kill_of with
-      | Some var ->
-          if not (Liveliness.VariableSet.mem var live_out) then
-            Basic_block.rem_ir bb i
-      | None -> ()
+      let ir = Basic_block.get_ir bb i in
+      (* things with potential side effects should never be eliminated. *)
+      match ir with
+      | Call _ | DebugPrint _ | GetParam _ | Return _ -> ()
+      | instr -> (
+          match Ir.kill_of instr with
+          | Some var ->
+              if not (Liveliness.VariableSet.mem var live_out) then
+                Basic_block.rem_ir bb i
+          | None -> ())
     done
 
   let pass = Pass.make dead_code

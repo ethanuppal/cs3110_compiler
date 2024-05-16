@@ -138,14 +138,8 @@ let compile paths flags build_dir_loc =
       compiled_files;
 
     (* Run clang *)
-    let runtime_folder_name =
-      match platform.os with
-      | Linux -> "linux"
-      | MacOS _ -> "macos"
-      | _ -> failwith "OS unknown. Cannot determine correct runtime."
-    in
     let runtime_lib_loc =
-      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+      Util.merge_paths [ Project_root.path; "lib/runtime/src" ]
     in
 
     let nasm_command =
@@ -163,10 +157,18 @@ let compile paths flags build_dir_loc =
       | None -> failwith "Unable to determine correct clang target."
     in
 
-    let clang_command =
-      Printf.sprintf "clang -target %s *.o %s/* -o a.out" clang_target
-        runtime_lib_loc
+    let define =
+      match platform.os with
+      | MacOS _ -> "X86ISTMB_MACOS"
+      | Linux -> "X86ISTMB_LINUX"
+      | Unknown -> failwith "Unable to determine correct runtime define."
     in
+
+    let clang_command =
+      Printf.sprintf "clang -D%s -target %s *.o %s/* -o a.out" define
+        clang_target runtime_lib_loc
+    in
+    print_endline clang_command;
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
 
     Printf.printf "==> \x1B[32mWrote build files to \x1B[4m%s\x1B[m\n" build_dir;

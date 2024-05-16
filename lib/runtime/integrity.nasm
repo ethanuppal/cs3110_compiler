@@ -3,8 +3,8 @@ section .data
 
 section .text
     global _x86istmb_Nruntime_Scheck_stack_alignment
-    extern _puts
-    extern _exit
+    extern _x86istmb_Nruntime_Sputs
+    extern _x86istmb_Nruntime_Sexit
 
 _x86istmb_Nruntime_Scheck_stack_alignment:
     push rdi
@@ -19,9 +19,9 @@ _x86istmb_Nruntime_Scheck_stack_alignment:
     ; otherwise fail
     sub rsp, 8 ; to actually make stack aligned
     lea rdi, [rel align_error]
-    call _puts
+    call _x86istmb_Nruntime_Sputs
     mov edi, 1
-    call _exit
+    call _x86istmb_Nruntime_Sexit
 
 .stack_aligned:
     pop rsi

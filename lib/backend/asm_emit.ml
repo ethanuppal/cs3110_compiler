@@ -132,8 +132,8 @@ let emit_bb text cfg regalloc bb =
       match op with
       | Variable var ->
           Asm.Section.add text (Cmp (emit_var regalloc var, Intermediate 0));
-          Asm.Section.add text (Je (Label (Basic_block.label_for false_bb)));
-          Asm.Section.add text (Jmp (Label (Basic_block.label_for true_bb)))
+          Asm.Section.add text (Je (Label (Basic_block.label_for true_bb)));
+          Asm.Section.add text (Jmp (Label (Basic_block.label_for false_bb)))
       | Constant _ -> failwith "failure")
 
 let emit_preamble ~text =

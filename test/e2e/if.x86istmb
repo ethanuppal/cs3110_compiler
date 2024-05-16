@@ -1,0 +1,16 @@
+func main() {
+    let x = 0
+    let y = 2
+    let z = x
+    let w = z + y
+
+    if (w == 2) {
+        print 2
+    }
+    if (w == 1) {
+        print 1
+    }
+    if (w == 0) {
+        print 0
+    }
+}

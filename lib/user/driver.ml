@@ -77,55 +77,63 @@ let compile paths flags build_dir_loc =
 
   let platform = Platform.get_platform () in
 
-  (* Write NASM *)
+  (* Write IR *)
   List.iter
-    (fun (ir_file_name, cfgs, asm_file_name, asm_file) ->
+    (fun (ir_file_name, cfgs, _, _) ->
       Util.write_file ir_file_name
-        (cfgs |> List.map Cfg.to_string |> String.concat "\n\n");
-      Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file))
+        (cfgs |> List.map Cfg.to_string |> String.concat "\n\n"))
     compiled_files;
 
-  (* Run NASM *)
-  let object_format =
-    match Platform.object_format platform with
-    | Some format -> format
-    | None -> failwith "Could not determine object file format."
-  in
-  List.iter
-    (fun (_, _, asm_file_name, _) ->
-      let nasm_command =
-        Printf.sprintf "nasm -f %s %s -o %s.o" object_format asm_file_name
-          (BatFilename.chop_extension asm_file_name)
-      in
-      if Sys.command nasm_command <> 0 then failwith "Failed to run NASM."
-      else
-        Printf.printf "==> \x1B[32mGenerated \x1B[4m%s/%s\x1B[m\n" build_dir
-          asm_file_name)
-    compiled_files;
+  if not (List.mem OnlyIR flags) then (
+    (* Write NASM *)
+    List.iter
+      (fun (_, _, asm_file_name, asm_file) ->
+        Util.write_file asm_file_name (Asm.AssemblyFile.to_nasm asm_file))
+      compiled_files;
 
-  (* Run clang *)
-  let runtime_folder_name =
-    match platform.os with
-    | Linux -> "linux"
-    | MacOS _ -> "macos"
-    | _ -> failwith "OS unknown. Cannot determine correct runtime."
-  in
-  let clang_target =
-    match Platform.clang_target platform with
-    | Some target -> target
-    | None -> failwith "Unable to determine correct clang target."
-  in
-  let runtime_lib_loc =
-    Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
-  in
-  let clang_command =
-    Printf.sprintf "clang -target %s *.o %s/* -o a.out 2>/dev/null" clang_target
-      runtime_lib_loc
-  in
-  if Sys.command clang_command <> 0 then failwith "Failed to run clang.";
+    (* Run NASM *)
+    let object_format =
+      match Platform.object_format platform with
+      | Some format -> format
+      | None -> failwith "Could not determine object file format."
+    in
+    List.iter
+      (fun (_, _, asm_file_name, _) ->
+        let nasm_command =
+          Printf.sprintf "nasm -f %s %s -o %s.o" object_format asm_file_name
+            (BatFilename.chop_extension asm_file_name)
+        in
+        if Sys.command nasm_command <> 0 then failwith "Failed to run NASM."
+        else
+          Printf.printf "==> \x1B[32mGenerated \x1B[4m%s/%s\x1B[m\n" build_dir
+            asm_file_name)
+      compiled_files;
+
+    (* Run clang *)
+    let runtime_folder_name =
+      match platform.os with
+      | Linux -> "linux"
+      | MacOS _ -> "macos"
+      | _ -> failwith "OS unknown. Cannot determine correct runtime."
+    in
+    let clang_target =
+      match Platform.clang_target platform with
+      | Some target -> target
+      | None -> failwith "Unable to determine correct clang target."
+    in
+    let runtime_lib_loc =
+      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+    in
+    let clang_command =
+      Printf.sprintf "clang -target %s *.o %s/* -o a.out 2>/dev/null"
+        clang_target runtime_lib_loc
+    in
+    if Sys.command clang_command <> 0 then failwith "Failed to run clang.");
 
   Printf.printf "==> \x1B[32mWrote build files to \x1B[4m%s\x1B[m\n" build_dir;
-  Printf.printf
-    "==> \x1B[33mYou can run the executable with \x1B[3m%s%s\x1B[m\n"
-    (Platform.command_prefix platform)
-    (Util.merge_paths [ build_dir; "a.out" ])
+
+  if not (List.mem OnlyIR flags) then
+    Printf.printf
+      "==> \x1B[33mYou can run the executable with \x1B[3m%s%s\x1B[m\n"
+      (Platform.command_prefix platform)
+      (Util.merge_paths [ build_dir; "a.out" ])

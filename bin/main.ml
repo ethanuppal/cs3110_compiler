@@ -25,10 +25,12 @@ let rec dispatch action prog =
   match action with
   | Cli.Help -> print_help prog
   | Version -> print_version ()
-  | Compile { paths; flags } ->
+  | Compile { paths; flags } -> (
       if List.is_empty paths then
         dispatch (Error { msg = "expected at least one file name" }) prog
-      else Driver.compile paths flags None
+      else
+        try Driver.compile paths flags None
+        with exn -> print_error (Printexc.to_string exn))
   | Error { msg } -> Printf.sprintf "%s\nuse %s -h\n" msg prog |> print_error
 
 let main args =

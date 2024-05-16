@@ -4,6 +4,7 @@ let type_of_expr = function
   | Var { name = _; ty } -> ty
   | ConstInt _ -> Some Type.int_prim_type
   | ConstBool _ -> Some Type.bool_prim_type
+  | StringLiteral { value = _; ty } -> ty
   | Infix { lhs = _; op = _; rhs = _; ty } -> ty
   | Prefix { op = _; rhs = _; ty } -> ty
   | Call { name = _; args = _; ty } -> ty
@@ -26,6 +27,8 @@ let rec expr_to_string = function
   | Var { name; ty = _ } -> name
   | ConstInt n -> string_of_int n
   | ConstBool b -> string_of_bool b
+  | StringLiteral { value; ty = _ } ->
+      "\"" ^ value ^ "\"" (* doesn't handle escaped *)
   | Infix { lhs; op; rhs; ty = _ } ->
       "(" ^ expr_to_string lhs ^ " " ^ op_to_string op ^ " "
       ^ expr_to_string rhs ^ ")"
@@ -62,6 +65,14 @@ let stmt_to_string =
             |> List.map (stmt_to_string_aux (indent ^ add_indent))
             |> String.concat "")
           ^ indent ^ "}"
+      | ForeignFunction { name; params; return } ->
+          "@ffi " ^ name ^ "("
+          ^ (params |> List.map Type.to_string |> String.concat ", ")
+          ^ ") -> " ^ Type.to_string return
+      | DeclaredFunction { name; params; return } ->
+          "@decl " ^ name ^ "("
+          ^ (params |> List.map Type.to_string |> String.concat ", ")
+          ^ ") -> " ^ Type.to_string return
       | Print expr -> "print " ^ expr_to_string expr
       | If { cond; body } ->
           "if " ^ expr_to_string cond ^ " {\n"

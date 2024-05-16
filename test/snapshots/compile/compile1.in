@@ -1,0 +1,11 @@
+func greet(str: Char*) {
+    std::print_string("Hello to: ")
+    std::print_string(str)
+    std::print_endline()
+}
+
+func main() {
+    print_string("hi\n")
+    print_string("hello\n")
+    greet("Professor Clarkson")
+}

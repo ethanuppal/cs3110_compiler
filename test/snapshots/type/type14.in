@@ -1,0 +1,5 @@
+@ffi puts(Char*)
+
+func main() {
+    let val = "hi"
+}

@@ -91,6 +91,7 @@ end
 module Instruction = struct
   type t =
     | Mov of Operand.t * Operand.t
+    | Lea of Operand.t * Operand.t
     | Add of Operand.t * Operand.t
     | Sub of Operand.t * Operand.t
     | IMul of Operand.t * Operand.t
@@ -104,10 +105,13 @@ module Instruction = struct
     | Ret
     | Syscall
     | Label of Label.t
+    | DataBytes of int list
 
   let to_nasm = function
     | Mov (op1, op2) ->
         "mov qword " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
+    | Lea (op1, op2) ->
+        "lea " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Add (op1, op2) ->
         "add " ^ Operand.to_nasm op1 ^ ", " ^ Operand.to_nasm op2
     | Sub (op1, op2) ->
@@ -125,6 +129,8 @@ module Instruction = struct
     | Ret -> "ret"
     | Syscall -> "syscall"
     | Label label -> Label.to_nasm label
+    | DataBytes data ->
+        "db " ^ (data |> List.map string_of_int |> String.concat ", ")
 end
 
 module Section = struct

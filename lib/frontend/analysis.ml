@@ -127,6 +127,7 @@ let rec infer_expr (ctx : Type.t Context.t) expr =
     | Var var -> var.ty <- Some (get_type_of_name ctx var.name (Left expr))
     | ConstInt _ -> ()
     | ConstBool _ -> ()
+    | StringLiteral _ -> ()
     | Infix infix -> (
         let lhs_ty = infer_expr ctx infix.lhs in
         let rhs_ty = infer_expr ctx infix.rhs in
@@ -174,8 +175,13 @@ let rec infer_expr (ctx : Type.t Context.t) expr =
               raise
                 (name_error name ~msg:"only functions can be called" (Left expr))
         in
-        if exp_params <> arg_tys then
-          raise (type_sig_error name arg_tys (Left expr));
+        if not (List.for_all2 Type.equal exp_params arg_tys) then (
+          let open Util in
+          print_endline "exp";
+          List.iter (Type.to_string >> prerr_endline) exp_params;
+          print_endline "act";
+          List.iter (Type.to_string >> prerr_endline) arg_tys;
+          raise (type_sig_error name arg_tys (Left expr)));
         call.ty <- Some exp_return
   in
   infer_expr_aux expr;
@@ -204,7 +210,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
   | Print expr ->
       infer_expr ctx expr |> ignore;
       Nonterminal
-  | Function _ | Namespace _ ->
+  | Function _ | Namespace _ | ForeignFunction _ | DeclaredFunction _ ->
       raise
         (general_error ~msg:"functions can only be written at top level"
            (Right stmt))
@@ -255,6 +261,14 @@ let rec infer_top_level ctx stmt =
       Context.add_namespace ctx name;
       List.iter (infer_top_level ctx) contents;
       Context.pop_namespace ctx
+  | ForeignFunction { name; params; return } ->
+      let fun_ty = Type.FunctionType { params; return } in
+      bind_name_to_type ctx ("ffi::" ^ name) fun_ty (Right stmt)
+  | DeclaredFunction { name; params; return } ->
+      let fun_ty = Type.FunctionType { params; return } in
+      bind_name_to_type ctx
+        (Context.in_namespace ctx name |> String.concat "::")
+        fun_ty (Right stmt)
   | Function { name; params; return; body } ->
       let fun_ty = Type.FunctionType { params = List.map snd params; return } in
       bind_name_to_type ctx

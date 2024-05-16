@@ -1,5 +1,6 @@
 exception ParserError of string
 
+(** Requires: [stmt] is not a top-level statement. *)
 let function_auto_unit_return = function
   | AstType.Function { name; params; return; body } ->
       let last_stmt_is_return =
@@ -19,6 +20,11 @@ let function_auto_unit_return = function
                body @ [ Return None ]
              else body);
         }
+  | AstType.ForeignFunction _ ->
+      raise
+        (ParserError
+           "ffi declarations must be at the top level, not nested in a \
+            namespace")
   | other -> other
 
 let lex_and_parse ?(filename = "<stdin>") input =

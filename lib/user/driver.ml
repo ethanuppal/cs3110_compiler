@@ -11,14 +11,24 @@ let compile paths flags build_dir_loc =
       then failwith "please use .x or .x86istmb file extensions")
     paths;
   let do_opts = List.mem Optimize flags in
-  let compile_one source_path =
+  let preamble_source =
+    Util.read_file
+      (Util.merge_paths [ Project_root.path; "lib/runtime/preamble.x" ])
+  in
+  let preamble_statements =
+    ParseLex.lex_and_parse ~filename:"preamble.x" preamble_source
+  in
+  let compile_one preamble_statements source_path =
     Printf.printf "==> \x1B[32mCompiling \x1B[4m%s\x1B[m\n" source_path;
     let source = Util.read_file source_path in
-    let statements = ParseLex.lex_and_parse ~filename:source_path source in
+    let statements =
+      preamble_statements @ ParseLex.lex_and_parse ~filename:source_path source
+    in
     Analysis.infer statements;
-    let cfgs = IrGen.generate statements in
+    let cfgs, ffi_names, decl_names = IrGen.generate statements in
     let text_section = Asm.Section.make "text" 16 in
-    AsmEmit.emit_preamble ~text:text_section;
+    let data_section = Asm.Section.make "data" 16 in
+    AsmEmit.emit_preamble ~text_section ~data_section ffi_names decl_names;
     List.iter
       (fun cfg ->
         let liveliness_analysis = Liveliness.analysis_of cfg in
@@ -41,11 +51,12 @@ let compile paths flags build_dir_loc =
         let regalloc =
           Regalloc.allocate_for cfg registers liveliness_analysis instr_ordering
         in
-        AsmEmit.emit_cfg ~text:text_section cfg regalloc)
+        AsmEmit.emit_cfg ~text_section ~data_section cfg regalloc)
       cfgs;
     if do_opts then AsmClean.clean text_section;
     let asm_file = Asm.AssemblyFile.make () in
     Asm.AssemblyFile.add asm_file text_section;
+    Asm.AssemblyFile.add asm_file data_section;
     let file_name_root =
       BatFilename.(source_path |> basename |> chop_extension)
     in
@@ -56,7 +67,11 @@ let compile paths flags build_dir_loc =
 
   Printf.printf "\x1B[2m[DEBUG] ignores some flags but -O works\x1B[m\n";
 
-  let compiled_files = List.map compile_one paths in
+  let compiled_files =
+    compile_one []
+      (Util.merge_paths [ Project_root.path; "lib/runtime/linkonce.x" ])
+    :: List.map (compile_one preamble_statements) paths
+  in
 
   (* Set up build directory *)
   let build_dir =
@@ -109,22 +124,34 @@ let compile paths flags build_dir_loc =
       compiled_files;
 
     (* Run clang *)
-    let runtime_folder_name =
-      match platform.os with
-      | Linux -> "linux"
-      | MacOS _ -> "macos"
-      | _ -> failwith "OS unknown. Cannot determine correct runtime."
+    let runtime_lib_loc =
+      Util.merge_paths [ Project_root.path; "lib/runtime/src" ]
     in
+
+    let nasm_command =
+      Printf.sprintf "nasm -f %s %s -o %s" object_format
+        (Util.merge_paths [ Project_root.path; "lib/runtime/integrity.nasm" ])
+        "_integrity.o"
+    in
+    if Sys.command nasm_command <> 0 then
+      failwith
+        ("Failed to run NASM to handle integrity.nasm runtime: " ^ nasm_command);
+
     let clang_target =
       match Platform.clang_target platform with
       | Some target -> target
       | None -> failwith "Unable to determine correct clang target."
     in
-    let runtime_lib_loc =
-      Util.merge_paths [ Project_root.path; "lib/runtime"; runtime_folder_name ]
+
+    let define =
+      match platform.os with
+      | MacOS _ -> "X86ISTMB_MACOS"
+      | Linux -> "X86ISTMB_LINUX"
+      | Unknown -> failwith "Unable to determine correct runtime define."
     in
+
     let clang_command =
-      Printf.sprintf "clang -target %s *.o %s/* -o a.out 2>/dev/null"
+      Printf.sprintf "clang -D%s -target %s *.o %s/* -o a.out" define
         clang_target runtime_lib_loc
     in
     if Sys.command clang_command <> 0 then failwith "Failed to run clang.");

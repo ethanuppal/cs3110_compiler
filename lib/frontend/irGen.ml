@@ -1,5 +1,4 @@
 open AstType
-open Util
 
 exception UnboundVariable of { name : string }
 
@@ -19,6 +18,7 @@ let rec generate_expr ctx cfg block expr =
       Operand.make_var var
   | ConstInt value -> Operand.make_const value
   | ConstBool value -> Operand.make_const (if value then 1 else 0)
+  | StringLiteral { value; ty = _ } -> Operand.make_string_literal value
   | Infix { lhs; op; rhs; _ } ->
       let result = Variable.make () in
       let lhs_result = generate_expr ctx cfg block lhs in
@@ -86,7 +86,8 @@ let rec generate_stmt ctx cfg block = function
       Cfg.insert_unconditional cfg true_end_block bf;
 
       bf
-  | Function _ -> failwith "not allowed"
+  | Function _ | ForeignFunction _ | DeclaredFunction _ ->
+      failwith "not allowed"
   | Print expr ->
       let to_print = generate_expr ctx cfg block expr in
       BasicBlock.add_ir block (Ir.DebugPrint to_print);
@@ -114,7 +115,7 @@ and generate_stmt_lst ctx cfg block lst =
   List.iter (fun stmt -> block_ref := generate_stmt ctx cfg !block_ref stmt) lst;
   !block_ref
 
-let rec generate_top_level ctx stmt =
+let rec generate_top_level ctx ffi_names_ref decl_names_ref stmt =
   match stmt with
   | Function { name; params; return = _; body } ->
       (* if not (List.is_empty params) then failwith "fix params in ir gen"; if
@@ -133,13 +134,28 @@ let rec generate_top_level ctx stmt =
   | Namespace { name; contents } ->
       Context.push ctx;
       Context.add_namespace ctx name;
-      let result = List.map (generate_top_level ctx) contents in
+      let result =
+        List.map (generate_top_level ctx ffi_names_ref decl_names_ref) contents
+      in
       Context.pop_namespace ctx;
       Context.pop ctx;
       List.concat result
+  | ForeignFunction { name; params = _; return = _ } ->
+      ffi_names_ref := name :: !ffi_names_ref;
+      []
+  | DeclaredFunction { name; params = _; return = _ } ->
+      decl_names_ref := Context.in_namespace ctx name :: !decl_names_ref;
+      []
   | _ -> failwith "?"
 
-let generate =
+let generate stmts =
   let ctx = Context.make () in
+  let ffi_names_ref = ref [] in
+  let decl_names_ref = ref [] in
   Context.push ctx;
-  List.map (generate_top_level ctx) >> List.concat
+  let cfgs =
+    stmts
+    |> List.map (generate_top_level ctx ffi_names_ref decl_names_ref)
+    |> List.concat
+  in
+  (cfgs, !ffi_names_ref, !decl_names_ref)

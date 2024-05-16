@@ -16,7 +16,7 @@ let apply_clean_rules_pair section i =
   match (cur, next) with
   | Asm.Instruction.Jmp (Asm.Operand.Label label), Asm.Instruction.Label label2
     when label = Asm.Label.name_of label2 ->
-      delete_pair ();
+      Asm.Section.rem_instr section i;
       true
   | Push op1, Pop op2 when op1 = op2 ->
       delete_pair ();

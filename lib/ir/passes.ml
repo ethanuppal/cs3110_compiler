@@ -8,6 +8,9 @@ module ConstFold : Pass.Sig = struct
       | Sub (var, Operand.Constant lhs, Operand.Constant rhs) ->
           Basic_block.set_ir bb i
             (Ir.Assign (var, Operand.make_const (lhs - rhs)))
+      | Mul (var, Operand.Constant lhs, Operand.Constant rhs) ->
+        Basic_block.set_ir bb i
+          (Ir.Assign (var, Operand.make_const (lhs * rhs)))
       | _ -> ()
     done
 

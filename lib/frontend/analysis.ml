@@ -201,7 +201,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
       (match hint with
       | None -> ()
       | Some hint_ty ->
-          if hint_ty <> expr_ty then
+          if not (Type.equal hint_ty expr_ty) then
             raise
               (type_mismatch_error hint_ty expr_ty ~msg:"in let statement"
                  (Right stmt)));
@@ -216,7 +216,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
            (Right stmt))
   | If { cond; body } ->
       let cond_ty = infer_expr ctx cond in
-      if cond_ty <> Type.bool_prim_type then
+      if not (Type.equal cond_ty Type.bool_prim_type) then
         raise
           (type_mismatch_error Type.bool_prim_type cond_ty
              ~msg:"in if statement condition" (Right stmt));
@@ -224,7 +224,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
   | Assignment (name, expr) ->
       let exp_ty = get_type_of_name ctx name (Right stmt) in
       let expr_ty = infer_expr ctx expr in
-      if exp_ty <> expr_ty then
+      if not (Type.equal exp_ty expr_ty) then
         raise
           (type_mismatch_error exp_ty expr_ty
              ~msg:"variable types cannot be modified" (Right stmt));
@@ -238,7 +238,7 @@ let rec infer_stmt (ctx : Type.t Context.t) return_ctx (stmt : stmt) :
         | None -> Type.unit_prim_type
         | Some expr -> infer_expr ctx expr
       in
-      if return_ctx <> expr_ty then
+      if not (Type.equal return_ctx expr_ty) then
         raise
           (type_mismatch_error return_ctx expr_ty ~msg:"invalid return type"
              (Right stmt));

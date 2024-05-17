@@ -31,6 +31,8 @@ $ ./main -v
     - Parser and lexer
     - Abstract syntax tree
     - Type checking
+- Jason Klein (jak532)
+- Vijay Shanmugam (vrs29)
 
 ## Usage
 

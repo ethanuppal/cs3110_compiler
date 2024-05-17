@@ -17,5 +17,12 @@ let get : t =
     name = "x86ISTMB";
     version = Version.make 1 0 0;
     description = "CS 3110 final project";
-    authors = [ "Utku Melemeti"; "Ethan Uppal"; "Jeffrey Huang" ];
+    authors =
+      [
+        "Utku Melemeti";
+        "Ethan Uppal";
+        "Jeffrey Huang";
+        "Vijay Shanmugam";
+        "Jason Klein";
+      ];
   }
